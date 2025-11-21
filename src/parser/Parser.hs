@@ -8,15 +8,15 @@
 module Parser (
     Parser(..),
     parseChar,
---    sepBy,
---    parseAnyChar,
---    parseSpaces,
---    betweenSpaces,
---    parseOr,
---    parseSome,
---    parseMany,
---    parseUInt,
---    parseInt
+    sepBy,
+    parseAnyChar,
+    parseSpaces,
+    betweenSpaces,
+    parseOr,
+    parseSome,
+    parseMany,
+    parseUInt,
+    parseInt
 ) where
 
 import Data.Char (isSpace)
