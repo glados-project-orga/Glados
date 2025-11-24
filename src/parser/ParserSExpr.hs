@@ -13,7 +13,7 @@ parseSymboleChar = Parser f
     f [] = Left "Reached end of input"
     f (x:xs)
       | not (isSpace x) && x /= '(' && x /= ')' = Right (x, xs)
-      | otherwise = Left $ "Invalid token char: " ++ show x
+      | otherwise = Left $ "Invalid Symbole char: " ++ show x
 
 parseSSymbol :: Parser SExpr
 parseSSymbol = SSymbol <$> some parseSymboleChar
