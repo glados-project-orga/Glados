@@ -7,8 +7,8 @@
 
 module Main (main) where
 
-import Lib
+import Shell
 import Parser
 
 main :: IO ()
-main = someFunc
+main = writeHelp >> startShell
