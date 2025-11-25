@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - main
-      - develop
-      - feature/*
+      - dev
+      - CI/CD
   pull_request:
 
 jobs:
