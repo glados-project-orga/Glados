@@ -1,3 +1,10 @@
+{- 
+-- EPITECH PROJECT, 2025
+-- epi-repo
+-- File description:
+-- Data.hs
+-}
+
 module Data (
   Ast(..),
   SExpr(..)

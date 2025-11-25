@@ -1,3 +1,10 @@
+{- 
+-- EPITECH PROJECT, 2025
+-- epi-repo
+-- File description:
+-- LispAst.hs
+-}
+
 module LispAst (
   getSymbol,
   getList,

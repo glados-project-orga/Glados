@@ -1,3 +1,10 @@
+{- 
+-- EPITECH PROJECT, 2025
+-- epi-repo
+-- File description:
+-- Eval.hs
+-}
+
 module Eval (
     evalAST
 ) where

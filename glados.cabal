@@ -29,6 +29,7 @@ library
       ParserSExpr
       Builtins
       Data
+      Eval
       LispAst
   other-modules:
       Paths_glados
