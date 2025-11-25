@@ -1,4 +1,10 @@
-module Boostrap_Ast(Ast(..), SExpr(..), getSymbol, getList, getInterger, sexprToAST) where
+module Ast.LispAst (
+  Ast(..),
+  SExpr(..),
+  getSymbol,
+  getList,
+  getInterger,
+  sexprToAST) where
 import Data.Traversable()
 import Data.Maybe()
 
