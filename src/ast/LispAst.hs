@@ -6,15 +6,12 @@
 -}
 
 module LispAst (
-  getSymbol,
-  getList,
-  getInterger,
   sexprToAST
 ) where
 
 import Data.Traversable()
 import Data.Maybe()
-import Builtins (apply)
+import Builtins ()
 import Data(Ast(..), SExpr(..))
 
 sexprToAST :: SExpr -> Maybe Ast
