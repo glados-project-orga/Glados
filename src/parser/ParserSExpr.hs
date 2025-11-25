@@ -2,7 +2,8 @@ module ParserSExpr (
     parseSExpr,
 ) where
 
-import Ast.LispAst(SExpr(..), getSymbol, getList, getInterger)
+import LispAst()
+import Data(SExpr(..))
 import Parser
 import Data.Char (isSpace)
 import Control.Applicative

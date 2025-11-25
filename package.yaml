@@ -37,6 +37,7 @@ library:
   source-dirs:
     - src
     - src/parser
+    - src/ast
 
 executables:
   glados-exe:

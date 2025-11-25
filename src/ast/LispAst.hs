@@ -1,26 +1,14 @@
-module Ast.LispAst (
-  Ast(..),
-  SExpr(..),
+module LispAst (
   getSymbol,
   getList,
   getInterger,
-  sexprToAST) where
+  sexprToAST
+) where
+
 import Data.Traversable()
 import Data.Maybe()
-
-
-data SExpr = SInt Int
-           | SSymbol String
-           | SList [SExpr]
-           deriving (Show, Eq)
-
-data Ast = AInt Int
-         | ASymbol String
-         | AList [Ast]
-         | ACall Ast [Ast]
-         | ADefine String Ast
-         deriving (Show, Eq)
-
+import Builtins (apply)
+import Data(Ast(..), SExpr(..))
 
 getSymbol :: SExpr -> Maybe String
 getSymbol (SSymbol mp) = Just mp
@@ -68,12 +56,6 @@ sexprToAST (SList mpp) =
   case traverse sexprToAST mpp of
     Just asts -> Just (AList asts)
     Nothing   -> Nothing
-
-apply :: String -> [Ast] -> Maybe Ast
-apply "+" [AInt a, AInt b] = Just (AInt (a + b))
-apply "-" [AInt a, AInt b] = Just (AInt (a - b))
-apply "*" [AInt a, AInt b] = Just (AInt (a * b))
-apply _ _ = Nothing
 
 evalAST :: Ast -> Maybe Ast
 evalAST (AInt li) = Just (AInt li)

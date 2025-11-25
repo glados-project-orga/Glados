@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.37.0.
+-- This file has been generated from package.yaml by hpack version 0.35.2.
 --
 -- see: https://github.com/sol/hpack
 
@@ -25,14 +25,19 @@ source-repository head
 
 library
   exposed-modules:
-      Boostrap_Ast
-      Lib
+      Parser
+      ParserSExpr
+      Builtins
+      Data
+      LispAst
   other-modules:
       Paths_glados
   autogen-modules:
       Paths_glados
   hs-source-dirs:
       src
+      src/parser
+      src/ast
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5

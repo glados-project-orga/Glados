@@ -7,7 +7,7 @@
 
 module Main (main) where
 
-import Ast.LispAst
+import LispAst
 import ParserSExpr
 import Parser
 
