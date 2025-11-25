@@ -5,7 +5,6 @@ module Ast.LispAst (
   getList,
   getInterger,
   sexprToAST) where
--- import System.Environment()
 import Data.Traversable()
 import Data.Maybe()
 
