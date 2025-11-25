@@ -56,18 +56,3 @@ sexprToAST (SList mpp) =
   case traverse sexprToAST mpp of
     Just asts -> Just (AList asts)
     Nothing   -> Nothing
-
--- main :: IO ()
--- main = do
-
-  -- print (sexprToAST (SInt 5))
-  -- print (sexprToAST (SSymbol "foo"))
-  -- print (sexprToAST(SList[SInt 5, SSymbol "symbol"]))
-
-  -- print (sexprToAST (SList [SSymbol "define", SSymbol "x", SInt 5]))
-  -- print (sexprToAST (SList [SSymbol "define", SSymbol "x", SInt 5, SInt 6]))
-  -- print(sexprToAST (SList [SSymbol "+", SSymbol "x", SInt 4]))
-
-  -- print(sexprToAST (SList [SSymbol "+", SSymbol "x", SList [SSymbol "*", SInt 4, SSymbol "y"]]))
-  -- print(sexprToAST (SList [SSymbol "define", SSymbol "fourtyTwo", SList [SSymbol "*", SInt 7, SInt 6]]))
-  -- print(evalAST(AList [ASymbol "define", ASymbol "x", AInt 5]))
