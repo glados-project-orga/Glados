@@ -1,7 +1,7 @@
 
 module Main (main) where
 import Test.HUnit
-import Boostrap_Ast(SExpr(..), getSymbol, getList, getInterger)
+import Ast.LispAst(SExpr(..), getSymbol, getList, getInterger)
 
 testGetSymbol:: Test
 testGetSymbol = TestList [
