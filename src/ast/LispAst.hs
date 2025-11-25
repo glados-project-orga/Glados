@@ -11,7 +11,6 @@ module LispAst (
 
 import Data.Traversable()
 import Data.Maybe()
-import Builtins ()
 import Data(Ast(..), SExpr(..))
 
 sexprToAST :: SExpr -> Maybe Ast

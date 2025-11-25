@@ -10,7 +10,7 @@ module Eval (
 ) where
 
 import Data(Ast(..))
-import Builtins (apply)
+import Builtins(apply)
 
 evalAST :: Ast -> Maybe Ast
 evalAST (AInt li) = Just (AInt li)
