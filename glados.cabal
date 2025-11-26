@@ -30,7 +30,7 @@ library
       Builtins
       Data
       Eval
-      LispAst
+      SExprToAST
   other-modules:
       Paths_glados
   autogen-modules:

@@ -2,10 +2,10 @@
 -- EPITECH PROJECT, 2025
 -- epi-repo
 -- File description:
--- LispAst.hs
+-- SExprToAST.hs
 -}
 
-module LispAst (
+module SExprToAST (
   sexprToAST
 ) where
 
