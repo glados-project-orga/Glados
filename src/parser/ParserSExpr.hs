@@ -9,7 +9,6 @@ module ParserSExpr (
     parseSExpr,
 ) where
 
-import LispAst()
 import Data(SExpr(..))
 import Parser
 import Data.Char (isSpace)
