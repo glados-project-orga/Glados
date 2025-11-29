@@ -5,25 +5,15 @@
 -- Eval.hs
 -}
 
-module Eval (
-    evalAST
-) where
+-- module Eval (
+--     evalAST
+-- ) where
 
 import Data(Ast(..))
--- import Builtins (apply)
+import Builtins (apply)
 
 import qualified Data.Map as Map
 type Env = Map.Map String Ast
-
--- evalAST :: Ast -> Maybe Ast
--- evalAST (AInt li) = Just (AInt li)
--- evalAST (ASymbol _) = Nothing
--- evalAST (ACall (ASymbol fn) args) =
---   case traverse evalAST args of
---     Just vals -> apply fn vals
---     Nothing   -> Nothing
--- evalAST (AList mp) = Just (AList mp)
--- evalAST _ = Nothing
 
 evalAST :: Env -> Ast -> Either String (Env, Ast)
 evalAST env (AInt li) = Right (env, AInt li)
@@ -38,7 +28,15 @@ evalAST env (ADefine name expr) =
     Right(_, val) -> Right(Map.insert name val env, val)
     Left err -> Left err
 
--- evalAST env (ACall (ASymbol name) args) =
+evalAST env (ACall (ASymbol name) args) =
+  case Map.lookup name apply of
+    Nothing -> Left ("Unknown function: " ++ name)
+    Just f ->
+      case traverse (fmap snd . evalAST env) args of
+        Left err -> Left err
+        Right vals ->
+          case f vals of
+            Left err -> Left err
+            Right val -> Right (env, val)
 
-
-evalAST _ baned = Left ("No correct Ast formar" ++ show baned)
+evalAST _ baned = Left ("No correct Ast format" ++ show baned)
