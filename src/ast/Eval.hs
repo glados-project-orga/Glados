@@ -5,9 +5,9 @@
 -- Eval.hs
 -}
 
--- module Eval (
---     evalAST
--- ) where
+module Eval (
+    evalAST
+) where
 
 import Data(Ast(..))
 import Builtins (apply)
