@@ -14,25 +14,25 @@ import Data.Maybe()
 import Builtins ()
 import Data(Ast(..), SExpr(..))
 
-sexprToAST :: SExpr -> Maybe Ast
-sexprToAST (SInt mp) = Just (AInt mp)
-sexprToAST (SSymbol ll) = Just (ASymbol ll)
+sexprToAST :: SExpr -> Either String Ast
+sexprToAST (SInt mp) = Right (AInt mp)
+sexprToAST (SSymbol symb) = Right (ASymbol symb)
 
 sexprToAST (SList [SSymbol "define", SSymbol name, expr]) =
   case sexprToAST expr of
-    Just astExpr -> Just (ADefine name astExpr)
-    Nothing      -> Nothing
+    Right astExpr -> Right (ADefine name astExpr)
+    Left err      -> Left err
 
-sexprToAST (SList (SSymbol "define" : _)) = Nothing
-
-sexprToAST (SList (fnExpr:args)) = 
+sexprToAST (SList (fnExpr:args)) =
   case sexprToAST fnExpr of
-    Just fnAst -> case traverse sexprToAST args of
-                    Just argAsts -> Just (ACall fnAst argAsts)
-                    Nothing      -> Nothing
-    Nothing -> Nothing
+    Right (ASymbol fname) ->
+      case traverse sexprToAST args of
+        Right argAsts -> Right (ACall (ASymbol fname) argAsts)
+        Left err      -> Left err
+    Right _ ->
+      case traverse sexprToAST (fnExpr:args) of
+        Right asts -> Right (AList asts)
+        Left err   -> Left err
+    Left err -> Left err
 
-sexprToAST (SList mpp) =
-  case traverse sexprToAST mpp of
-    Just asts -> Just (AList asts)
-    Nothing   -> Nothing
+sexprToAST _ = Left "Unsupported SExpr form"
