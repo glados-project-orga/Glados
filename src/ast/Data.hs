@@ -20,4 +20,5 @@ data Ast = AInt Int
          | AList [Ast]
          | ACall Ast [Ast]
          | ADefine String Ast
+         | ALamdba [String] Ast
          deriving (Show, Eq)
