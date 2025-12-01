@@ -7,7 +7,12 @@
 
 -- module Main (main) where
 module Builtins (
-    apply
+    apply,
+    builtinAdd,
+    builtinSub,
+    builtinMul,
+    builtinMod,
+    builtinDiv
 ) where
 
 import Data(Ast(..))
@@ -24,7 +29,7 @@ apply = Map.fromList
 
 foundInt :: Ast -> Either String Int
 foundInt (AInt n) = Right n
-foundInt _ = Left "Expected interger"
+foundInt _ = Left "Expected integer"
 
 builtinAdd :: [Ast] -> Either String Ast
 builtinAdd args =
@@ -54,7 +59,7 @@ builtinMod args = case args of
   [AInt x, AInt y] ->
     if y == 0 then Left "mod: undefined for 0"
               else Right (AInt(x `mod` y))
-  _ -> Left "expected exactly 2 intergers"
+  _ -> Left "expected exactly 2 integers"
 
 
 builtinDiv :: [Ast] -> Either String Ast
@@ -62,30 +67,4 @@ builtinDiv args = case args of
   [AInt x, AInt y] ->
     if y == 0 then Left "division by zero"
               else Right (AInt(x `div` y))
-  _ -> Left "expected exactly 2 intergers"
-
--- main :: IO ()
--- main = do
---   let expr = [AInt 5, AInt 6, AInt 7, AInt 8]
---   let expr1 = [AInt 7, AInt 8]
-
---   case builtinMod expr1 of
---     Left err -> putStrLn ("error" ++ err)
---     Right ast -> print ast
-
---   case builtinDiv expr1 of
---     Left err -> putStrLn ("error" ++ err)
---     Right ast -> print ast
-  
---   case builtinAdd expr of
---     Left err -> putStrLn ("error" ++ err)
---     Right ast -> print ast
-  
---   case builtinSub expr of
---     Left err -> putStrLn ("error" ++ err)
---     Right ast -> print ast
-  
---   case builtinMul expr of
---     Left err -> putStrLn ("error" ++ err)
---     Right ast -> print ast
-  
+  _ -> Left "expected exactly 2 integers"
