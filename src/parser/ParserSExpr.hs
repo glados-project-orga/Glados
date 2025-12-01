@@ -37,6 +37,3 @@ parseSExpr = betweenSpaces (
     parseSSymbol <|>
     parseSList
     )
-
--- main :: IO ()
--- main = print (runParser parseSExpr "(hello (42 world) 123)")

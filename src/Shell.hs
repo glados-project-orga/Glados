@@ -25,14 +25,6 @@ writeHelp = putStrLn "LISP interpreter Usage :" >>
             putStrLn "Write in the shell your code (e.g : (define two (1 + 1))." >>
             putStrLn "To quit the interpreter, write exit."
 
--- main =
---     case runParser parseSExpr string of
---       Left err -> putStrLn ("Parse error: " ++ err)
---       Right (sexpr, _) ->
---         case sexprToAST sexpr of
---             Left err -> putStrLn ("Could not convert SExpr to AST" ++ err)
---             Right ast -> print ast
-
 initializeEnv :: IO Env
 initializeEnv = mempty
 
