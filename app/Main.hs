@@ -11,7 +11,8 @@ import Shell
 import Parser
 
 main :: IO ()
-main = writeHelp >> startShell
+main = (writeHelp >> initializeEnv) >>= \env -> 
+  startShell env
 
 -- import SExprToAST
 -- import ParserSExpr

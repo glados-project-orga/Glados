@@ -6,7 +6,8 @@
 -}
 
 module Eval (
-    evalAST
+    evalAST,
+    Env
 ) where
 
 import Data(Ast(..))
