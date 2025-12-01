@@ -8,6 +8,7 @@
 -- module Main (main) where
 module Builtins (
     apply,
+    foundInt,
     builtinAdd,
     builtinSub,
     builtinMul,
@@ -29,42 +30,44 @@ apply = Map.fromList
 
 foundInt :: Ast -> Either String Int
 foundInt (AInt n) = Right n
-foundInt _ = Left "Expected integer"
+foundInt a = Left (show a ++ " is not a number")
 
 builtinAdd :: [Ast] -> Either String Ast
 builtinAdd args =
   case traverse foundInt args of
-    Left err -> Left err
+    Left err -> Left ("Exception in +: " ++ err)
     Right vals -> Right (AInt (sum vals))
 
 
 builtinSub :: [Ast] -> Either String Ast
-builtinSub [] = Left "empty"
-builtinSub (AInt x: xs) =
-  case traverse foundInt xs of
-    Left err -> Left err
-    Right vals -> Right (AInt (foldl (-) x (vals)))
-builtinSub _ = Left "execpted elements"
+builtinSub (first:rest) =
+  case traverse foundInt (first:rest) of
+    Left err -> Left ("Exception in +: " ++ err)
+    Right (firstVal:restVal) -> Right (AInt (foldl (-) firstVal restVal))
+    Right _ -> Left "Exception: incorrect argument count in call (-)"
+builtinSub [] = Left "Exception: incorrect argument count in call (-)"
 
 
 builtinMul :: [Ast] -> Either String Ast
 builtinMul args = 
   case traverse foundInt args of
-    Left err -> Left err
+    Left err -> Left ("Exception in +: " ++ err)
     Right vals -> Right (AInt (product vals))
 
 
 builtinMod :: [Ast] -> Either String Ast
-builtinMod args = case args of
-  [AInt x, AInt y] ->
-    if y == 0 then Left "mod: undefined for 0"
-              else Right (AInt(x `mod` y))
-  _ -> Left "expected exactly 2 integers"
+builtinMod args = case traverse foundInt args of
+  Left err -> Left ("Exception in mod: " ++ err)
+  Right [x, y] ->
+    if y == 0 then Left "Exception in mod: undefined for 0"
+              else Right (AInt (x `mod` y))
+  Right _ -> Left ("Exception: incorrect argument count in call (mod " ++ show (AList args) ++ ")")
 
 
 builtinDiv :: [Ast] -> Either String Ast
-builtinDiv args = case args of
-  [AInt x, AInt y] ->
-    if y == 0 then Left "division by zero"
-              else Right (AInt(x `div` y))
-  _ -> Left "expected exactly 2 integers"
+builtinDiv args = case traverse foundInt args of
+  Left err -> Left ("Exception in div: " ++ err)
+  Right [x, y] ->
+    if y == 0 then Left "Exception in div: undefined for 0"
+              else Right (AInt (x `div` y))
+  _ -> Left ("Exception: incorrect argument count in call (div " ++ show (AList args) ++ ")")
