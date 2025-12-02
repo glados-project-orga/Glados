@@ -7,7 +7,14 @@
 
 -- module Main (main) where
 module Builtins (
-    apply
+    apply,
+    foundInt,
+    builtinAdd,
+    builtinSub,
+    builtinMul,
+    builtinMod,
+    builtinDiv,
+    builtinEqual
 ) where
 
 import Data(Ast(..))
@@ -19,73 +26,54 @@ apply = Map.fromList
     ("*", builtinMul),
     ("-", builtinSub),
     ("mod", builtinMod),
-    ("div", builtinDiv)
+    ("div", builtinDiv),
+    ("eq?", builtinEqual)
   ]
 
 foundInt :: Ast -> Either String Int
 foundInt (AInt n) = Right n
-foundInt _ = Left "Expected interger"
+foundInt a = Left (show a ++ " is not a number")
 
 builtinAdd :: [Ast] -> Either String Ast
 builtinAdd args =
   case traverse foundInt args of
-    Left err -> Left err
+    Left err -> Left ("Exception in +: " ++ err)
     Right vals -> Right (AInt (sum vals))
 
-
 builtinSub :: [Ast] -> Either String Ast
-builtinSub [] = Left "empty"
-builtinSub (AInt x: xs) =
-  case traverse foundInt xs of
-    Left err -> Left err
-    Right vals -> Right (AInt (foldl (-) x (vals)))
-builtinSub _ = Left "execpted elements"
-
+builtinSub (first:rest) =
+  case traverse foundInt (first:rest) of
+    Left err -> Left ("Exception in +: " ++ err)
+    Right (firstVal:restVal) -> Right (AInt (foldl (-) firstVal restVal))
+    Right _ -> Left "Exception: incorrect argument count in call (-)"
+builtinSub [] = Left "Exception: incorrect argument count in call (-)"
 
 builtinMul :: [Ast] -> Either String Ast
 builtinMul args = 
   case traverse foundInt args of
-    Left err -> Left err
+    Left err -> Left ("Exception in +: " ++ err)
     Right vals -> Right (AInt (product vals))
 
-
 builtinMod :: [Ast] -> Either String Ast
-builtinMod args = case args of
-  [AInt x, AInt y] ->
-    if y == 0 then Left "mod: undefined for 0"
-              else Right (AInt(x `mod` y))
-  _ -> Left "expected exactly 2 intergers"
-
+builtinMod args = case traverse foundInt args of
+  Left err -> Left ("Exception in mod: " ++ err)
+  Right [x, y] ->
+    if y == 0 then Left "Exception in mod: undefined for 0"
+              else Right (AInt (x `mod` y))
+  Right _ -> Left ("Exception: incorrect argument count in call (mod " ++ show (AList args) ++ ")")
 
 builtinDiv :: [Ast] -> Either String Ast
-builtinDiv args = case args of
-  [AInt x, AInt y] ->
-    if y == 0 then Left "division by zero"
-              else Right (AInt(x `div` y))
-  _ -> Left "expected exactly 2 intergers"
+builtinDiv args = case traverse foundInt args of
+  Left err -> Left ("Exception in div: " ++ err)
+  Right [x, y] ->
+    if y == 0 then Left "Exception in div: undefined for 0"
+              else Right (AInt (x `div` y))
+  Right _ -> Left ("Exception: incorrect argument count in call (div " ++ show (AList args) ++ ")")
 
--- main :: IO ()
--- main = do
---   let expr = [AInt 5, AInt 6, AInt 7, AInt 8]
---   let expr1 = [AInt 7, AInt 8]
-
---   case builtinMod expr1 of
---     Left err -> putStrLn ("error" ++ err)
---     Right ast -> print ast
-
---   case builtinDiv expr1 of
---     Left err -> putStrLn ("error" ++ err)
---     Right ast -> print ast
-  
---   case builtinAdd expr of
---     Left err -> putStrLn ("error" ++ err)
---     Right ast -> print ast
-  
---   case builtinSub expr of
---     Left err -> putStrLn ("error" ++ err)
---     Right ast -> print ast
-  
---   case builtinMul expr of
---     Left err -> putStrLn ("error" ++ err)
---     Right ast -> print ast
-  
+builtinEqual :: [Ast] -> Either String Ast
+builtinEqual args = case traverse foundInt args of
+  Left err -> Left ("Exception in eq?: " ++ err)
+  Right [x, y] ->
+    if x == y then Right (ABool True)
+    else Right (ABool False)
+  Right _ -> Left ("Exception: incorrect argument count in call (eq? " ++ show (AList args) ++ ")")

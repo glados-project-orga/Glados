@@ -11,7 +11,7 @@ module Eval (
 ) where
 
 import Data(Ast(..))
-import Builtins (apply)
+import Builtins(apply)
 
 import qualified Data.Map as Map
 type Env = Map.Map String Ast

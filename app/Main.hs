@@ -8,7 +8,6 @@
 module Main (main) where
 
 import Shell
-import Parser
 
 main :: IO ()
 main = (writeHelp >> initializeEnv) >>= \env -> 
