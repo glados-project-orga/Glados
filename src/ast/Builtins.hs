@@ -14,7 +14,9 @@ module Builtins (
     builtinMul,
     builtinMod,
     builtinDiv,
-    builtinEqual
+    builtinEqual,
+    builtinLower,
+    builtinGreater
 ) where
 
 import Data(Ast(..))
@@ -27,7 +29,9 @@ apply = Map.fromList
     ("-", builtinSub),
     ("mod", builtinMod),
     ("div", builtinDiv),
-    ("eq?", builtinEqual)
+    ("eq?", builtinEqual),
+    ("<", builtinLower),
+    (">", builtinGreater)
   ]
 
 foundInt :: Ast -> Either String Int
@@ -77,3 +81,25 @@ builtinEqual args = case traverse foundInt args of
     if x == y then Right (ABool True)
     else Right (ABool False)
   Right _ -> Left ("Exception: incorrect argument count in call (eq? " ++ show (AList args) ++ ")")
+
+isLower :: [Int] -> Ast
+isLower [] = (ABool True)
+isLower [_] = (ABool True)
+isLower [val1, val2]
+  | val1 < val2 = (ABool True)
+  | otherwise = (ABool False)
+isLower (val1:val2:rest) 
+  | val1 < val2 = isLower (val2:rest)
+  | otherwise = (ABool False)
+
+builtinLower :: [Ast] -> Either String Ast
+builtinLower [] = Left ("Exception: incorrect argument count in call (<)")
+builtinLower args = case traverse foundInt args of
+  Left err -> Left ("Exception in eq?: " ++ err)
+  Right vals -> Right (isLower vals)
+
+builtinGreater :: [Ast] -> Either String Ast
+builtinGreater [] = Left ("Exception: incorrect argument count in call (<)")
+builtinGreater args = case traverse foundInt args of
+  Left err -> Left ("Exception in eq?: " ++ err)
+  Right vals -> Right (isLower (reverse vals))
