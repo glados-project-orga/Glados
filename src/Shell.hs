@@ -19,6 +19,7 @@ import SExprToAST
 import ParserSExpr
 import Parser
 import Eval
+import Data(Ast(..))
 
 writeHelp :: IO ()
 writeHelp = putStrLn "LISP interpreter Usage :" >>
@@ -28,17 +29,23 @@ writeHelp = putStrLn "LISP interpreter Usage :" >>
 initializeEnv :: IO Env
 initializeEnv = mempty
 
-startParser :: String -> Env -> IO ()
+startParser :: String -> Env -> Either String (Env, Ast)
 startParser str env = case runParser parseSExpr str of
-    Left err -> putStrLn ("Parse error: " ++ err)
+    Left err -> Left ("Parse error: " ++ err)
     Right (sexpr, _) ->
         case sexprToAST sexpr of
-            Left err -> putStrLn ("Could not convert SExpr to AST" ++ err)
-            Right ast -> print $ evalAST env ast
+            Left err -> Left ("Could not convert SExpr to AST" ++ err)
+            Right ast ->
+                case evalAST env ast of
+                    Left err -> Left err  
+                    Right val -> Right val 
 
 startShell :: Env -> IO ()
 startShell env = putStr "> " >> hFlush stdout >>
     getLine >>= \input ->
     case input of
         "exit" -> exitWith (ExitFailure 84)
-        _ -> startParser input env >> startShell env
+        _ ->
+            case startParser input env of
+                Left err -> putStrLn err >> startShell env
+                Right (newEnv, ast) -> print ast >> startShell newEnv
