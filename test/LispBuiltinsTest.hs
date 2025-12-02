@@ -10,7 +10,7 @@ module LispBuiltinsTest (
 ) where
 
 import Test.HUnit
-import Builtins(foundInt, builtinAdd, builtinSub, builtinMul, builtinMod, builtinDiv)
+import Builtins(foundInt, builtinAdd, builtinSub, builtinMul, builtinMod, builtinDiv, builtinEqual)
 import Data(Ast(..))
 
 testFoundInt :: Test
@@ -57,6 +57,13 @@ testBuiltinsMod = TestList[
     TestCase(assertEqual "(mod 2 0)" (Left "Exception in mod: undefined for 0") (builtinMod [AInt 2, AInt 0]))
     ]
 
+testBuiltinsEqual :: Test
+testBuiltinsEqual = TestList[
+    TestCase(assertEqual "(eq?)" (Left "Exception: incorrect argument count in call (eq?)") (builtinEqual [])),
+    TestCase(assertEqual "(eq? 1 2)" (Right (ABool False)) (builtinEqual [AInt 1, AInt 2])),
+    TestCase(assertEqual "(eq? 1 1)" (Right (ABool True)) (builtinEqual [AInt 1, AInt 1]))
+    ]
+
 testBuiltins :: Test
 testBuiltins = TestList[
     testFoundInt,
@@ -64,5 +71,6 @@ testBuiltins = TestList[
     testBuiltinsSub,
     testBuiltinsMul,
     testBuiltinsDiv,
-    testBuiltinsMod
+    testBuiltinsMod,
+    testBuiltinsEqual
     ]

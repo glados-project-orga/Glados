@@ -13,7 +13,8 @@ module Builtins (
     builtinSub,
     builtinMul,
     builtinMod,
-    builtinDiv
+    builtinDiv,
+    builtinEqual
 ) where
 
 import Data(Ast(..))
@@ -25,7 +26,8 @@ apply = Map.fromList
     ("*", builtinMul),
     ("-", builtinSub),
     ("mod", builtinMod),
-    ("div", builtinDiv)
+    ("div", builtinDiv),
+    ("eq?", builtinEqual)
   ]
 
 foundInt :: Ast -> Either String Int
@@ -38,7 +40,6 @@ builtinAdd args =
     Left err -> Left ("Exception in +: " ++ err)
     Right vals -> Right (AInt (sum vals))
 
-
 builtinSub :: [Ast] -> Either String Ast
 builtinSub (first:rest) =
   case traverse foundInt (first:rest) of
@@ -47,13 +48,11 @@ builtinSub (first:rest) =
     Right _ -> Left "Exception: incorrect argument count in call (-)"
 builtinSub [] = Left "Exception: incorrect argument count in call (-)"
 
-
 builtinMul :: [Ast] -> Either String Ast
 builtinMul args = 
   case traverse foundInt args of
     Left err -> Left ("Exception in +: " ++ err)
     Right vals -> Right (AInt (product vals))
-
 
 builtinMod :: [Ast] -> Either String Ast
 builtinMod args = case traverse foundInt args of
@@ -63,11 +62,18 @@ builtinMod args = case traverse foundInt args of
               else Right (AInt (x `mod` y))
   Right _ -> Left ("Exception: incorrect argument count in call (mod " ++ show (AList args) ++ ")")
 
-
 builtinDiv :: [Ast] -> Either String Ast
 builtinDiv args = case traverse foundInt args of
   Left err -> Left ("Exception in div: " ++ err)
   Right [x, y] ->
     if y == 0 then Left "Exception in div: undefined for 0"
               else Right (AInt (x `div` y))
-  _ -> Left ("Exception: incorrect argument count in call (div " ++ show (AList args) ++ ")")
+  Right _ -> Left ("Exception: incorrect argument count in call (div " ++ show (AList args) ++ ")")
+
+builtinEqual :: [Ast] -> Either String Ast
+builtinEqual args = case traverse foundInt args of
+  Left err -> Left ("Exception in eq?: " ++ err)
+  Right [x, y] ->
+    if x == y then Right (ABool True)
+    else Right (ABool False)
+  Right _ -> Left ("Exception: incorrect argument count in call (eq? " ++ show (AList args) ++ ")")
