@@ -27,7 +27,7 @@ data Parser a = Parser {
 }
 
 sepBy :: Parser a -> Parser sep -> Parser [a]
-sepBy p sep = (:) <$> p <*> many (sep *> p) <|> pure [] --}
+sepBy p sep = (:) <$> p <*> many (sep *> p) <|> pure []
 
 instance Functor Parser where
     fmap fct (Parser a) = Parser f
