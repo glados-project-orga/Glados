@@ -16,7 +16,8 @@ module Builtins (
     builtinDiv,
     builtinEqual,
     builtinLower,
-    builtinGreater
+    builtinGreater,
+    builtinIf
 ) where
 
 import Data(Ast(..))
@@ -31,12 +32,17 @@ apply = Map.fromList
     ("div", builtinDiv),
     ("eq?", builtinEqual),
     ("<", builtinLower),
-    (">", builtinGreater)
+    (">", builtinGreater),
+    ("if", builtinIf)
   ]
 
 foundInt :: Ast -> Either String Int
 foundInt (AInt n) = Right n
 foundInt a = Left (show a ++ " is not a number")
+
+foundBool :: Ast -> Either String Bool
+foundBool (ABool b) = Right b
+foundBool a = Left (show a ++ " is not a boolean")
 
 builtinAdd :: [Ast] -> Either String Ast
 builtinAdd args =
@@ -103,3 +109,11 @@ builtinGreater [] = Left ("Exception: incorrect argument count in call (<)")
 builtinGreater args = case traverse foundInt args of
   Left err -> Left ("Exception in eq?: " ++ err)
   Right vals -> Right (isLower (reverse vals))
+
+builtinIf :: [Ast] -> Either String Ast
+builtinIf [_, expr1] = Right expr1
+builtinIf [condition, expr1, expr2] = case foundBool condition of
+  Left err -> Left ("Exception in eq?: " ++ err)
+  Right False -> Right expr2
+  Right True -> Right expr1
+builtinIf args = Left ("Exception: invalid syntax (if " ++ show (AList args) ++ ")")

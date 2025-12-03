@@ -54,6 +54,8 @@ executables:
 tests:
   glados-test:
     main:                Spec.hs
+    other-modules:
+    - LispBuiltinsTest
     source-dirs:         test
     ghc-options:
     - -threaded
