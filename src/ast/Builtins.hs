@@ -9,6 +9,7 @@
 module Builtins (
     apply,
     foundInt,
+    foundBool,
     builtinAdd,
     builtinSub,
     builtinMul,
@@ -54,6 +55,7 @@ builtinSub :: [Ast] -> Either String Ast
 builtinSub (first:rest) =
   case traverse foundInt (first:rest) of
     Left err -> Left ("Exception in +: " ++ err)
+    Right [val] -> Right (AInt (-val)) 
     Right (firstVal:restVal) -> Right (AInt (foldl (-) firstVal restVal))
     Right _ -> Left "Exception: incorrect argument count in call (-)"
 builtinSub [] = Left "Exception: incorrect argument count in call (-)"
@@ -108,7 +110,7 @@ builtinLower args = case traverse foundInt args of
   Right vals -> Right (isLower vals)
 
 builtinGreater :: [Ast] -> Either String Ast
-builtinGreater [] = Left ("Exception: incorrect argument count in call (<)")
+builtinGreater [] = Left ("Exception: incorrect argument count in call (>)")
 builtinGreater args = case traverse foundInt args of
   Left err -> Left ("Exception in eq?: " ++ err)
   Right vals -> Right (isLower (reverse vals))
