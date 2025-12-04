@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - mirror
+      - main
       - CI/CD
   pull_request:
 
