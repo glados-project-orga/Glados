@@ -31,14 +31,14 @@ evalAST env (ADefine name expr) =
     Right(_, val) -> Right(Map.insert name val env, AVoid)
     Left err -> Left err
 
-evalAST env (ALamdba args body) = Right (env, ALamdba args body)
+evalAST env (ALambda args body) = Right (env, ALambda args body)
 
 evalAST env (ACall ffn args) =
 
   case evalAST env ffn of
     Left err -> Left err
 
-    Right(_, ALamdba argss body) ->
+    Right(_, ALambda argss body) ->
       if length argss == length args
         then case traverse (fmap snd . evalAST env) args of
           Left err -> Left err
@@ -61,4 +61,4 @@ evalAST env (ACall ffn args) =
     Right (_, other) ->
       Left ("Trying to call non-function: " ++ show other)
 
-evalAST _ baned = Left ("No correct Ast format" ++ show baned)
+evalAST _ baned = Left ("No correct Ast format: " ++ show baned)
