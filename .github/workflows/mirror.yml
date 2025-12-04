@@ -12,7 +12,7 @@ on:
 
 jobs:
   push-mirror:
-    if: ${{ github.repository == 'HajarAhazzam/glados' }}
+    if: ${{ github.repository == 'glados-project-orga/Glados' }}
     runs-on: ubuntu-latest
 
     steps:
