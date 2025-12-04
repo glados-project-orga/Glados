@@ -53,7 +53,7 @@ jobs:
         with:
           files: ./glados.zip
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ssh_private_key: ${{ secrets.GIT_SSH_PRIVATE_KEY }}
 
       - name: Upload zip as artifact
         if: ${{ github.event_name != 'push' }}
