@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - CI/CD
+      - dev
   pull_request:
 
 jobs:
