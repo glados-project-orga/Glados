@@ -7,12 +7,6 @@ on:
       - dev
     tags:
       - "v*"
-  workflow_dispatch:
-    inputs:
-      dry-run:
-        type: boolean
-        default: false
-        description: "test release sans publier"
 
 jobs:
   build-and-release:
@@ -48,20 +42,12 @@ jobs:
         # utiliser variable GITHUB_REF pour obtenir le nom du tag (pour que soit + propre) run: zip glados-${GITHUB_REF#refs/tags/}.zip glados 
 
       - name: Create GitHub Release
-        if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && inputs.dry-run == false }}
+        if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: ./glados.zip
         env:
           ssh_private_key: ${{ secrets.GIT_SSH_PRIVATE_KEY }}
-
-      - name: Upload zip as artifact
-        if: ${{ github.event_name != 'push' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: glados-zip-test
-          path: ./glados.zip
-
 
 
           ## usage: git tag v0.1.0-test et git push origin v0.1.0-test
