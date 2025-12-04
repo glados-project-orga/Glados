@@ -48,4 +48,5 @@ startShell env = putStr "> " >> hFlush stdout >>
         _ ->
             case startParser input env of
                 Left err -> putStrLn err >> startShell env
+                Right (newEnv, AVoid) -> startShell newEnv
                 Right (newEnv, ast) -> print ast >> startShell newEnv
