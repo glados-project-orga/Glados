@@ -11,10 +11,12 @@ module Main (
 
 import Test.HUnit
 import LispBuiltinsTest
+import SExprToAstTest
 
 tests :: Test
 tests = TestList[
-    testBuiltins
+    testBuiltins,
+    testSExpr
     ]
 
 main :: IO Counts

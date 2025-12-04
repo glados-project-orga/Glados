@@ -56,6 +56,7 @@ tests:
     main:                Spec.hs
     other-modules:
     - LispBuiltinsTest
+    - SExprToAstTest
     source-dirs:         test
     ghc-options:
     - -threaded
