@@ -9,12 +9,16 @@
 module Builtins (
     apply,
     foundInt,
+    foundBool,
     builtinAdd,
     builtinSub,
     builtinMul,
     builtinMod,
     builtinDiv,
-    builtinEqual
+    builtinEqual,
+    builtinLower,
+    builtinGreater,
+    builtinIf
 ) where
 
 import Data(Ast(..))
@@ -27,12 +31,19 @@ apply = Map.fromList
     ("-", builtinSub),
     ("mod", builtinMod),
     ("div", builtinDiv),
-    ("eq?", builtinEqual)
+    ("eq?", builtinEqual),
+    ("<", builtinLower),
+    (">", builtinGreater),
+    ("if", builtinIf)
   ]
 
 foundInt :: Ast -> Either String Int
 foundInt (AInt n) = Right n
 foundInt a = Left (show a ++ " is not a number")
+
+foundBool :: Ast -> Either String Bool
+foundBool (ABool b) = Right b
+foundBool a = Left (show a ++ " is not a boolean")
 
 builtinAdd :: [Ast] -> Either String Ast
 builtinAdd args =
@@ -44,6 +55,7 @@ builtinSub :: [Ast] -> Either String Ast
 builtinSub (first:rest) =
   case traverse foundInt (first:rest) of
     Left err -> Left ("Exception in +: " ++ err)
+    Right [val] -> Right (AInt (-val)) 
     Right (firstVal:restVal) -> Right (AInt (foldl (-) firstVal restVal))
     Right _ -> Left "Exception: incorrect argument count in call (-)"
 builtinSub [] = Left "Exception: incorrect argument count in call (-)"
@@ -60,6 +72,7 @@ builtinMod args = case traverse foundInt args of
   Right [x, y] ->
     if y == 0 then Left "Exception in mod: undefined for 0"
               else Right (AInt (x `mod` y))
+  Right [] -> Left ("Exception: incorrect argument count in call (mod)")
   Right _ -> Left ("Exception: incorrect argument count in call (mod " ++ show (AList args) ++ ")")
 
 builtinDiv :: [Ast] -> Either String Ast
@@ -68,6 +81,7 @@ builtinDiv args = case traverse foundInt args of
   Right [x, y] ->
     if y == 0 then Left "Exception in div: undefined for 0"
               else Right (AInt (x `div` y))
+  Right [] -> Left ("Exception: incorrect argument count in call (div)")
   Right _ -> Left ("Exception: incorrect argument count in call (div " ++ show (AList args) ++ ")")
 
 builtinEqual :: [Ast] -> Either String Ast
@@ -76,4 +90,39 @@ builtinEqual args = case traverse foundInt args of
   Right [x, y] ->
     if x == y then Right (ABool True)
     else Right (ABool False)
+  Right [] -> Left ("Exception: incorrect argument count in call (eq?)")
   Right _ -> Left ("Exception: incorrect argument count in call (eq? " ++ show (AList args) ++ ")")
+
+isLower :: [Int] -> Ast
+isLower [] = (ABool True)
+isLower [_] = (ABool True)
+isLower [val1, val2]
+  | val1 < val2 = (ABool True)
+  | otherwise = (ABool False)
+isLower (val1:val2:rest) 
+  | val1 < val2 = isLower (val2:rest)
+  | otherwise = (ABool False)
+
+builtinLower :: [Ast] -> Either String Ast
+builtinLower [] = Left ("Exception: incorrect argument count in call (<)")
+builtinLower args = case traverse foundInt args of
+  Left err -> Left ("Exception in eq?: " ++ err)
+  Right vals -> Right (isLower vals)
+
+builtinGreater :: [Ast] -> Either String Ast
+builtinGreater [] = Left ("Exception: incorrect argument count in call (>)")
+builtinGreater args = case traverse foundInt args of
+  Left err -> Left ("Exception in eq?: " ++ err)
+  Right vals -> Right (isLower (reverse vals))
+
+builtinIf :: [Ast] -> Either String Ast
+builtinIf [condition, expr1] = case foundBool condition of
+  Left err -> Left ("Exception in eq? " ++ err)
+  Right False -> Right AVoid
+  Right True -> Right expr1
+builtinIf [condition, expr1, expr2] = case foundBool condition of
+  Left err -> Left ("Exception in eq?: " ++ err)
+  Right False -> Right expr2
+  Right True -> Right expr1
+builtinIf [] = Left ("Exception: invalid syntax (if)")
+builtinIf args = Left ("Exception: invalid syntax (if " ++ show (AList args) ++ ")")

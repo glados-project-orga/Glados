@@ -10,13 +10,31 @@ module LispBuiltinsTest (
 ) where
 
 import Test.HUnit
-import Builtins(foundInt, builtinAdd, builtinSub, builtinMul, builtinMod, builtinDiv, builtinEqual)
+import Builtins(
+    foundInt,
+    foundBool,
+    builtinAdd,
+    builtinSub,
+    builtinMul,
+    builtinMod, 
+    builtinDiv,
+    builtinEqual,
+    builtinLower,
+    builtinGreater,
+    builtinIf
+    )
 import Data(Ast(..))
 
 testFoundInt :: Test
 testFoundInt = TestList[
     TestCase(assertEqual "foundInt AInt 5" (Right 5) (foundInt (AInt 5))),
     TestCase(assertEqual "foundInt ASymbol foo" (Left "foo is not a number") (foundInt (ASymbol "foo")))
+    ]
+
+testFoundBool :: Test
+testFoundBool = TestList[
+    TestCase(assertEqual "foundBool ABool True" (Right True) (foundBool (ABool True))),
+    TestCase(assertEqual "foundBool ASymbol foo" (Left "foo is not a boolean") (foundBool (ASymbol "foo")))
     ]
 
 testBuiltinsAdd :: Test
@@ -64,13 +82,42 @@ testBuiltinsEqual = TestList[
     TestCase(assertEqual "(eq? 1 1)" (Right (ABool True)) (builtinEqual [AInt 1, AInt 1]))
     ]
 
+testBuiltinsLower :: Test
+testBuiltinsLower = TestList[
+    TestCase(assertEqual "(<)" (Left "Exception: incorrect argument count in call (<)") (builtinLower [])),
+    TestCase(assertEqual "(< 2 1)" (Right (ABool False)) (builtinLower [AInt 2, AInt 1])),
+    TestCase(assertEqual "(< 1 2 3)" (Right (ABool True)) (builtinLower [AInt 1, AInt 2, AInt 3])),
+    TestCase(assertEqual "(< 1 2 2)" (Right (ABool False)) (builtinLower [AInt 1, AInt 2, AInt 2]))
+    ]
+
+testBuiltinsGreater :: Test
+testBuiltinsGreater = TestList[
+    TestCase(assertEqual "(>)" (Left "Exception: incorrect argument count in call (>)") (builtinGreater [])),
+    TestCase(assertEqual "(> 1 2)" (Right (ABool False)) (builtinGreater [AInt 1, AInt 2])),
+    TestCase(assertEqual "(> 3 2 1)" (Right (ABool True)) (builtinGreater [AInt 3, AInt 2, AInt 1])),
+    TestCase(assertEqual "(> 2 2 1)" (Right (ABool False)) (builtinGreater [AInt 2, AInt 2, AInt 1]))
+    ]
+
+testBuiltinsIf :: Test
+testBuiltinsIf = TestList[
+    TestCase(assertEqual "(if)" (Left "Exception: invalid syntax (if)") (builtinIf [])),
+    TestCase(assertEqual "(if #t 1)" (Right (AInt 1)) (builtinIf [ABool True, AInt 1])),
+    TestCase(assertEqual "(if #f 1)" (Right AVoid) (builtinIf [ABool False, AInt 1])),
+    TestCase(assertEqual "(if #t 2 1)" (Right (AInt 2)) (builtinIf [ABool True, AInt 2, AInt 1])),
+    TestCase(assertEqual "(if #f 2 1)" (Right (AInt 1)) (builtinIf [ABool False, AInt 2, AInt 1]))
+    ]
+
 testBuiltins :: Test
 testBuiltins = TestList[
     testFoundInt,
+    testFoundBool,
     testBuiltinsAdd,
     testBuiltinsSub,
     testBuiltinsMul,
     testBuiltinsDiv,
     testBuiltinsMod,
-    testBuiltinsEqual
+    testBuiltinsEqual,
+    testBuiltinsLower,
+    testBuiltinsGreater,
+    testBuiltinsIf
     ]

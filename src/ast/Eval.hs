@@ -24,9 +24,11 @@ evalAST env (ASymbol symb) =
     Just val -> Right (env, val)
     Nothing -> Left ("Unbound symbol: " ++ symb)
 
+evalAST env (ABool bool) =  Right (env, ABool bool)
+
 evalAST env (ADefine name expr) =
   case evalAST env expr of
-    Right(_, val) -> Right(Map.insert name val env, val)
+    Right(_, val) -> Right(Map.insert name val env, AVoid)
     Left err -> Left err
 
 evalAST env (ALamdba args body) = Right (env, ALamdba args body)

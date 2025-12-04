@@ -15,7 +15,8 @@ data SExpr = SInt Int
            | SList [SExpr]
            deriving (Show, Eq)
 
-data Ast = AInt Int
+data Ast = AVoid
+         | AInt Int
          | ASymbol String
          | ABool Bool
          | AList [Ast]
@@ -25,9 +26,12 @@ data Ast = AInt Int
          deriving (Eq)
 
 instance Show Ast where
+    show (AVoid) = "#<void>"
     show (AInt n) = show n
     show (ASymbol s) = s
-    show (ABool b) = show b
+    show (ABool b) = case b of 
+      False -> "#f"
+      True -> "#t"
     show (AList list) = (formatList list)
     show (ACall f args) = "(" ++ show f ++ " " ++ concatMap (\x -> show x ++ " ") args ++ ")"
     show (ADefine name expr) = "(define " ++ name ++ " " ++ show expr ++ ")"

@@ -15,7 +15,10 @@ import Data(Ast(..), SExpr(..))
 
 sexprToAST :: SExpr -> Either String Ast
 sexprToAST (SInt mp) = Right (AInt mp)
-sexprToAST (SSymbol symb) = Right (ASymbol symb)
+sexprToAST (SSymbol symb) = case symb of
+  "#f" -> Right (ABool False)
+  "#t" -> Right (ABool True)
+  str -> Right (ASymbol str)
 
 sexprToAST (SList [SSymbol "define", SSymbol name, expr]) =
   case sexprToAST expr of
