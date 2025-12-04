@@ -114,7 +114,10 @@ builtinGreater args = case traverse foundInt args of
   Right vals -> Right (isLower (reverse vals))
 
 builtinIf :: [Ast] -> Either String Ast
-builtinIf [_, expr1] = Right expr1
+builtinIf [condition, expr1] = case foundBool condition of
+  Left err -> Left ("Exception in eq? " ++ err)
+  Right False -> Right AVoid
+  Right True -> Right expr1
 builtinIf [condition, expr1, expr2] = case foundBool condition of
   Left err -> Left ("Exception in eq?: " ++ err)
   Right False -> Right expr2
