@@ -22,7 +22,7 @@ data Ast = AVoid
          | AList [Ast]
          | ACall Ast [Ast]
          | ADefine String Ast
-         | ALamdba [String] Ast
+         | ALambda [String] Ast
          deriving (Eq)
 
 instance Show Ast where
@@ -35,7 +35,7 @@ instance Show Ast where
     show (AList list) = (formatList list)
     show (ACall f args) = "(" ++ show f ++ " " ++ concatMap (\x -> show x ++ " ") args ++ ")"
     show (ADefine name expr) = "(define " ++ name ++ " " ++ show expr ++ ")"
-    show (ALamdba params body) = "(lambda (" ++ concatMap (\x -> x ++ " ") params ++ ") " ++ show body ++ ")"
+    show (ALambda params body) = "(lambda (" ++ concatMap (\x -> x ++ " ") params ++ ") " ++ show body ++ ")"
 
 formatList :: [Ast] -> String
 formatList [] = ""
