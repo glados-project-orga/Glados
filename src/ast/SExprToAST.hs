@@ -40,6 +40,10 @@ sexprToAST (SList (fnExpr:args)) =
       case traverse sexprToAST args of
         Right argAsts -> Right (ACall (ASymbol fname) argAsts)
         Left err      -> Left err
+    Right (ALambda params body) ->
+      case traverse sexprToAST args of
+        Right argAsts -> Right (ACall (ALambda params body) argAsts)
+        Left err      -> Left err
     Right _ ->
       case traverse sexprToAST (fnExpr:args) of
         Right asts -> Right (AList asts)

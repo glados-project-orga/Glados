@@ -18,20 +18,47 @@ type Env = Map.Map String Ast
 
 evalAST :: Env -> Ast -> Either String (Env, Ast)
 evalAST env (AInt li) = Right (env, AInt li)
-
-evalAST env (ASymbol symb) =
-  case Map.lookup symb env of
-    Just val -> Right (env, val)
-    Nothing -> Left ("Unbound symbol: " ++ symb)
-
 evalAST env (ABool bool) =  Right (env, ABool bool)
+evalAST env (ALambda args body) = Right (env, ALambda args body)
 
 evalAST env (ADefine name expr) =
   case evalAST env expr of
     Right(_, val) -> Right(Map.insert name val env, AVoid)
     Left err -> Left err
 
-evalAST env (ALambda args body) = Right (env, ALambda args body)
+evalAST env (ASymbol symb) =
+  case Map.lookup symb env of
+    Just val -> Right (env, val)
+    Nothing -> Left ("Unbound symbol: " ++ symb)
+
+
+evalAST env (ACall (ASymbol name) args) =
+
+  case Map.lookup name apply of
+    Just f ->
+      case traverse (fmap snd . evalAST env) args of
+        Left err -> Left err
+        Right vals ->
+          case f vals of
+            Left err -> Left err
+            Right val -> Right (env, val)
+  
+    Nothing ->
+        case Map.lookup name env of
+          Just (ALambda argss body) ->
+            if length argss == length args
+              then case traverse (fmap snd . evalAST env) args of
+                Left err     -> Left err
+                Right argvals ->
+                  let newEnv = Map.union (Map.fromList (zip argss argvals)) env
+                  in evalAST newEnv body
+              else Left "Invalid number of arguments"
+
+          Just other ->
+            Left ("Trying to call non-function: " ++ show other)
+
+          Nothing ->
+            Left ("Unknown function: " ++ name)
 
 evalAST env (ACall ffn args) =
 
