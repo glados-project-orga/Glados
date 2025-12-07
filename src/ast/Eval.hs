@@ -31,6 +31,19 @@ evalAST env (ASymbol symb) =
     Just val -> Right (env, val)
     Nothing -> Left ("Unbound symbol: " ++ symb)
 
+evalAST env (ACall (ASymbol "if") [cond, thenBranch, elseBranch]) =
+  case evalAST env cond of 
+    Left err -> Left err
+    Right (_, ABool True) -> evalAST env thenBranch
+    Right (_, ABool False) -> evalAST env elseBranch
+    Right (_, other) -> Left ("if condition must be a boolean, and not: " ++ show other)
+
+evalAST env (ACall (ASymbol "if") [cond, thenBranch]) =
+  case evalAST env cond of 
+    Left err -> Left err
+    Right (_, ABool True) -> evalAST env thenBranch
+    Right (_, ABool False) -> Right (env, AVoid)
+    Right (_, other) -> Left ("if condition must be a boolean, and not: " ++ show other)
 
 evalAST env (ACall (ASymbol name) args) =
 

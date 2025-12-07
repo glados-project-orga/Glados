@@ -20,8 +20,7 @@ import Builtins(
     builtinDiv,
     builtinEqual,
     builtinLower,
-    builtinGreater,
-    builtinIf
+    builtinGreater
     )
 import Data(Ast(..))
 
@@ -98,15 +97,6 @@ testBuiltinsGreater = TestList[
     TestCase(assertEqual "(> 2 2 1)" (Right (ABool False)) (builtinGreater [AInt 2, AInt 2, AInt 1]))
     ]
 
-testBuiltinsIf :: Test
-testBuiltinsIf = TestList[
-    TestCase(assertEqual "(if)" (Left "Exception: invalid syntax (if)") (builtinIf [])),
-    TestCase(assertEqual "(if #t 1)" (Right (AInt 1)) (builtinIf [ABool True, AInt 1])),
-    TestCase(assertEqual "(if #f 1)" (Right AVoid) (builtinIf [ABool False, AInt 1])),
-    TestCase(assertEqual "(if #t 2 1)" (Right (AInt 2)) (builtinIf [ABool True, AInt 2, AInt 1])),
-    TestCase(assertEqual "(if #f 2 1)" (Right (AInt 1)) (builtinIf [ABool False, AInt 2, AInt 1]))
-    ]
-
 testBuiltins :: Test
 testBuiltins = TestList[
     testFoundInt,
@@ -118,6 +108,5 @@ testBuiltins = TestList[
     testBuiltinsMod,
     testBuiltinsEqual,
     testBuiltinsLower,
-    testBuiltinsGreater,
-    testBuiltinsIf
+    testBuiltinsGreater
     ]
