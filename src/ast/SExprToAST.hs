@@ -25,6 +25,15 @@ sexprToAST (SList [SSymbol "define", SSymbol name, expr]) =
     Right astExpr -> Right (ADefine name astExpr)
     Left err      -> Left err
 
+sexprToAST (SList [SSymbol "define", SList (SSymbol name : params), body]) =
+  case traverse sexprToAST params of
+    Right argAsts ->
+      let argNames = [ n | ASymbol n <- argAsts ]
+      in case sexprToAST body of
+          Right bdy -> Right (ADefine name (ALambda argNames bdy))
+          Left err  -> Left err
+    Left err -> Left err
+
 sexprToAST (SList [SSymbol "lambda", SList params, body]) =
   case traverse sexprToAST params of
     Right argAsts ->

@@ -18,7 +18,10 @@ testSExprFirst = TestList [
     TestCase(assertEqual "SInt to AInt" (Right (AInt 5)) (sexprToAST(SInt 5))),
     TestCase(assertEqual "SSymbol to ASSymbol" (Right(ASymbol "add")) (sexprToAST(SSymbol "add"))),
     TestCase(assertEqual "SList to ACall" (Right (ACall (ASymbol "+") [AInt 5, AInt 6])) (sexprToAST (SList [SSymbol "+", SInt 5, SInt 6]))),
-    TestCase(assertEqual "SList to ADefine" (Right (ADefine "x" (AInt 5))) (sexprToAST (SList [SSymbol "define", SSymbol "x", SInt 5])))
+    TestCase(assertEqual "SList to ADefine" (Right (ADefine "x" (AInt 5))) (sexprToAST (SList [SSymbol "define", SSymbol "x", SInt 5]))),
+    TestCase(assertEqual "SList to ADefine function shorthand" 
+        (Right (ADefine "add" (ALambda ["a", "b"] (ACall (ASymbol "+") [ASymbol "a", ASymbol "b"]))))
+        (sexprToAST (SList [SSymbol "define", SList [SSymbol "add", SSymbol "a", SSymbol "b"], SList [SSymbol "+", SSymbol "a", SSymbol "b"]])))
     ]
 
 
