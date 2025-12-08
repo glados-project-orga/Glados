@@ -20,7 +20,9 @@ testSExprAint = TestList [
 
 testSExprASymbol :: Test
 testSExprASymbol = TestList [
-    TestCase(assertEqual "SSymbol to ASSymbol" (Right(ASymbol "add")) (sexprToAST(SSymbol "add")))
+    TestCase(assertEqual "SSymbol to ASSymbol" (Right(ASymbol "add")) (sexprToAST(SSymbol "add"))),
+    TestCase(assertEqual "SSymbol #t to ABool True" (Right(ABool True)) (sexprToAST(SSymbol "#t"))),
+    TestCase(assertEqual "SSymbol #f to ABool False" (Right(ABool False)) (sexprToAST(SSymbol "#f")))
     ]
 
 testSExprADefine :: Test
@@ -28,7 +30,12 @@ testSExprADefine = TestList [
     TestCase(assertEqual "SList to ADefine" (Right (ADefine "x" (AInt 5))) (sexprToAST (SList [SSymbol "define", SSymbol "x", SInt 5]))),
     TestCase(assertEqual "SList to ADefine function shorthand"
         (Right (ADefine "add" (ALambda ["a", "b"] (ACall (ASymbol "+") [ASymbol "a", ASymbol "b"]))))
-        (sexprToAST (SList [SSymbol "define", SList [SSymbol "add", SSymbol "a", SSymbol "b"], SList [SSymbol "+", SSymbol "a", SSymbol "b"]])))
+        (sexprToAST (SList [SSymbol "define", SList [SSymbol "add", SSymbol "a", SSymbol "b"], SList [SSymbol "+", SSymbol "a", SSymbol "b"]]))),
+    TestCase(assertEqual "Define without body" (Left "Unsupported SExpr form") (sexprToAST (SList [SSymbol "define", SSymbol "x", SList []]))),
+    TestCase(assertEqual "Define lambda without args"
+        (Left ("Unsupported SExpr form")) (sexprToAST (SList [SSymbol "define", SList [SSymbol "add", SSymbol "a", SSymbol "b"], SList []]))),
+    TestCase(assertEqual "Define lambda without body"
+        (Left ("Unsupported SExpr form")) (sexprToAST (SList [SSymbol "define", SList [], SList [SSymbol "+", SSymbol "a", SSymbol "b"]])))
     ]
 
 testSExprACalls :: Test
