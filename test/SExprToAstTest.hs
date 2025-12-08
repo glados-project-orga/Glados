@@ -13,25 +13,36 @@ import Test.HUnit
 import SExprToAST(sexprToAST)
 import Data(Ast(..), SExpr(..))
 
-testSExprFirst :: Test
-testSExprFirst = TestList [
-    TestCase(assertEqual "SInt to AInt" (Right (AInt 5)) (sexprToAST(SInt 5))),
-    TestCase(assertEqual "SSymbol to ASSymbol" (Right(ASymbol "add")) (sexprToAST(SSymbol "add"))),
-    TestCase(assertEqual "SList to ACall" (Right (ACall (ASymbol "+") [AInt 5, AInt 6])) (sexprToAST (SList [SSymbol "+", SInt 5, SInt 6]))),
+testSExprAint :: Test
+testSExprAint = TestList [
+    TestCase(assertEqual "SInt to AInt" (Right (AInt 5)) (sexprToAST(SInt 5)))
+    ]
+
+testSExprASymbol :: Test
+testSExprASymbol = TestList [
+    TestCase(assertEqual "SSymbol to ASSymbol" (Right(ASymbol "add")) (sexprToAST(SSymbol "add")))
+    ]
+
+testSExprADefine :: Test
+testSExprADefine = TestList [
     TestCase(assertEqual "SList to ADefine" (Right (ADefine "x" (AInt 5))) (sexprToAST (SList [SSymbol "define", SSymbol "x", SInt 5]))),
-    TestCase(assertEqual "SList to ADefine function shorthand" 
+    TestCase(assertEqual "SList to ADefine function shorthand"
         (Right (ADefine "add" (ALambda ["a", "b"] (ACall (ASymbol "+") [ASymbol "a", ASymbol "b"]))))
         (sexprToAST (SList [SSymbol "define", SList [SSymbol "add", SSymbol "a", SSymbol "b"], SList [SSymbol "+", SSymbol "a", SSymbol "b"]])))
     ]
 
-
-testSExprSecond :: Test
-testSExprSecond = TestList [
-    TestCase (assertEqual "SList to AList" (Right (AList [AInt 1, AInt 2, AInt 3])) (sexprToAST (SList [SInt 1, SInt 2, SInt 3]))),
-    TestCase (assertEqual "Empty SList unsupported" (Left "Unsupported SExpr form") (sexprToAST (SList []))),
-    TestCase (assertEqual "Nested ACall" (Right (ACall (ASymbol "+") [ACall (ASymbol "*") [AInt 2, AInt 3], AInt 4]))
+testSExprACalls :: Test
+testSExprACalls = TestList [
+    TestCase(assertEqual "SList to ACall" (Right (ACall (ASymbol "+") [AInt 5, AInt 6])) (sexprToAST (SList [SSymbol "+", SInt 5, SInt 6]))),
+    TestCase(assertEqual "Nested ACall" (Right (ACall (ASymbol "+") [ACall (ASymbol "*") [AInt 2, AInt 3], AInt 4]))
         (sexprToAST (SList [SSymbol "+", SList [SSymbol "*", SInt 2, SInt 3], SInt 4])))
     ]
 
+testSExprAList :: Test
+testSExprAList = TestList [
+    TestCase (assertEqual "SList to AList" (Right (AList [AInt 1, AInt 2, AInt 3])) (sexprToAST (SList [SInt 1, SInt 2, SInt 3]))),
+    TestCase (assertEqual "Empty SList unsupported" (Left "Unsupported SExpr form") (sexprToAST (SList [])))
+    ]
+
 testSExpr :: Test
-testSExpr = TestList [testSExprFirst, testSExprSecond]
+testSExpr = TestList[testSExprACalls, testSExprAint, testSExprASymbol, testSExprADefine, testSExprAList]
