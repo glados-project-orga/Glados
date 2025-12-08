@@ -1,2 +1,9 @@
 .stack-work/
 *~
+.vscode/
+glados
+glados.cabal
+coding-style-reports.log
+stack.yaml.lock
+test/coverage/
+dist-newstyle/
