@@ -29,7 +29,6 @@ testSExprSecond :: Test
 testSExprSecond = TestList [
     TestCase (assertEqual "SList to AList" (Right (AList [AInt 1, AInt 2, AInt 3])) (sexprToAST (SList [SInt 1, SInt 2, SInt 3]))),
     TestCase (assertEqual "Empty SList unsupported" (Left "Unsupported SExpr form") (sexprToAST (SList []))),
-    -- TestCase (assertEqual "Unsupported form" (Left "Unsupported SExpr form") (sexprToAST (SList [SSymbol "onlyOne"]))),
     TestCase (assertEqual "Nested ACall" (Right (ACall (ASymbol "+") [ACall (ASymbol "*") [AInt 2, AInt 3], AInt 4]))
         (sexprToAST (SList [SSymbol "+", SList [SSymbol "*", SInt 2, SInt 3], SInt 4])))
     ]
