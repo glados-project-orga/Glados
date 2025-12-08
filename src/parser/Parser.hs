@@ -52,7 +52,7 @@ instance Alternative Parser where
      where
       f str = case runParser p1 str of
          Right (res, rest) -> Right (res, rest)
-         Left err -> runParser p2 str
+         Left _ -> runParser p2 str
 
 parseChar :: Char -> Parser Char
 parseChar c = Parser f

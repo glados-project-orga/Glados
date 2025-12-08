@@ -14,7 +14,7 @@ module Shell
     ) where
 
 import System.Exit
-import System.IO (hFlush, stdout)
+import System.IO (hFlush, stdout, stdin, hIsEOF)
 import SExprToAST
 import ParserSExpr
 import Parser
@@ -42,11 +42,14 @@ startParser str env = case runParser parseSExpr str of
 
 startShell :: Env -> IO ()
 startShell env = putStr "> " >> hFlush stdout >>
-    getLine >>= \input ->
-    case input of
-        "exit" -> exitWith (ExitFailure 84)
-        _ ->
-            case startParser input env of
-                Left err -> putStrLn err >> startShell env
-                Right (newEnv, AVoid) -> startShell newEnv
-                Right (newEnv, ast) -> print ast >> startShell newEnv
+    hIsEOF stdin >>= \eof ->
+        case eof of 
+            True -> exitWith ExitSuccess
+            False -> getLine >>= \input ->
+                case input of
+                    "exit" -> exitWith (ExitFailure 84)
+                    _ ->
+                        case startParser input env of
+                            Left err -> putStrLn err >> startShell env
+                            Right (newEnv, AVoid) -> startShell newEnv
+                            Right (newEnv, ast) -> print ast >> startShell newEnv
