@@ -8,7 +8,14 @@
 module Main (main) where
 
 import Shell
+import EvalShell
+import System.IO (hIsTerminalDevice, stdin)
+import Init (writeHelp, initializeEnv)
 
 main :: IO ()
 main = (writeHelp >> initializeEnv) >>= \env -> 
-  startShell env
+  hIsTerminalDevice stdin >>= \redirection ->
+    case redirection of
+      True -> startShell env
+      False -> readAll "" >>= \content -> evalRedirShell content env
+
