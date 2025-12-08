@@ -1,0 +1,30 @@
+name: mirror
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+    types:
+      - closed
+
+jobs:
+  push-mirror:
+    if: ${{ github.repository == 'glados-project-orga/Glados' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Mirror push to Epitech repo
+        uses: pixta-dev/repository-mirroring-action@v1
+        with:
+          target_repo_url: "git@github.com:EpitechPGE3-2025/G-FUN-500-PAR-5-2-glados-4.git"
+          ssh_private_key: ${{ secrets.GIT_SSH_PRIVATE_KEY }}

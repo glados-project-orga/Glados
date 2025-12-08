@@ -21,6 +21,7 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
+- containers
 
 ghc-options:
 - -Wall
@@ -34,7 +35,10 @@ ghc-options:
 - -Wredundant-constraints
 
 library:
-  source-dirs: src
+  source-dirs:
+    - src
+    - src/parser
+    - src/ast
 
 executables:
   glados-exe:
@@ -50,6 +54,9 @@ executables:
 tests:
   glados-test:
     main:                Spec.hs
+    other-modules:
+    - LispBuiltinsTest
+    - SExprToAstTest
     source-dirs:         test
     ghc-options:
     - -threaded

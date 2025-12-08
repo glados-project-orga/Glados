@@ -1,6 +1,14 @@
+{-
+-- EPITECH PROJECT, 2025
+-- gladeeeosss
+-- File description:
+-- Main
+-}
+
 module Main (main) where
 
-import Lib
+import Shell
 
 main :: IO ()
-main = someFunc
+main = (writeHelp >> initializeEnv) >>= \env -> 
+  startShell env

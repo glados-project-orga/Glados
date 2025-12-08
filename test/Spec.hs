@@ -1,32 +1,23 @@
+{- 
+-- EPITECH PROJECT, 2025
+-- epi-repo
+-- File description:
+-- Spec.hs
+-}
 
-module Main (main) where
+module Main (
+    main
+) where
+
 import Test.HUnit
-import Boostrap_Ast(SExpr(..), getSymbol, getList, getInterger)
-
-testGetSymbol:: Test
-testGetSymbol = TestList [
-    TestCase(assertEqual "Verificate symbol" (Just ("+")) (getSymbol (SSymbol "+"))),
-    TestCase(assertEqual "Will output Nothing" (Nothing) (getSymbol (SInt 8)))
-    ]
-
-
-testGetInterger :: Test
-testGetInterger = TestList [
-    TestCase(assertEqual "Verificate int" (Just 5) (getInterger (SInt 5))),
-    TestCase(assertEqual "Will output Nothing" (Nothing) (getInterger (SSymbol "+")))
-    ]
-   
-
-testGetList:: Test
-testGetList = TestList [
-    TestCase(assertEqual "Verificate interger" (Just ([SSymbol "define", SSymbol "x", SInt 5]))
-        (getList (SList [SSymbol "+", SInt 1, SInt 2]))),
-    TestCase(assertEqual "Will output Nothing" (Nothing) (getList(SSymbol "define")))
-    ]
-
+import LispBuiltinsTest
+import SExprToAstTest
 
 tests :: Test
-tests = TestList[testGetSymbol , testGetList, testGetInterger]
+tests = TestList[
+    testBuiltins,
+    testSExpr
+    ]
 
 main :: IO Counts
 main = runTestTT tests
