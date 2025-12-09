@@ -1,0 +1,142 @@
+{-
+-- EPITECH PROJECT, 2021
+-- parserTest
+-- File description:
+-- unit tests for parser
+-}
+
+module ParserTest (
+    testParser
+) where
+
+import Test.HUnit
+import Parser (
+    Parser(..),
+    parseChar,
+    sepBy,
+    parseAnyChar,
+    parseSpaces,
+    betweenSpaces,
+    parseOr,
+    parseSome,
+    parseMany,
+    parseUInt,
+    parseInt
+    )
+
+import Data(SExpr(..))
+
+import ParserSExpr (
+    parseSList,
+    parseSNumber,
+    parseSSymbol
+    )
+
+testParseChar :: Test
+testParseChar = TestList [
+    TestCase (assertEqual "parseChar with valid string" (Right ('a', "bc")) (runParser (parseChar 'a') "abc")),
+    TestCase (assertEqual "parseChar with string not containing char" (Left "Character 'a' not found") (runParser (parseChar 'a') "bc")),
+    TestCase (assertEqual "parseChar with empty string" (Left "Expected 'a' but reached end of input") (runParser (parseChar 'a') ""))
+    ]
+
+testSepBy :: Test
+testSepBy = TestList [
+    TestCase (assertEqual "sepBy parseChar ',' with valid string'" (Right ([1,2,3], "")) (runParser (sepBy ( parseInt) (parseChar ',')) "1,2,3"))
+    ]
+
+testParseAnyChar :: Test
+testParseAnyChar = TestList [
+    TestCase (assertEqual "parseAnyChar with valid string" (Right ('a', "bc")) (runParser (parseAnyChar "a") "abc")),
+    TestCase (assertEqual "parseAnyChar with invalid string" (Left "Character 'b' not found in the entier string") (runParser (parseAnyChar "az") "bc")),
+    TestCase (assertEqual "parseAnyChar on empty string" (Left "Reached end of input") (runParser (parseAnyChar "a") ""))
+    ]
+
+testParseSpaces :: Test
+testParseSpaces = TestList [
+    TestCase (assertEqual "parseSpaces with spaces" (Right ((), "abc")) (runParser parseSpaces "   abc")),
+    TestCase (assertEqual "parseSpaces without spaces" (Right ((), "abc")) (runParser parseSpaces "abc")),
+    TestCase (assertEqual "parseSpaces with only spaces" (Right ((), "")) (runParser parseSpaces "     ")),
+    TestCase (assertEqual "parseSpaces with empty string" (Right ((), "")) (runParser parseSpaces ""))
+    ]
+
+testBetweenSpaces :: Test
+testBetweenSpaces = TestList [
+    TestCase (assertEqual "betweenSpaces parseChar with spaces around" (Right ('a', "bc")) (runParser (betweenSpaces (parseChar 'a')) " a bc")),
+    TestCase (assertEqual "betweenSpaces parseChar without any spaces" (Right ('a', "bc")) (runParser (betweenSpaces (parseChar 'a')) "abc"))
+    ]
+
+testParseOr :: Test
+testParseOr = TestList [
+    TestCase (assertEqual "parseOr with first parser succeeding" (Right ('a', "bc")) (runParser (parseOr (parseChar 'a') (parseChar 'b')) "abc")),
+    TestCase (assertEqual "parseOr with second parser succeeding" (Right ('b', "ac")) (runParser (parseOr (parseChar 'a') (parseChar 'b')) "bac")),
+    TestCase (assertEqual "parseOr with both parsers failing" (Left "Character 'b' not found") (runParser (parseOr (parseChar 'a') (parseChar 'b')) "cde"))
+    ]
+
+testParseSome :: Test
+testParseSome = TestList [
+    TestCase (assertEqual "parseSome with multiple of the same char" (Right (['a','a','a'], "bc")) (runParser (parseSome (parseChar 'a')) "aaabc")),
+    TestCase (assertEqual "parseSome with no matching chars" (Left "Character 'a' not found") (runParser (parseSome (parseChar 'a')) "bc"))
+    ]
+
+testParseMany :: Test
+testParseMany = TestList [
+    TestCase (assertEqual "parseMany with multiple of the same char" (Right (['a','a','a'], "bc")) (runParser (parseMany (parseChar 'a')) "aaabc")),
+    TestCase (assertEqual "parseMany with no matching chars" (Right ([], "bc")) (runParser (parseMany (parseChar 'a')) "bc"))
+    ]
+
+testParseUInt :: Test
+testParseUInt = TestList [
+    TestCase (assertEqual "parseUInt with valid number" (Right (123, "abc")) (runParser parseUInt "123abc")),
+    TestCase (assertEqual "parseUInt with invalid number" (Left "Character 'a' not found in the entier string") (runParser parseUInt "abc")),
+    TestCase (assertEqual "parseUint with negative number" (Left "Character '-' not found in the entier string") (runParser parseUInt "-123abc")),
+    TestCase (assertEqual "parseUInt on empty string" (Left "Reached end of input") (runParser parseUInt ""))
+    ]
+
+testParseInt :: Test
+testParseInt = TestList [
+    TestCase (assertEqual "parseInt with valid positive number" (Right (123, "abc")) (runParser parseInt "123abc")),
+    TestCase (assertEqual "parseInt with invalid number" (Left "Character 'a' not found in the entier string") (runParser parseInt "abc")),
+    TestCase (assertEqual "parseInt with valid negative number" (Right (-123, "abc")) (runParser parseInt "-123abc")),
+    TestCase (assertEqual "parseInt on empty string" (Left "Reached end of input") (runParser parseInt ""))
+    ]
+
+testParseSNumber :: Test
+testParseSNumber = TestList [
+    TestCase (assertEqual "parseSNumber with valid number" (Right (SInt 42, " rest")) (runParser parseSNumber "42 rest")),
+    TestCase (assertEqual "parseSNumber with invalid number" (Left "Character 'a' not found in the entier string") (runParser parseSNumber "abc")),
+    TestCase (assertEqual "parseSNumber on empty string" (Left "Reached end of input") (runParser parseSNumber ""))
+    ]
+
+testSSymbol :: Test
+testSSymbol = TestList [
+    TestCase (assertEqual "parseSSymbol with valid symbol" (Right (SSymbol "add", "")) (runParser parseSSymbol "add")),
+    TestCase (assertEqual "parseSSymbol with invalid symbol starting with space" (Left "Invalid Symbole char: ' '") (runParser parseSSymbol " add")),
+    TestCase (assertEqual "parseSSymbol on empty string" (Left "Reached end of input") (runParser parseSSymbol ""))
+    ]
+
+testParseSList :: Test
+testParseSList = TestList [
+    TestCase (assertEqual "parseSList with valid SList" (Right (SList [SSymbol "+", SInt 1, SInt 2], "")) (runParser parseSList "(+ 1 2)")),
+    TestCase (assertEqual "parseSList with nested SList" (Right (SList [SSymbol "+", SList [SSymbol "*", SInt 1, SInt 2], SInt 3], ""))
+        (runParser parseSList "(+ (* 1 2) 3)")),
+    TestCase (assertEqual "parseSList with missing closing parenthesis" (Left "Expected ')' but reached end of input") (runParser parseSList "(+ 1 2")),
+    TestCase (assertEqual "parseSList with missing opening parenthesis" (Left "Character '(' not found") (runParser parseSList "+ 1 2)")),
+    TestCase (assertEqual "parseSList on empty string" (Left "Expected '(' but reached end of input") (runParser parseSList ""))
+    ]
+
+testParser :: Test
+testParser = TestList [
+    testParseChar,
+    testSepBy,
+    testParseAnyChar,
+    testParseSpaces,
+    testBetweenSpaces,
+    testParseOr,
+    testParseUInt,
+    testParseInt,
+    testParseMany,
+    testParseSome,
+    testParseSList,
+    testParseSNumber,
+    testSSymbol
+    ]
