@@ -57,6 +57,7 @@ tests:
     other-modules:
     - LispBuiltinsTest
     - SExprToAstTest
+    - ParserTest
     source-dirs:         test
     ghc-options:
     - -threaded
