@@ -12,10 +12,6 @@ module EvalTest (
 import Test.HUnit
 import Eval(
     evalAST,
-    applyBuiltin,
-    applyLambda,
-    evalASTAcall1,
-    evalASTAcall2,
     Env
     )
 
@@ -27,6 +23,9 @@ emptyEnv = Map.empty
 
 intEnv :: Env
 intEnv = Map.fromList[("x", AInt 1)]
+
+plusFunctionAST :: Ast
+plusFunctionAST = ALambda ["a", "b"] (ACall (ASymbol "+") [ASymbol "a", ASymbol "b"])
 
 testEvalAInt :: Test
 testEvalAInt = TestList [
@@ -50,10 +49,55 @@ testEvalDefine = TestList [
     TestCase (assertEqual "Eval define error" (Left "Unbound symbol: ") (evalAST emptyEnv (ADefine "x" (ASymbol ""))))
     ]
 
+testEvalLambda :: Test
+testEvalLambda = TestList [
+    TestCase (assertEqual "Eval simple lambda"
+        (Right (emptyEnv, plusFunctionAST))
+        (evalAST emptyEnv plusFunctionAST))
+    ]
+
+testEvalIfThenElse :: Test
+testEvalIfThenElse = TestList [
+    TestCase (assertEqual "Eval if then True branch"
+        (Right (emptyEnv, AInt 1))
+        (evalAST emptyEnv (ACall (ASymbol "if") [ABool True, AInt 1, AInt 0]))),
+    TestCase (assertEqual "Eval if then False branch"
+        (Right (emptyEnv, AInt 0))
+        (evalAST emptyEnv (ACall (ASymbol "if") [ABool False, AInt 1, AInt 0]))),
+    TestCase (assertEqual "Eval if with bad condition type"
+        (Left "if condition must be a boolean, and not: 2")
+        (evalAST emptyEnv (ACall (ASymbol "if") [AInt 2, AInt 1, AInt 0])))
+    ]
+
+testEvalIfThenNoElse :: Test
+testEvalIfThenNoElse = TestList [
+    TestCase (assertEqual "Eval if then True branch"
+        (Right (emptyEnv, AInt 1))
+        (evalAST emptyEnv (ACall (ASymbol "if") [ABool True, AInt 1]))),
+    TestCase (assertEqual "Eval if then False branch"
+        (Right (emptyEnv, AVoid))
+        (evalAST emptyEnv (ACall (ASymbol "if") [ABool False, AInt 1]))),
+    TestCase (assertEqual "Eval if with bad condition type"
+        (Left "if condition must be a boolean, and not: 2")
+        (evalAST emptyEnv (ACall (ASymbol "if") [AInt 2, AInt 1])))
+    ]
+
+testEvalCallByName :: Test
+testEvalCallByName = TestList [
+    TestCase (assertEqual "Eval ACall with builtin function"
+        (Right (emptyEnv, AInt 3)) (evalAST emptyEnv (ACall (ASymbol "+") [AInt 1, AInt 2]))),
+    TestCase (assertEqual "Eval ACall with unknown function"
+        (Left "Unknown function: unknown-func") (evalAST emptyEnv (ACall (ASymbol "unknown-func") [AInt 1])))
+    ]
+
 testEval :: Test
 testEval = TestList[
     testEvalAInt,
     testEvalABool,
     testEvalSymbol,
-    testEvalDefine
+    testEvalDefine,
+    testEvalLambda,
+    testEvalIfThenElse,
+    testEvalIfThenNoElse,
+    testEvalCallByName
     ]
