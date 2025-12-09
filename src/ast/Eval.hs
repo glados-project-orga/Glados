@@ -38,8 +38,8 @@ applyLambda env argss body args =
     else Left "Invalid number of arguments"
 
 
-evalASTAcall1 :: Env -> String -> [Ast] -> Either String (Env, Ast)
-evalASTAcall1 env name args =
+evalCallByName :: Env -> String -> [Ast] -> Either String (Env, Ast)
+evalCallByName env name args =
   case Map.lookup name apply of
 
     Just f -> applyBuiltin env args f
@@ -55,8 +55,8 @@ evalASTAcall1 env name args =
             Left ("Unknown function: " ++ name)
 
 
-evalASTAcall2 :: Env -> Ast -> [Ast] -> Either String (Env, Ast)
-evalASTAcall2 env ffn args =
+evalCallByExpr :: Env -> Ast -> [Ast] -> Either String (Env, Ast)
+evalCallByExpr env ffn args =
   case evalAST env ffn of
     Left err -> Left err
 
@@ -100,6 +100,6 @@ evalAST env (ACall (ASymbol "if") [cond, thenBranch]) =
     Right (_, ABool False) -> Right (env, AVoid)
     Right (_, other) -> Left ("if condition must be a boolean, and not: " ++ show other)
 
-evalAST env (ACall (ASymbol name) args) = evalASTAcall1 env name args
-evalAST env (ACall ffn args) = evalASTAcall2 env ffn args
+evalAST env (ACall (ASymbol name) args) = evalCallByName env name args
+evalAST env (ACall ffn args) = evalCallByExpr env ffn args
 evalAST _ baned = Left ("No correct Ast format: " ++ show baned)
