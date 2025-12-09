@@ -13,12 +13,14 @@ import Test.HUnit
 import LispBuiltinsTest
 import SExprToAstTest
 import ParserTest
+import EvalTest
 
 tests :: Test
 tests = TestList[
     testBuiltins,
     testSExpr,
-    testParser
+    testParser,
+    testEval
     ]
 
 main :: IO Counts
