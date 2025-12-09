@@ -60,6 +60,7 @@ tests:
     - ParserTest
     - EvalTest
     - DataTest
+    - RuntimeTest
     source-dirs:         test
     ghc-options:
     - -threaded
