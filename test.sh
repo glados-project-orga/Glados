@@ -79,6 +79,13 @@ test_expr "If true branch" "(if #t 1 2)" "1"
 test_expr "If false branch" "(if #f 1 2)" "2"
 test_expr "If with comparison" "(if (< 1 2) 10 20)" "10"
 
+echo "=== Variables and Functions ==="
+test_expr "Define and use variable" "(define x 42)
+x" "42"
+test_expr "Define and call function" "(define (square x) (* x x))
+(square 5)" "25"
+test_expr "Lambda expression" "((lambda (x) (* x x)) 4)" "16"
+
 echo "========================================"
 echo -e "Results: $PASSED passed, $FAILED failed"
 echo "========================================"
