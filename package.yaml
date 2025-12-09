@@ -59,7 +59,6 @@ tests:
     - ParserTest
     - EvalTest
     - DataTest
-    - RuntimeTest
     source-dirs:         tests/unit-test
     ghc-options:
     - -threaded
