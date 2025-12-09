@@ -34,8 +34,11 @@ jobs:
       - name: Build (make all)
         run: make all
 
-      - name: Run tests (make tests_run)
+      - name: Run unit tests (make tests_run)
         run: make tests_run
+
+      - name: Run runtime tests
+        run: ./tests/functionals-tests.sh
 
       - name: Upload coverage report
         if: always()
