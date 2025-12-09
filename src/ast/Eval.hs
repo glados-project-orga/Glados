@@ -9,8 +9,8 @@ module Eval (
     evalAST,
     applyBuiltin,
     applyLambda,
-    evalASTAcall1,
-    evalASTAcall2,
+    evalCallByName,
+    evalCallByExpr,
     Env
 ) where
 
