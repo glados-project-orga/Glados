@@ -86,6 +86,14 @@ test_expr "Define and call function" "(define (square x) (* x x))
 (square 5)" "25"
 test_expr "Lambda expression" "((lambda (x) (* x x)) 4)" "16"
 
+echo ""
+echo "=== Recursive Functions ==="
+test_expr "Factorial" "(define (fact x) (if (eq? x 1) 1 (* x (fact (- x 1)))))
+(fact 5)" "120"
+test_expr "Factorial" "(define (fact x) (if (eq? x 1) 1 (* x (fact (- x 1)))))
+(fact 4)" "24"
+echo ""
+
 echo "========================================"
 echo -e "Results: $PASSED passed, $FAILED failed"
 echo "========================================"
