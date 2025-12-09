@@ -61,7 +61,7 @@ tests:
     - EvalTest
     - DataTest
     - RuntimeTest
-    source-dirs:         test
+    source-dirs:         tests/unit-test
     ghc-options:
     - -threaded
     - -rtsopts
