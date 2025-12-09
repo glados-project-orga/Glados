@@ -21,7 +21,7 @@ testRuntime = TestList [
 
 testValidProgram :: Test
 testValidProgram = TestCase (
-    readProcessWithExitCode "./glados" ["tests/valid.lisp"] "" >>=
+    readProcessWithExitCode "./glados" < ["tests/valid.lisp"] "" >>=
         (\(code, _, _) -> assertEqual
             "Program must exit 0 on valid input"
             ExitSuccess
@@ -30,7 +30,7 @@ testValidProgram = TestCase (
 
 testErrorProgram :: Test
 testErrorProgram = TestCase (
-    readProcessWithExitCode "./glados" ["tests/error.lisp"] "" >>=
+    readProcessWithExitCode "./glados" < ["tests/error.lisp"] "" >>=
         (\(code, _, _) -> assertEqual
             "Program must exit 84 on error input"
             (ExitFailure 84)
