@@ -49,5 +49,5 @@ startParser str env = case runParser parseSExpr str of
 startShell :: Env -> IO ()
 startShell env = putStr "> " >> hFlush stdout >> getLine >>= \input ->
     case input of
-        "exit" -> exitWith (ExitFailure 84)
+        "exit" -> exitWith ExitSuccess
         _ -> evalShell input env
