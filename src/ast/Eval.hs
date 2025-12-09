@@ -7,6 +7,10 @@
 
 module Eval (
     evalAST,
+    applyBuiltin,
+    applyLambda,
+    evalCallByName,
+    evalCallByExpr,
     Env
 ) where
 
