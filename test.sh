@@ -37,6 +37,26 @@ test_expr() {
     fi
 }
 
+echo "=== Builtins ==="
+echo "== Arithmetic Operations =="
+test_expr "Addition no args" "(+)" "0"
+test_expr "Addition 1 arg" "(+ 5)" "5"
+test_expr "Addition" "(+ 1 2)" "3"
+test_expr "Addition multiple args" "(+ 1 2 3 4)" "10"
+test_expr "Subtraction no args" "(-)" "Exception: incorrect argument count in call (-)"
+test_expr "Subtraction 1 arg" "(- 5)" "-5"
+test_expr "Subtraction" "(- 1 2)" "-1"
+test_expr "Subtraction multiple args" "(- 1 2 3 4)" "-8"
+test_expr "multiplication no args" "(*)" "1"
+test_expr "multiplication 1 arg" "(* 5)" "5"
+test_expr "multiplication" "(* 4 2)" "8"
+test_expr "multiplication multiple args" "(* 1 2 3 4)" "24"
+test_expr "division wrong args number" "(div)" "Exception: incorrect argument count in call (div)"
+test_expr "division" "(div 4 2)" "2"
+test_expr "modulo wrong args number" "(mod)" "Exception: incorrect argument count in call (mod)"
+test_expr "modulo" "(mod 3 2)" "1"
+test_expr "Nested Arithmetic" "(+ (* 2 3) (- 10 5))" "11"
+
 echo ""
 echo "========================================"
 echo -e "Results: $PASSED passed, $FAILED failed"
