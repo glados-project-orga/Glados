@@ -41,9 +41,5 @@ evalAll (input:expr) env =
         Right (newEnv, AVoid) -> evalAll expr newEnv
         Right (newEnv, ast) -> print ast >> evalAll expr newEnv
 
-printSexpr :: [String] -> IO ()
-printSexpr [] = return ()
-printSexpr (str:rest) = putStrLn str >> printSexpr rest
-
 evalRedirShell :: String -> Env -> IO ()
 evalRedirShell input env = evalAll (splitSExprs input) env
