@@ -71,7 +71,8 @@ builtinMod args = case traverse foundInt args of
     if y == 0 then Left "Exception in mod: undefined for 0"
               else Right (AInt (x `mod` y))
   Right [] -> Left ("Exception: incorrect argument count in call (mod)")
-  Right _ -> Left ("Exception: incorrect argument count in call (mod " ++ show (AList args) ++ ")")
+  Right _ -> Left ("Exception: incorrect argument count in call (mod "
+    ++ show (AList args) ++ ")")
 
 builtinDiv :: [Ast] -> Either String Ast
 builtinDiv args = case traverse foundInt args of
@@ -80,7 +81,8 @@ builtinDiv args = case traverse foundInt args of
     if y == 0 then Left "Exception in div: undefined for 0"
               else Right (AInt (x `div` y))
   Right [] -> Left ("Exception: incorrect argument count in call (div)")
-  Right _ -> Left ("Exception: incorrect argument count in call (div " ++ show (AList args) ++ ")")
+  Right _ -> Left ("Exception: incorrect argument count in call (div "
+    ++ show (AList args) ++ ")")
 
 builtinEqual :: [Ast] -> Either String Ast
 builtinEqual args = case traverse foundInt args of
@@ -89,7 +91,8 @@ builtinEqual args = case traverse foundInt args of
     if x == y then Right (ABool True)
     else Right (ABool False)
   Right [] -> Left ("Exception: incorrect argument count in call (eq?)")
-  Right _ -> Left ("Exception: incorrect argument count in call (eq? " ++ show (AList args) ++ ")")
+  Right _ -> Left ("Exception: incorrect argument count in call (eq? "
+    ++ show (AList args) ++ ")")
 
 isLower :: [Int] -> Ast
 isLower [] = (ABool True)

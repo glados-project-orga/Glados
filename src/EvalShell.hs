@@ -24,15 +24,14 @@ splitSExprs str = splitAux str 0 "" []
 splitAux :: String -> Int -> String -> [String] -> [String]
 splitAux [] _ "" acc = reverse acc
 splitAux [] _ buf acc = reverse (buf:acc)
-splitAux (c:cs) nbPar buf acc
-    | c == '('  = splitAux cs (nbPar + 1) (buf ++ [c]) acc
-    | c == ')'  = if (nbPar - 1) == 0
-        then splitAux cs 0 "" ((buf ++ [c]) : acc)
-        else splitAux cs (nbPar - 1) (buf ++ [c]) acc
-    | nbPar == 0 && c == '\n' && not (null buf) =
-                    splitAux cs nbPar "" ((buf ++ [c]):acc)
-    | c == '\n' || c == '\t' = splitAux cs nbPar buf acc
-    | otherwise = splitAux cs nbPar (buf ++ [c]) acc
+splitAux ('(':cs) nbPar buf acc = splitAux cs (nbPar + 1) (buf ++ ['(']) acc
+splitAux (')':cs) nbPar buf acc = if (nbPar - 1) == 0
+    then splitAux cs 0 "" ((buf ++ [')']):acc)
+    else splitAux cs (nbPar - 1) (buf ++ [')']) acc
+splitAux ('\n':cs) 0 buf acc | not (null buf) =
+    splitAux cs 0 "" ((buf ++ ['\n']):acc)
+splitAux ('\n':cs) nbPar buf acc = splitAux cs nbPar buf acc
+splitAux (c:cs) nbPar buf acc = splitAux cs nbPar (buf ++ [c]) acc
 
 evalAll :: [String] -> Env -> IO ()
 evalAll [] _ = exitWith ExitSuccess
