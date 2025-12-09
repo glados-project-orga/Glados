@@ -64,12 +64,32 @@ testParseOr = TestList [
     TestCase (assertEqual "parseOr with both parsers failing" (Left "Character 'b' not found") (runParser (parseOr (parseChar 'a') (parseChar 'b')) "cde"))
     ]
 
+testParseSome :: Test
+testParseSome = TestList [
+    TestCase (assertEqual "parseSome with multiple of the same char" (Right (['a','a','a'], "bc")) (runParser (parseSome (parseChar 'a')) "aaabc")),
+    TestCase (assertEqual "parseSome with no matching chars" (Left "Character 'a' not found") (runParser (parseSome (parseChar 'a')) "bc"))
+    ]
+
+testParseMany :: Test
+testParseMany = TestList [
+    TestCase (assertEqual "parseMany with multiple of the same char" (Right (['a','a','a'], "bc")) (runParser (parseMany (parseChar 'a')) "aaabc")),
+    TestCase (assertEqual "parseMany with no matching chars" (Right ([], "bc")) (runParser (parseMany (parseChar 'a')) "bc"))
+    ]
+
 testParseUInt :: Test
 testParseUInt = TestList [
     TestCase (assertEqual "parseUInt with valid number" (Right (123, "abc")) (runParser parseUInt "123abc")),
     TestCase (assertEqual "parseUInt with invalid number" (Left "Character 'a' not found in the entier string") (runParser parseUInt "abc")),
     TestCase (assertEqual "parseUint with negative number" (Left "Character '-' not found in the entier string") (runParser parseUInt "-123abc")),
     TestCase (assertEqual "parseUInt on empty string" (Left "Reached end of input") (runParser parseUInt ""))
+    ]
+
+testParseInt :: Test
+testParseInt = TestList [
+    TestCase (assertEqual "parseInt with valid positive number" (Right (123, "abc")) (runParser parseInt "123abc")),
+    TestCase (assertEqual "parseInt with invalid number" (Left "Character 'a' not found in the entier string") (runParser parseInt "abc")),
+    TestCase (assertEqual "parseInt with valid negative number" (Right (-123, "abc")) (runParser parseInt "-123abc")),
+    TestCase (assertEqual "parseInt on empty string" (Left "Reached end of input") (runParser parseInt ""))
     ]
 
 
@@ -81,5 +101,8 @@ testParser = TestList [
     testParseSpaces,
     testBetweenSpaces,
     testParseOr,
-    testParseUInt
+    testParseUInt,
+    testParseInt,
+    testParseMany,
+    testParseSome
     ]
