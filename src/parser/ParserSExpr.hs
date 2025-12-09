@@ -7,6 +7,9 @@
 
 module ParserSExpr (
     parseSExpr,
+    parseSList,
+    parseSNumber,
+    parseSSymbol
 ) where
 
 import Data(SExpr(..))
