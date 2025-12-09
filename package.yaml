@@ -58,6 +58,8 @@ tests:
     - LispBuiltinsTest
     - SExprToAstTest
     - ParserTest
+    - EvalTest
+    - DataTest
     source-dirs:         test
     ghc-options:
     - -threaded
