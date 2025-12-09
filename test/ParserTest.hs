@@ -1,5 +1,5 @@
 {-
--- EPITECH PROJECT, 2025
+-- EPITECH PROJECT, 2021
 -- parserTest
 -- File description:
 -- unit tests for parser
@@ -22,6 +22,14 @@ import Parser (
     parseMany,
     parseUInt,
     parseInt
+    )
+
+import Data(SExpr(..))
+
+import ParserSExpr (
+    parseSList,
+    parseSNumber,
+    parseSSymbol
     )
 
 testParseChar :: Test
@@ -92,6 +100,29 @@ testParseInt = TestList [
     TestCase (assertEqual "parseInt on empty string" (Left "Reached end of input") (runParser parseInt ""))
     ]
 
+testParseSNumber :: Test
+testParseSNumber = TestList [
+    TestCase (assertEqual "parseSNumber with valid number" (Right (SInt 42, " rest")) (runParser parseSNumber "42 rest")),
+    TestCase (assertEqual "parseSNumber with invalid number" (Left "Character 'a' not found in the entier string") (runParser parseSNumber "abc")),
+    TestCase (assertEqual "parseSNumber on empty string" (Left "Reached end of input") (runParser parseSNumber ""))
+    ]
+
+testSSymbol :: Test
+testSSymbol = TestList [
+    TestCase (assertEqual "parseSSymbol with valid symbol" (Right (SSymbol "add", "")) (runParser parseSSymbol "add")),
+    TestCase (assertEqual "parseSSymbol with invalid symbol starting with space" (Left "Invalid Symbole char: ' '") (runParser parseSSymbol " add")),
+    TestCase (assertEqual "parseSSymbol on empty string" (Left "Reached end of input") (runParser parseSSymbol ""))
+    ]
+
+testParseSList :: Test
+testParseSList = TestList [
+    TestCase (assertEqual "parseSList with valid SList" (Right (SList [SSymbol "+", SInt 1, SInt 2], "")) (runParser parseSList "(+ 1 2)")),
+    TestCase (assertEqual "parseSList with nested SList" (Right (SList [SSymbol "+", SList [SSymbol "*", SInt 1, SInt 2], SInt 3], ""))
+        (runParser parseSList "(+ (* 1 2) 3)")),
+    TestCase (assertEqual "parseSList with missing closing parenthesis" (Left "Expected ')' but reached end of input") (runParser parseSList "(+ 1 2")),
+    TestCase (assertEqual "parseSList with missing opening parenthesis" (Left "Character '(' not found") (runParser parseSList "+ 1 2)")),
+    TestCase (assertEqual "parseSList on empty string" (Left "Expected '(' but reached end of input") (runParser parseSList ""))
+    ]
 
 testParser :: Test
 testParser = TestList [
@@ -104,5 +135,8 @@ testParser = TestList [
     testParseUInt,
     testParseInt,
     testParseMany,
-    testParseSome
+    testParseSome,
+    testParseSList,
+    testParseSNumber,
+    testSSymbol
     ]
