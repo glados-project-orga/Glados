@@ -68,3 +68,4 @@ tests:
     dependencies:
     - HUnit
     - glados
+    - process

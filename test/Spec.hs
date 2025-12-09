@@ -15,6 +15,7 @@ import SExprToAstTest
 import ParserTest
 import EvalTest
 import DataTest
+import RuntimeTest
 
 tests :: Test
 tests = TestList[
@@ -22,7 +23,8 @@ tests = TestList[
     testSExpr,
     testParser,
     testEval,
-    testData
+    testData,
+    testRuntime
     ]
 
 main :: IO Counts
