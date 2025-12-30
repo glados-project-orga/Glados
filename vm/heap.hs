@@ -42,3 +42,24 @@ readArray heap hand index =
                 then Left  "Array index out of bounds"
             else Right (tab !! index)
         _   -> Left "Handle is not an array"
+
+
+writeArray :: Heap -> Handle -> Int -> Value -> Either String Heap
+writeArray    heap    hand      index  val =
+    case Map.lookup hand heap of
+        Just (HArray tab) -> 
+            if  index < 0 || index >= length tab
+                then Left  "Array index out of bounds"
+            else
+                let newTab = take index tab ++ [val] ++ drop (index + 1) tab 
+                in Right (Map.insert hand (HArray newTab) heap)
+        _    -> Left "Handle is not an array"
+
+
+writeField :: Heap -> Handle -> String -> Value -> Either String Heap
+writeField heap h field val =
+  case Map.lookup h heap of
+    Just (HObject fields) ->
+      let fields' = Map.insert field val fields
+      in Right (Map.insert h (HObject fields') heap)
+    _ -> Left "Handle is not an object"
