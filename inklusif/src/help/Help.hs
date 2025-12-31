@@ -6,8 +6,12 @@
 -}
 
 module Help (
+    argErrorLog,
     helpMessage
     ) where
+
+argErrorLog :: String -> IO ()
+argErrorLog msg = putStrLn $ "Arguments Error: " ++ msg
 
 helpMessage :: String
 helpMessage = unlines

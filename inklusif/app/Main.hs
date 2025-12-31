@@ -8,9 +8,10 @@
 module Main (main) where
 
 import System.Environment (getArgs)
+import Help (argErrorLog)
 import Args (checkArgs)
 
 main :: IO ()
 main = getArgs >>= \args ->
-    checkArgs args >>= either (putStrLn . ("Arguments Error: " ++)) (\content -> 
+    checkArgs args >>= either argErrorLog (\content -> 
         putStrLn $ "File content loaded successfully:\n" ++ content)
