@@ -20,8 +20,8 @@ checkOne arg | takeExtension arg == ".ink" = Right ()
 
 checkArgs :: [String] -> IO (Either String String)
 checkArgs [] = return $ Left "No arguments provided. Use -help for usage information."
-checkArgs [_ , _] = return $ Left "Too many arguments provided. Use -help for usage information."
 checkArgs [arg] =
     case checkOne arg of
         Left err -> return $ Left err
         Right () -> checkFile arg
+checkArgs _ = return $ Left "Too many arguments provided. Use -help for usage information."
