@@ -17,6 +17,6 @@ checkFile path = doesFileExist path >>= \exists ->
        then return $ Left $ "File not found: " ++ path
        else (Right <$> readFile path) >>= \content ->
             getFileSize path >>= \size ->
-            return $ if size <= 5
+            return $ if size <= 0
                 then Left "File is not completed, check documentation on how to code in Inklusif."
                 else content
