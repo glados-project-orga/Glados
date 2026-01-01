@@ -7,11 +7,15 @@
 
 module Help (
     argErrorLog,
+    parsingErrorLog,
     helpMessage
     ) where
 
 argErrorLog :: String -> IO ()
 argErrorLog msg = putStrLn $ "Arguments Error: " ++ msg
+
+parsingErrorLog :: String -> IO ()
+parsingErrorLog msg = putStrLn $ "File Error: " ++ msg
 
 helpMessage :: String
 helpMessage = unlines
