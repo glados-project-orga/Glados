@@ -5,61 +5,81 @@
 -- hs
 -}
 
+module Heapelem (
+        allocArray,
+        allocObject,
+        writeArray,
+        writeField,
+        readField,
+        readArray
+) where
+
 import Data2
-
 import qualified Data.Map as Map
+import qualified Data.Vector as V
+
+allocArray :: Int -> Value -> Heap -> (Handle, Heap)
+allocArray size initVal heapp =
+    let handle = V.length heapp
+        newArray = HArray (V.replicate size initVal) 
+        newHeap = V.snoc heapp newArray 
+    in (handle, newHeap)
 
 
-allocObjet :: Heap -> Map.Map String Value -> (Heap, Handle)
-allocObjet heap object =
-    let val = if Map.null heap then 0 else (fst(Map.findMax(heap)) + 1)
-        newheap = Map.insert val (HObject object) heap
-    in (newheap, val)
-
-
-allocArray :: Heap -> [Value] -> (Heap, Handle)
-allocArray heap values =
-    let val = if Map.null heap then 0 else (fst(Map.findMax(heap)) + 1)
-        newheap = Map.insert val (HArray values) heap
-    in  (newheap, val)
+allocObject :: Map.Map String Value -> Heap -> (Handle, Heap)
+allocObject fields heapp =
+  let handle    = V.length heapp
+      newObject = HObject fields
+      newHeap   = V.snoc heapp newObject
+  in (handle, newHeap)
 
 
 readField :: Heap -> Handle -> String -> Either String Value
-readField heap hand stt =
-    case Map.lookup hand heap of
-        Just (HObject object) ->
-            case Map.lookup stt object of
-                Just val -> Right val
-                _ -> Left ("Unknown field: " ++ stt)
-        _ -> Left "Handle is not an object"
+readField heapp hand field =
+  case heapp V.!? hand of
+    Just (HObject obj) ->
+      case Map.lookup field obj of
+        Just val -> Right val
+        Nothing  -> Left ("Unknown field: " ++ field)
+
+    Just _  -> Left "Handle is not an object"
+    Nothing -> Left "Invalid handle"
 
 
 readArray :: Heap -> Handle -> Int -> Either String Value
-readArray heap hand index =
-    case Map.lookup hand heap of
-        Just (HArray tab) ->
-            if  index < 0 || index >= length tab
-                then Left  "Array index out of bounds"
-            else Right (tab !! index)
-        _   -> Left "Handle is not an array"
+readArray heapp hand index =
+  case heapp V.!? hand of
+    Just (HArray arr) ->
+      case arr V.!? index of
+        Just val -> Right val
+        Nothing  -> Left "Array index out of bounds"
 
-
-writeArray :: Heap -> Handle -> Int -> Value -> Either String Heap
-writeArray    heap    hand      index  val =
-    case Map.lookup hand heap of
-        Just (HArray tab) -> 
-            if  index < 0 || index >= length tab
-                then Left  "Array index out of bounds"
-            else
-                let newTab = take index tab ++ [val] ++ drop (index + 1) tab 
-                in Right (Map.insert hand (HArray newTab) heap)
-        _    -> Left "Handle is not an array"
+    Just _  -> Left "Handle is not an array"
+    Nothing -> Left "Invalid handle"
 
 
 writeField :: Heap -> Handle -> String -> Value -> Either String Heap
-writeField heap h field val =
-  case Map.lookup h heap of
-    Just (HObject fields) ->
-      let fields' = Map.insert field val fields
-      in Right (Map.insert h (HObject fields') heap)
-    _ -> Left "Handle is not an object"
+writeField heapp hand field val =
+  case heapp V.!? hand of
+    Just (HObject obj) ->
+      let newobj  = Map.insert field val obj
+          newheap = heapp V.// [(hand, HObject newobj)]
+      in Right (newheap)
+
+    Just _  -> Left "Handle is not an object"
+    Nothing -> Left "Invalid handle"
+    
+
+writeArray :: Heap -> Handle -> Int -> Value -> Either String Heap
+writeArray heapp hand index val =
+  case heapp V.!? hand of
+    Just (HArray arr) ->
+      case arr V.!? index of
+        Nothing -> Left "Array index out of bounds"
+        Just _  ->
+          let newarr  = arr V.// [(index, val)]
+              newheap = heapp V.// [(hand, HArray newarr)]
+          in Right newheap
+
+    Just _  -> Left "Handle is not an array"
+    Nothing -> Left "Invalid handle"

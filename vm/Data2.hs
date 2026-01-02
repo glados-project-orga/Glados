@@ -6,62 +6,65 @@
 -}
 
 module Data2 (
-        Op(..),
-        Value(..),
-        Action(..),
-        HeapValue(..),
         Heap,
         Stack,
-        Args,
-        Insts,
-        Env,
+        Value(..),
+        Instr(..),
         Handle,
-        Function
+        VMState(..),
+        HeapValue(..)
+        -- Action(..),
+        -- Op(..),
+        -- Function
+        -- Args,
+        -- Insts,
+        -- Env,
 ) where
 
 import qualified Data.Map as Map
+import qualified Data.Vector as V
 
-
-data Op = Add
-        | Sub
-        | Mul
-        | Div
-        | Eq
-        | Less
-        deriving (Show, Eq)
-
+-- data Op = Add
+--         | Sub
+--         | Mul
+--         | Div
+--         | Eq
+--         | Less
+--         deriving (Show, Eq)
 
 data Value = VInt  Int
           | VBool Bool
-          | VOp Op
-          | VFun Function
+          | VString String
           | VHandle Handle
           deriving (Show, Eq)
+        --   | VOp Op
+        --   | VFun Function
+        --   | VNull
 
 
-data Action = IPush Value
-           | ICall
-           | IPushArg Int
-           | IPushEnv String
-           | IJumpIfFalse Int
-           | IRet
-           deriving (Show, Eq)
+-- data Action = IPush Value
+--            | ICall
+--            | IPushArg Int
+--            | IPushEnv String
+--            | IJumpIfFalse Int
+--            | IRet
+--            deriving (Show, Eq)
 
-type Env = Map.Map String Function
+-- type Env = Map.Map String Function
+-- type Insts = [Action]
+-- type Args  = [Value]
+-- type Function = [Action]
+
 
 type Stack = [Value]
-type Insts = [Action]
-type Args  = [Value]
-type Function = [Action]
-
 
 type Handle = Int
 
 data HeapValue = HObject (Map.Map String Value)
-               |HArray [Value] 
+               |HArray (V.Vector Value) 
                deriving(Show, Eq)
 
-type Heap = Map.Map Handle HeapValue
+type Heap = V.Vector HeapValue
 
 
 data Instr = IConstInt Int
@@ -105,9 +108,9 @@ data Frame = Frame
 
 data VMState = VMState
         {  stack  :: Stack,
-           locals :: [Value],
+           locals :: V.Vector Value,
            ip     :: Int,
-           code   :: [Instr],
+           code   :: V.Vector Instr,
            heap   :: Heap,
            frames :: [Frame]
         } deriving(Show)
