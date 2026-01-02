@@ -9,6 +9,11 @@
 {-# LANGUAGE RecordWildCards #-}
 
 
+module Vmstate (
+    compile
+) where
+
+
 import Data2
 import qualified Data.Vector as V
 
@@ -83,3 +88,14 @@ exec st@VMState{stack, locals, ip, code, heap, frames} =
                             in Right st {ip = ip + 1, stack = newStack}
         
                 _ -> Left ("Instruction not implemented: " ++ show instr)
+
+
+
+compile :: VMState -> Either String VMState
+compile vmst =
+  if ip vmst >= V.length (code vmst)
+    then Right vmst
+    else
+      case exec vmst of
+        Left err  -> Left err
+        Right newvmst -> run newvmst
