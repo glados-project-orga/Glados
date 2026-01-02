@@ -98,4 +98,4 @@ compile vmst =
     else
       case exec vmst of
         Left err  -> Left err
-        Right newvmst -> run newvmst
+        Right newvmst -> compile newvmst
