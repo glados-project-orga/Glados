@@ -37,7 +37,7 @@ exec st@VMState{stack, locals, ip, code, heap, frames} =
                                 Just _ -> 
                                     let newLocals = locals V.// [(n, first)] 
                                     in Right st {ip = ip + 1, stack = rest, locals = newLocals}
-                                IMulInt ->
+                IMulInt ->
                     case stack of
                         [] -> Left "Empty Stack  in IMulInt"
                         (VInt i2: VInt i1: rest) -> 
@@ -67,6 +67,19 @@ exec st@VMState{stack, locals, ip, code, heap, frames} =
                         (VInt i2: VInt i1: rest) -> 
                             let newRet = i1 + i2
                             in Right st {ip = ip + 1, stack = (VInt newRet:rest)}
-                        _ -> Left "Type error or insufficient stack in IAddInt"
+                        _ -> Left "Type error or insufficient stack in IAddInt" 
+                
+                IPop ->
+                    case stack of
+                        [] -> Left "Empty Stack"
+                        (_: rest) -> Right st {ip = ip + 1, stack = rest}
+
+                IDup ->
+                    case stack of
+                        [] -> Left "Empty Stack"
+                        (first: rest) -> 
+                            let val = first
+                                newStack = (val:first:rest)
+                            in Right st {ip = ip + 1, stack = newStack}
         
                 _ -> Left ("Instruction not implemented: " ++ show instr)
