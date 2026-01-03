@@ -13,48 +13,18 @@ module Data2 (
         Handle,
         VMState(..),
         HeapValue(..)
-        -- Action(..),
-        -- Op(..),
-        -- Function
-        -- Args,
-        -- Insts,
-        -- Env,
+
 ) where
 
 import qualified Data.Map as Map
 import qualified Data.Vector as V
 
--- data Op = Add
---         | Sub
---         | Mul
---         | Div
---         | Eq
---         | Less
---         deriving (Show, Eq)
 
 data Value = VInt  Int
           | VBool Bool
           | VString String
           | VHandle Handle
           deriving (Show, Eq)
-        --   | VOp Op
-        --   | VFun Function
-        --   | VNull
-
-
--- data Action = IPush Value
---            | ICall
---            | IPushArg Int
---            | IPushEnv String
---            | IJumpIfFalse Int
---            | IRet
---            deriving (Show, Eq)
-
--- type Env = Map.Map String Function
--- type Insts = [Action]
--- type Args  = [Value]
--- type Function = [Action]
-
 
 type Stack = [Value]
 
@@ -66,17 +36,34 @@ data HeapValue = HObject (Map.Map String Value)
 
 type Heap = V.Vector HeapValue
 
-
 data Instr = IConstInt Int
            | ILoadInt Int
            | IStoreInt Int
+        
            | IAddInt
            | ISubInt
            | IMulInt
            | IDivInt
+           | IRemInt 
+           | INegInt 
+           | IOrInt 
+           | IXorInt 
+           | IShlInt 
+           | IShrInt 
+
            | IPop
            | IDup
-   
+           | INop
+           | ISwap
+           | IDup2 
+           | IPop2
+           | IDupX1 
+           | IDupX2
+           | IDup2X1 
+           | IDup2X2
+
+           -------------------------------
+
            | IGoto Int
            | IIfEq Int
            | IIfGt Int
@@ -87,6 +74,7 @@ data Instr = IConstInt Int
            | IInvokeStatic String
            | IInvokeVirtual String
            | IInvokeSpecial String
+
            | IReturn
            | IReturnInt
    
@@ -98,6 +86,7 @@ data Instr = IConstInt Int
            | IALoad
            | IAStore
            | IArrayLength
+
            deriving (Show, Eq)
 
 data Frame = Frame
