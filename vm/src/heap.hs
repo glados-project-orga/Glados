@@ -14,7 +14,7 @@ module Heapelem (
         readArray
 ) where
 
-import Data2
+import Data
 import qualified Data.Map as Map
 import qualified Data.Vector as V
 

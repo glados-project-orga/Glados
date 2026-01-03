@@ -5,7 +5,7 @@
 -- part
 -}
 
-module Data2 (
+module Data (
         Heap,
         Stack,
         Value(..),
@@ -18,7 +18,6 @@ module Data2 (
 
 import qualified Data.Map as Map
 import qualified Data.Vector as V
-
 
 data Value = VInt  Int
           | VBool Bool

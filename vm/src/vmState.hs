@@ -11,7 +11,7 @@ module Vmstate (
     compile
 ) where
 
-import Data2
+import Data
 import qualified Data.Vector as V
 
 
