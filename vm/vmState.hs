@@ -15,11 +15,11 @@ import Data2
 import qualified Data.Vector as V
 
 
+
 execInstr :: Instr -> VMState -> Either String VMState
 
 execInstr (IConstInt n) st@VMState{stack, ip} =
     Right st { ip = ip + 1, stack = (VInt n : stack)}
-
 
 execInstr (ILoadInt n) st@VMState{stack, ip, locals} =
     case locals V.!? n of
@@ -37,14 +37,14 @@ execInstr (IStoreInt n) st@VMState{stack, ip, locals} =
                     let newLocals = locals V.// [(n, first)] 
                     in Right st {ip = ip + 1, stack = rest, locals = newLocals}
 
-
+        
 execInstr (IMulInt) st@VMState{stack, ip} =
     case stack of
         [] -> Left "Empty Stack  in IMulInt"
         (VInt i2: VInt i1: rest) -> 
             let newRet = i1 * i2
             in Right st {ip = ip + 1, stack = (VInt newRet:rest)}
-        _ -> Left "Type error or insufficient stack in IMulInt"
+        _ -> Left "IMulInt expects two integers on the stack"
 
 
 execInstr (IDivInt) st@VMState{stack, ip} = 
@@ -53,7 +53,7 @@ execInstr (IDivInt) st@VMState{stack, ip} =
         (VInt i2: VInt i1: rest) -> 
             let newRet = i1 `div` i2
             in Right st {ip = ip + 1, stack = (VInt newRet:rest)}
-        _ -> Left "Type error or insufficient stack in IDivInt"
+        _ -> Left "IDivInt expects two integers on the stack"
 
 
 execInstr (ISubInt) st@VMState{stack, ip} =
@@ -62,16 +62,23 @@ execInstr (ISubInt) st@VMState{stack, ip} =
         (VInt i2: VInt i1: rest) -> 
             let newRet = i1 - i2
             in Right st {ip = ip + 1, stack = (VInt newRet:rest)}
-        _ -> Left "Type error or insufficient stack in ISubInt" 
+        _ -> Left "ISubInt expects two integers on the stack" 
 
-           
+
 execInstr (IAddInt) st@VMState{stack, ip} =
     case stack of
         [] -> Left "Empty Stack  in IAddInt"
         (VInt i2: VInt i1: rest) -> 
             let newRet = i1 + i2
             in Right st {ip = ip + 1, stack = (VInt newRet:rest)}
-        _ -> Left "Type error or insufficient stack in IAddInt" 
+        _ -> Left "IAddInt expects two integers on the stack" 
+
+
+execInstr (INegInt) st@VMState{stack, ip} =
+    case stack of
+        [] -> Left "Empty Stack  in IAddInt"
+        (VInt i:rest) -> Right st { ip = ip + 1, stack = VInt (-i) : rest }
+        _ -> Left "IAddInt expects one integers on the stack" 
 
 
 execInstr (IOrInt) st@VMState{stack, ip} =
@@ -123,7 +130,6 @@ execInstr (IPop2) st@VMState{stack, ip} =
         [] -> Left "Empty Stack in in IPop2"
         (_:_:rest) -> Right st {ip = ip + 1, stack = rest}
         _ -> Left "IPop2 expects at least two stack values"
-
 
 
 execInstr (IDup) st@VMState{stack, ip} =
