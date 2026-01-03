@@ -40,7 +40,6 @@ module Ast
     MethodCallExpr(..),
     ArrayIndexExpr(..),
     FieldAccessExpr(..),
-
 ) where
 
 -- Position dans le parsing pour les cas d'erreurs
