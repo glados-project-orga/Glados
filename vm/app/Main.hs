@@ -10,6 +10,7 @@ module Main (main) where
 import System.Environment (getArgs)
 import System.Exit (exitWith, ExitCode(..))
 import System.IO (hPutStrLn, stderr)
+import Loader (loadBytecode)
 
 main :: IO ()
 main = getArgs >>= \args ->
@@ -22,4 +23,6 @@ usage = hPutStrLn stderr "Usage: glados-vm <bytecode-file>"
 
 runFile :: FilePath -> IO ()
 runFile path = readFile path >>= \content ->
-  putStrLn content
+  case loadBytecode content of
+    Left err -> print ("Error: " ++ err) >> exitWith (ExitFailure 84)
+    Right instrs -> print instrs
