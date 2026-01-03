@@ -1,0 +1,133 @@
+{- 
+-- EPITECH PROJECT, 2025
+-- mirror-repo
+-- File description:
+-- Loader.hs
+-}
+
+module Loader (
+    loadBytecode,
+    parseInstr,
+    parseInstrs
+) where
+
+import Data (Instr(..))
+import Parser (
+    Parser(..),
+    runParser,
+    parseChar,
+    parseSpaces,
+    betweenSpaces,
+    parseMany,
+    parseInt,
+    parseString
+  )
+import Control.Applicative ((<|>))
+
+loadBytecode :: String -> Either String [Instr]
+loadBytecode content =
+    case runParser parseInstrs content of
+        Left err -> Left err
+        Right (instrs, _) -> Right instrs
+
+parseInstrs :: Parser [Instr]
+parseInstrs = parseMany (betweenSpaces parseInstr)
+
+parseInstr :: Parser Instr
+parseInstr = parseConstInt
+         <|> parseLoadInt
+         <|> parseStoreInt
+         <|> parseArithmetic
+         <|> parseStack
+         <|> parseControlFlow
+         <|> parseInvoke
+         <|> parseReturn
+         <|> parseArray
+         <|> parseObject
+
+parseKeyword :: String -> Parser ()
+parseKeyword [] = pure ()
+parseKeyword (c:cs) = parseChar c *> parseKeyword cs
+
+parseConstInt :: Parser Instr
+parseConstInt = parseKeyword "iconst" *> parseSpaces *> (IConstInt <$> parseInt)
+
+parseLoadInt :: Parser Instr
+parseLoadInt = parseKeyword "iload" *> parseSpaces *> (ILoadInt <$> parseInt)
+
+parseStoreInt :: Parser Instr
+parseStoreInt = parseKeyword "istore" *> parseSpaces *> (IStoreInt <$> parseInt)
+
+parseArithmetic :: Parser Instr
+parseArithmetic = (parseKeyword "iadd" *> pure IAddInt)
+              <|> (parseKeyword "isub" *> pure ISubInt)
+              <|> (parseKeyword "imul" *> pure IMulInt)
+              <|> (parseKeyword "idiv" *> pure IDivInt)
+
+parseStack :: Parser Instr
+parseStack = (parseKeyword "pop" *> pure IPop)
+         <|> (parseKeyword "dup" *> pure IDup)
+
+parseControlFlow :: Parser Instr
+parseControlFlow = parseIfICmpGt
+               <|> parseIfICmpLt
+               <|> parseIfEq
+               <|> parseIfGt
+               <|> parseIfLt
+               <|> parseGoto
+
+parseGoto :: Parser Instr
+parseGoto = parseKeyword "goto" *> parseSpaces *> (IGoto <$> parseInt)
+
+parseIfEq :: Parser Instr
+parseIfEq = parseKeyword "ifeq" *> parseSpaces *> (IIfEq <$> parseInt)
+
+parseIfGt :: Parser Instr
+parseIfGt = parseKeyword "ifgt" *> parseSpaces *> (IIfGt <$> parseInt)
+
+parseIfLt :: Parser Instr
+parseIfLt = parseKeyword "iflt" *> parseSpaces *> (IIfLt <$> parseInt)
+
+parseIfICmpGt :: Parser Instr
+parseIfICmpGt = parseKeyword "if_icmpgt" *> parseSpaces *> (IIfICmpGt <$> parseInt)
+
+parseIfICmpLt :: Parser Instr
+parseIfICmpLt = parseKeyword "if_icmplt" *> parseSpaces *> (IIfICmpLt <$> parseInt)
+
+parseInvoke :: Parser Instr
+parseInvoke = parseInvokeStatic
+          <|> parseInvokeVirtual
+          <|> parseInvokeSpecial
+
+parseInvokeStatic :: Parser Instr
+parseInvokeStatic = parseKeyword "invokestatic" *> (IInvokeStatic <$> parseString)
+
+parseInvokeVirtual :: Parser Instr
+parseInvokeVirtual = parseKeyword "invokevirtual" *> (IInvokeVirtual <$> parseString)
+
+parseInvokeSpecial :: Parser Instr
+parseInvokeSpecial = parseKeyword "invokespecial" *> (IInvokeSpecial <$> parseString)
+
+parseReturn :: Parser Instr
+parseReturn = (parseKeyword "ireturn" *> pure IReturnInt)
+          <|> (parseKeyword "return" *> pure IReturn)
+
+parseObject :: Parser Instr
+parseObject = parseNew
+          <|> parseGetField
+          <|> parsePutField
+
+parseNew :: Parser Instr
+parseNew = parseKeyword "new" *> (INew <$> parseString)
+
+parseGetField :: Parser Instr
+parseGetField = parseKeyword "getfield" *> (IGetField <$> parseString)
+
+parsePutField :: Parser Instr
+parsePutField = parseKeyword "putfield" *> (IPutField <$> parseString)
+
+parseArray :: Parser Instr
+parseArray = (parseKeyword "newarray" *> pure INewArray)
+         <|> (parseKeyword "iaload" *> pure IALoad)
+         <|> (parseKeyword "iastore" *> pure IAStore)
+         <|> (parseKeyword "arraylength" *> pure IArrayLength)
