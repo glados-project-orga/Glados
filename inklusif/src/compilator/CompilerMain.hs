@@ -1,28 +1,30 @@
-import AST
-
 module CompilerMain where
+import CompilerTypes (ConstantPool, Bytecode, Ast)
+import Ast (
+    Declaration(..),
+    FunctionDecl(..),
+    StructDecl(..),
+    EnumDecl(..),
+    TypedefDecl(..)
+    )
+import Function (compileFunction)
+import Struct (compileStruct)
+import Enum (compileEnum)
+import Typedef (compileTypedef)
 
-compileStruct :: Declaration -> ConstantPool -> Bytecode -> (ConstantPool, Bytecode)
-compileStruct _ _ _ = ([], [])
-
-compileFunction :: Declaration -> ConstantPool -> Bytecode -> (ConstantPool, Bytecode)
-compileFunction _ _ _ = ([], [])
-
-compileEnum :: Declaration -> ConstantPool -> Bytecode -> (ConstantPool, Bytecode)
-compileEnum _ _ _ = ([], [])
-
-
+concatTuples :: ([a], [b]) -> ([a], [b]) -> ([a], [b])
+concatTuples (a1, b1) (a2, b2) = (a1 ++ a2, b1 ++ b2)
 
 compileDeclarations :: Ast -> (ConstantPool, Bytecode)
-compileDeclarations [] constPool bytecode = ([], [])
-compileDeclaration (fun@(FunctionDecl _ _ _ _ _):ast) constPool bytecode =
-    compileFunction fun ++ compileDeclarations ast
-compileDeclaration (struct@(StructDecl _ _ _):ast) constPool bytecode =
-    compileStruct struct ++ compileDeclarations ast
-compileDeclaration (enum@(EnumDecl _ _):ast) constPool bytecode =
-    compileEnum enum ++ compileDeclarations ast
-compileDeclaration (typedef@(TypedefDecl _ _ _):ast) constPool bytecode =
-    compileTypedef typedef ++ compileDeclarations ast
+compileDeclarations [] = ([], [])
+compileDeclarations ((Function fun):ast) =
+    compileFunction fun `concatTuples` compileDeclarations ast
+compileDeclarations ((Struct struct):ast) =
+    compileStruct struct `concatTuples` compileDeclarations ast
+compileDeclarations ((Enum enum):ast) =
+    compileEnum enum `concatTuples` compileDeclarations ast
+compileDeclarations ((Typedef typedef):ast) =
+    compileTypedef typedef `concatTuples` compileDeclarations ast
 
 compilerMain :: Ast -> (ConstantPool, Bytecode)
 compilerMain ast = compileDeclarations (ast)

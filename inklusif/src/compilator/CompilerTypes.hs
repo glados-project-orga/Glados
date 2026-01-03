@@ -1,9 +1,11 @@
-import AST
 module CompilerTypes (
     ConstantPool,
     Bytecode,
     SymbolTable,
+    Ast
 ) where
+
+import Ast (Declaration)
 
 type Ast = [Declaration]
 type ConstantPool = [String]

@@ -1,5 +1,6 @@
 module Typedef (compileTypedef) where
-import ast AST (TypedefDecl(..))
+import Ast (TypedefDecl(..))
+import CompilerTypes (ConstantPool, Bytecode)
 
 compileTypedef :: TypedefDecl -> (ConstantPool, Bytecode)
-compileTypedef _ _ _ = ([], [])
+compileTypedef _ = ([], [])

@@ -1,5 +1,6 @@
 module Struct (compileStruct) where
-import ast AST (StructDecl(..))
+import Ast (StructDecl(..))
+import CompilerTypes (ConstantPool, Bytecode)
 
 compileStruct :: StructDecl -> (ConstantPool, Bytecode)
-compileStruct _ _ _ = ([], [])
+compileStruct _ = ([], [])

@@ -1,5 +1,6 @@
 module Enum (compileEnum) where
-import ast AST (EnumDecl(..))
+import Ast (EnumDecl(..))
+import CompilerTypes (ConstantPool, Bytecode)
 
 compileEnum :: EnumDecl -> (ConstantPool, Bytecode)
-compileEnum _ _ _ = ([], [])
+compileEnum _ = ([], [])
