@@ -21,6 +21,7 @@ description:         Please see the README on GitHub at <https://github.com/gith
 dependencies:
 - base >= 4.7 && < 5
 - containers
+- vector
 
 ghc-options:
 - -Wall
@@ -36,6 +37,7 @@ ghc-options:
 library:
   source-dirs:
     - src
+    - src/parser
 
 executables:
   glados-vm-exe:
