@@ -20,7 +20,26 @@ module Ast
     LoopResult(..),
     Literal(..),
     BinOp(..),
-    SourcePos(..)
+    SourcePos(..),
+    FunctionDecl(..),
+    StructDecl(..),
+    EnumDecl(..),
+    TypedefDecl(..),
+    VarDecl(..),
+    Assignment(..),
+    IfStmt(..),
+    WhileStmt(..),
+    ForStmt(..),
+    ForEachStmt(..),
+    MatchStmt(..),
+    TryCatchStmt(..),
+    ThrowStmt(..),
+    ReturnStmt(..),
+    ExprStmt(..),
+    CallExpr(..),
+    MethodCallExpr(..),
+    ArrayIndexExpr(..),
+    FieldAccessExpr(..),
 ) where
 
 -- Position dans le parsing pour les cas d'erreurs
@@ -40,29 +59,38 @@ data EnumField = EnumField
 -- Fonction / Structure / Enum / TypeDef - Avec généralement les infos suivantes :
 -- La SourcePos (en gros l'endroit ou c'est déclaré) je suis moyen sûr de ça honnêtement
 -- le nom / les params / le body / etc ..
+
+data FunctionDecl = FunctionDecl
+  { funcPos :: SourcePos
+  , funcName :: String
+  , funcParams :: [Parameter]
+  , funcReturnType :: Type
+  , funcBody :: [Statement]
+  } deriving (Show, Eq)
+
+data StructDecl = StructDecl
+  { structPos :: SourcePos
+  , structName :: String
+  , structFields :: [StructField]
+  } deriving (Show, Eq)
+
+data EnumDecl = EnumDecl
+  { enumPos :: SourcePos
+  , enumName :: String
+  , enumDecl :: [EnumField]
+  } deriving (Show, Eq)
+
+data TypedefDecl = TypedefDecl
+  { typedefPos :: SourcePos
+  , typedefAlias :: String
+  , typedefOriginal :: Type
+  } deriving (Show, Eq)
+
 data Declaration
-  = FunctionDecl
-      { funcPos :: SourcePos
-      , funcName :: String
-      , funcParams :: [Parameter] -- PARAMETER EST DÉCLARÉ EN DESSOUS
-      , funcReturnType :: Type
-      , funcBody :: [Statement] -- DÉCLARÉ EN DESSOUS AUSSI
-      }
-  | StructDecl
-      { structPos :: SourcePos
-      , structName :: String
-      , structFields :: [StructField] -- DESSOUS
-      }
-  | EnumDecl
-      { enumPos :: SourcePos
-      , enumName :: String
-      , enumDecl :: [EnumField] -- DESSOUS
-      }
-  | TypedefDecl
-      { typedefPos :: SourcePos
-      , typedefAlias :: String
-      , typedefOriginal :: Type -- DESSOUS
-      }
+  = Function FunctionDecl
+  | Struct StructDecl
+  | Enum EnumDecl
+  | Typedef TypedefDecl
   deriving (Show, Eq)
 
 -- Params d'une fonction
@@ -94,58 +122,82 @@ data Type
   deriving (Show, Eq)
 
 -- Déclarations
+data VarDecl = VarDecl
+  { varName :: String
+  , varType :: Type
+  , varValue :: Expr
+  , varIsConst :: Bool
+  , varIsRef :: Bool
+  } deriving (Show, Eq)
+
+data Assignment = Assignment
+  { assignTarget :: Expr
+  , assignValue :: Expr
+  } deriving (Show, Eq)
+
+data IfStmt = IfStmt
+  { ifCondition :: Expr
+  , ifThenBody :: [Statement]
+  , ifElseBody :: Maybe [Statement]
+  } deriving (Show, Eq)
+
+data WhileStmt = WhileStmt
+  { whileCondition :: Expr
+  , whileBody :: [Statement]
+  } deriving (Show, Eq)
+
+data ForStmt = ForStmt
+  { forInit :: Maybe Statement
+  , forCondition :: Expr
+  , forUpdate :: [Expr]
+  , forBody :: [Statement]
+  } deriving (Show, Eq)
+
+data ForEachStmt = ForEachStmt
+  { forEachVar :: String
+  , forEachCollection :: Expr
+  , forEachBody :: [Statement]
+  } deriving (Show, Eq)
+
+data MatchStmt = MatchStmt
+  { matchExpr :: Expr
+  , matchCases :: [MatchCase]
+  } deriving (Show, Eq)
+
+data TryCatchStmt = TryCatchStmt
+  { tryBody :: [Statement]
+  , catchType :: String
+  , catchVar :: String
+  , catchBody :: [Statement]
+  } deriving (Show, Eq)
+
+data ThrowStmt = ThrowStmt
+  { throwType :: String
+  , throwMessage :: Expr
+  } deriving (Show, Eq)
+
+data ReturnStmt = ReturnStmt
+  { returnExpr :: Expr
+  } deriving (Show, Eq)
+
+data ExprStmt = ExprStmt
+  { stmtExpr :: Expr
+  } deriving (Show, Eq)
+
 data Statement
-  = VarDecl
-      { varName :: String
-      , varType :: Type
-      , varValue :: Expr
-      , varIsConst :: Bool -- let ou const
-      , varIsRef :: Bool
-      }
-  | Assignment
-      { assignTarget :: Expr
-      , assignValue :: Expr
-      }
-  | IfStmt
-      { ifCondition :: Expr
-      , ifThenBody :: [Statement]
-      , ifElseBody :: Maybe [Statement]
-      }
-  | WhileLoop
-      { whileCondition :: Expr
-      , whileBody :: [Statement]
-      }
-  | ForLoop
-      { forInit :: Maybe Statement
-      , forCondition :: Expr
-      , forUpdate :: [Expr]
-      , forBody :: [Statement]
-      }
-  | ForEachLoop
-      { forEachVar :: String
-      , forEachCollection :: Expr
-      , forEachBody :: [Statement]
-      }
-  | MatchStmt
-      { matchExpr :: Expr
-      , matchCases :: [MatchCase]
-      }
-  | TryCatch
-      { tryBody :: [Statement]
-      , catchType :: String
-      , catchVar :: String
-      , catchBody :: [Statement]
-      }
-  | ThrowStmt
-      { throwType :: String
-      , throwMessage :: Expr
-      }
-  | ReturnStmt
-      { returnExpr :: Expr
-      }
-  | ExprStmt
-      { stmtExpr :: Expr
-      }
+  = VarDeclStmt VarDecl
+  | AssignmentStmt Assignment
+  | IfStatement IfStmt
+  | WhileStatement WhileStmt
+  | ForStatement ForStmt
+  | ForEachStatement ForEachStmt
+  | MatchStatement MatchStmt
+  | TryCatchStatement TryCatchStmt
+  | ThrowStatement ThrowStmt
+  | ReturnStatement ReturnStmt
+  | ExprStatement ExprStmt
+  | Break
+  | Continue
   deriving (Show, Eq)
 
 -- Pattern matchinggg
@@ -163,37 +215,40 @@ data Pattern
   deriving (Show, Eq)
 
 -- Expressions
+data CallExpr = CallExpr
+  { callName :: String
+  , callArgs :: [Expr]
+  } deriving (Show, Eq)
+
+data MethodCallExpr = MethodCallExpr
+  { methodObj :: Expr
+  , methodName :: String
+  , methodArgs :: [Expr]
+  } deriving (Show, Eq)
+
+data ArrayIndexExpr = ArrayIndexExpr
+  { arrayExpr :: Expr
+  , indexExpr :: Expr
+  } deriving (Show, Eq)
+
+data FieldAccessExpr = FieldAccessExpr
+  { fieldObj :: Expr
+  , fieldName :: String
+  } deriving (Show, Eq)
+
 data Expr
-  = LiteralExpr Literal
+  = LitExpr Literal
   | VarExpr String
-  | BinaryOp BinOp Expr Expr
-  | FunctionCall
-      { callName :: String
-      , callArgs :: [Expr]
-      }
-  | MethodCall
-      { methodObj :: Expr
-      , methodName :: String
-      , methodArgs :: [Expr]
-      }
+  | BinOpExpr BinOp Expr Expr
+  | UnaryOpExpr String Expr
+  | CallExpression CallExpr
+  | MethodCallExpression MethodCallExpr
   | ArrayLiteral [Expr]
-  | TupleLiteral [Expr]
-  | ArrayIndex
-      { arrayExpr :: Expr
-      , indexExpr :: Expr
-      }
-  | FieldAccess
-      { fieldObj :: Expr
-      , fieldName :: String
-      }
-  | LoopExpr
-      { loopBody :: [LoopBranch]
-      }
-  | LambdaExpr
-      { lambdaParams :: [Parameter]
-      , lambdaBody :: Expr
-      }
-  | RefExpr Expr
+  | ArrayIndexExpression ArrayIndexExpr
+  | FieldAccessExpression FieldAccessExpr
+  | StructLiteral String [(String, Expr)]
+  | Lambda [Parameter] [Statement]
+  | LoopExpr [LoopBranch] LoopResult
   deriving (Show, Eq)
 
 -- Les loop/récursives
