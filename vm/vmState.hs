@@ -114,18 +114,71 @@ execInstr (IShlInt) st@VMState{stack, ip} =
 
 execInstr (IPop) st@VMState{stack, ip} =
     case stack of
-        [] -> Left "Empty Stack"
+        [] -> Left "Empty Stack in IPop"
         (_: rest) -> Right st {ip = ip + 1, stack = rest}
+
+
+execInstr (IPop2) st@VMState{stack, ip} =
+    case stack of
+        [] -> Left "Empty Stack in in IPop2"
+        (_:_:rest) -> Right st {ip = ip + 1, stack = rest}
+        _ -> Left "IPop2 expects at least two stack values"
+
 
 
 execInstr (IDup) st@VMState{stack, ip} =
     case stack of
-        [] -> Left "Empty Stack"
+        [] -> Left "Empty Stack in IDup"
         (first: rest) -> 
-            let val = first
-                newStack = (val:first:rest)
+            let newStack = (first:first:rest)
             in Right st {ip = ip + 1, stack = newStack}
 
+
+execInstr (IDupX1) st@VMState{stack, ip} =
+    case stack of
+        [] -> Left "Empty Stack in IDupX1"
+        (second: first: rest) -> 
+            let newStack = (first:second:first:rest)
+            in Right st {ip = ip + 1, stack = newStack}
+        _ -> Left "IDupX1 expects at least two stack values"
+
+
+execInstr (IDupX2) st@VMState{stack, ip} =
+    case stack of
+        [] -> Left "Empty Stack in IDupX2"
+        (third:second:first:rest) -> 
+            let newStack = (first:third:second:first:rest)
+            in Right st {ip = ip + 1, stack = newStack}
+        _ -> Left "IDupX2 expects at least three stack values"
+
+
+
+execInstr IDup2X1 st@VMState{stack, ip} =
+    case stack of
+        (v1:v2:v3:rest) ->
+            let newStack = v2:v1:v3:v2:v1:rest
+            in Right st { ip = ip + 1, stack = newStack }
+        _ -> Left "IDup2X1 expects at least 3 stack values"
+
+
+execInstr IDup2X2 st@VMState{stack, ip} =
+    case stack of
+        (v1:v2:v3:v4:rest) ->
+            let newStack = v2:v1:v4:v3:v2:v1:rest
+            in Right st { ip = ip + 1, stack = newStack }
+        _ -> Left "IDup2X2 expects at least 4 stack values"
+
+
+execInstr (ISwap) st@VMState{stack, ip} =
+    case stack of
+        [] -> Left "Empty Stack in ISwap"
+        (second: first: rest) ->
+            let newStack = (first:second:rest)
+            in Right st {ip = ip + 1, stack = newStack}
+        _ -> Left "ISwap expects at least two stack values"
+
+
+execInstr (INop) st = Right st
 
 execInstr _  _ = Left "Invalid isntruction or not yet implemented"
 
