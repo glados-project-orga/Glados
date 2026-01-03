@@ -74,6 +74,44 @@ execInstr (IAddInt) st@VMState{stack, ip} =
         _ -> Left "Type error or insufficient stack in IAddInt" 
 
 
+execInstr (IOrInt) st@VMState{stack, ip} =
+    case stack of
+        [] -> Left "Empty Stack  in IOrInt"
+        (VInt i2: VInt i1: rest) -> 
+            let newRet = i1 .|. i2
+            in Right st {ip = ip + 1, stack = (VInt newRet:rest)}
+        _ -> Left "IOrInt expects two integers on the stack" 
+
+
+execInstr (IXorInt) st@VMState{stack, ip} =
+    case stack of
+        [] -> Left "Empty Stack  in IXorInt"
+        (VInt i2: VInt i1: rest) -> 
+            let newRet = i1 `xor` i2
+            in Right st {ip = ip + 1, stack = (VInt newRet:rest)}
+        _ -> Left "IXorInt expects two integers on the stack" 
+
+
+execInstr (IShrInt) st@VMState{stack, ip} =
+    case stack of
+        [] -> Left "Empty Stack  in IShrInt"
+        (VInt i2: VInt i1: rest) ->
+            let s = i2 .&. 0x1F
+                newVal = i1 `shiftR` s
+            in Right st {ip = ip + 1, stack = (VInt newVal : rest)}
+        _ -> Left "IShrInt expects two integers on the stack" 
+
+
+execInstr (IShlInt) st@VMState{stack, ip} =
+    case stack of
+        [] -> Left "Empty Stack  in IShlInt"
+        (VInt i2: VInt i1: rest) ->
+            let s = i2 .&. 0x1F
+                newVal = i1 `shiftL` s
+            in Right st {ip = ip + 1, stack = (VInt newVal : rest)}
+        _ -> Left "IShlInt expects two integers on the stack" 
+
+
 execInstr (IPop) st@VMState{stack, ip} =
     case stack of
         [] -> Left "Empty Stack"
@@ -87,6 +125,7 @@ execInstr (IDup) st@VMState{stack, ip} =
             let val = first
                 newStack = (val:first:rest)
             in Right st {ip = ip + 1, stack = newStack}
+
 
 execInstr _  _ = Left "Invalid isntruction or not yet implemented"
 
