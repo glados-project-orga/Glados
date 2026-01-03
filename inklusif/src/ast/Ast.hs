@@ -20,7 +20,26 @@ module Ast
     LoopResult(..),
     Literal(..),
     BinOp(..),
-    SourcePos(..)
+    SourcePos(..),
+    FunctionDecl(..),
+    StructDecl(..),
+    EnumDecl(..),
+    TypedefDecl(..),
+    VarDecl(..),
+    Assignment(..),
+    IfStmt(..),
+    WhileStmt(..),
+    ForStmt(..),
+    ForEachStmt(..),
+    MatchStmt(..),
+    TryCatchStmt(..),
+    ThrowStmt(..),
+    ReturnStmt(..),
+    ExprStmt(..),
+    CallExpr(..),
+    MethodCallExpr(..),
+    ArrayIndexExpr(..),
+    FieldAccessExpr(..),
 
 ) where
 
