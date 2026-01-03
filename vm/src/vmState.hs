@@ -12,6 +12,7 @@ module Vmstate (
 ) where
 
 import Data
+import Data.Bits
 import qualified Data.Vector as V
 
 
