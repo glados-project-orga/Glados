@@ -1,11 +1,11 @@
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE RecordWildCards #-}
 {- 
 -- EPITECH PROJECT, 2025
 -- vm
 -- File description:
 -- State
 -}
-
-
 
 module Vmstate (
     compile
@@ -14,8 +14,6 @@ module Vmstate (
 import Data
 import Data.Bits
 import qualified Data.Vector as V
-
-
 
 execInstr :: Instr -> VMState -> Either String VMState
 

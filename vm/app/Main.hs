@@ -11,6 +11,9 @@ import System.Environment (getArgs)
 import System.Exit (exitWith, ExitCode(..))
 import System.IO (hPutStrLn, stderr)
 import Loader (loadBytecode)
+import Data (VMState(..), Value(..), Instr(..))
+import Vmstate(compile)
+import qualified Data.Vector as V
 
 main :: IO ()
 main = getArgs >>= \args ->
@@ -25,4 +28,18 @@ runFile :: FilePath -> IO ()
 runFile path = readFile path >>= \content ->
   case loadBytecode content of
     Left err -> print ("Error: " ++ err) >> exitWith (ExitFailure 84)
-    Right instrs -> print instrs
+    Right instrs -> runVM instrs
+
+runVM :: [Instr] -> IO()
+runVM instrs = 
+  let initialState = VMState
+        { stack  = []
+        , locals = V.empty
+        , ip     = 0
+        , code   = V.fromList instrs
+        , heap   = V.empty
+        , frames = []
+        }
+  in case compile initialState of 
+    Left err -> print ("Error: " ++ err) >> exitWith (ExitFailure 84)
+    Right finalState -> print finalState
