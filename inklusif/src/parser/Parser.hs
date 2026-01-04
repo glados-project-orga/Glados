@@ -91,3 +91,23 @@ parseUInt = read <$> some (parseAnyChar ['0'..'9'])
 parseInt :: Parser Int
 parseInt = (negate <$> (parseChar '-' *> parseUInt)) <|> parseUInt
 
+token :: Parser a -> Parser a
+token p = parseSpaces *> p <* parseSpaces
+
+parseString :: String -> Parser String
+parseString [] = pure []
+parseString (c:cs) = (:) <$> parseChar c <*> parseString cs
+
+symbol :: String -> Parser String
+symbol s = token (parseString s)
+
+eof :: Parser ()
+eof = Parser $ \input ->
+  case dropWhile isSpace input of
+    "" -> Right ((), "")
+    _  -> Left "expected end of input"
+
+chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
+chainl1 p op =
+  foldl (\acc (f, x) -> f acc x) <$> p <*> many ((,) <$> op <*> p)
+
