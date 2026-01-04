@@ -43,26 +43,27 @@ data Instr = IConstInt Int
            | ISubInt
            | IMulInt
            | IDivInt
-           | IRemInt 
-           | INegInt 
-           | IOrInt 
-           | IXorInt 
-           | IShlInt 
-           | IShrInt 
+           | IRemInt
+           | INegInt
+           | IOrInt
+           | IXorInt
+           | IShlInt
+           | IShrInt
 
            | IPop
            | IDup
            | INop
            | ISwap
-           | IDup2 
+           | IDup2
            | IPop2
-           | IDupX1 
+           | IDupX1
            | IDupX2
-           | IDup2X1 
+           | IDup2X1
            | IDup2X2
 
            -------------------------------
-
+           | IAndInt
+           | IIncInt Int Int
            | IGoto Int
            | IIfEq Int
            | IIfGt Int

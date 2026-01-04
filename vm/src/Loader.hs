@@ -63,10 +63,30 @@ parseArithmetic = (parseKeyword "iadd" *> pure IAddInt)
               <|> (parseKeyword "isub" *> pure ISubInt)
               <|> (parseKeyword "imul" *> pure IMulInt)
               <|> (parseKeyword "idiv" *> pure IDivInt)
+              <|> (parseKeyword "irem" *> pure IRemInt)
+              <|> (parseKeyword "ineg" *> pure INegInt)
+              <|> (parseKeyword "iand" *> pure IAndInt)
+              <|> (parseKeyword "ior" *> pure IOrInt)
+              <|> (parseKeyword "ixor" *> pure IXorInt)
+              <|> (parseKeyword "ishl" *> pure IShlInt)
+              <|> (parseKeyword "ishr" *> pure IShrInt)
+              <|> parseIncInt
+
+parseIncInt :: Parser Instr
+parseIncInt = parseKeyword "iinc" *> parseSpaces *>
+              (IIncInt <$> parseInt <*> (parseSpaces *> parseInt))
 
 parseStack :: Parser Instr
-parseStack = (parseKeyword "pop" *> pure IPop)
+parseStack = (parseKeyword "dup2_x2" *> pure IDup2X2)
+         <|> (parseKeyword "dup2_x1" *> pure IDup2X1)
+         <|> (parseKeyword "dup_x2" *> pure IDupX2)
+         <|> (parseKeyword "dup_x1" *> pure IDupX1)
+         <|> (parseKeyword "dup2" *> pure IDup2)
          <|> (parseKeyword "dup" *> pure IDup)
+         <|> (parseKeyword "pop2" *> pure IPop2)
+         <|> (parseKeyword "pop" *> pure IPop)
+         <|> (parseKeyword "swap" *> pure ISwap)
+         <|> (parseKeyword "nop" *> pure INop)
 
 parseControlFlow :: Parser Instr
 parseControlFlow = parseIfICmpGt
