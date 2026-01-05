@@ -1,5 +1,10 @@
-module CompilerMain where
-import CompilerTypes (ConstantPool, Bytecode, Ast)
+module CompilerMain (compilerMain) where
+import CompilerTypes (
+    ConstantPool,
+    Bytecode,
+    Ast,
+    ProgramBinary
+    )
 import Ast (
     Declaration(..),
     FunctionDecl(..),
@@ -12,19 +17,14 @@ import Struct (compileStruct)
 import Enum (compileEnum)
 import Typedef (compileTypedef)
 
-concatTuples :: ([a], [b]) -> ([a], [b]) -> ([a], [b])
-concatTuples (a1, b1) (a2, b2) = (a1 ++ a2, b1 ++ b2)
+compileDeclarations :: Declaration -> ProgramBinary -> ProgramBinary
+compileDeclarations (Function fun) prog = compileFunction fun
+compileDeclarations (Struct struct) prog = compileStruct struct
+compileDeclarations (Enum enum) prog = compileEnum enum
+compileDeclarations (Typedef typedef) prog = compileTypedef typedef
 
-compileDeclarations :: Ast -> (ConstantPool, Bytecode)
-compileDeclarations [] = ([], [])
-compileDeclarations ((Function fun):ast) =
-    compileFunction fun `concatTuples` compileDeclarations ast
-compileDeclarations ((Struct struct):ast) =
-    compileStruct struct `concatTuples` compileDeclarations ast
-compileDeclarations ((Enum enum):ast) =
-    compileEnum enum `concatTuples` compileDeclarations ast
-compileDeclarations ((Typedef typedef):ast) =
-    compileTypedef typedef `concatTuples` compileDeclarations ast
-
-compilerMain :: Ast -> (ConstantPool, Bytecode)
-compilerMain ast = compileDeclarations (ast)
+compilerMain :: Ast -> ProgramBinary -> ProgramBinary
+compilerMain [] prog = prog
+compilerMain (declaration:ast) prog = compilerMain ast n_prog
+    where
+        n_prog = compileDeclarations declaration prog
