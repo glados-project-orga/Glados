@@ -43,6 +43,7 @@ library:
     - src/compilator
     - src/compilator/declarations
     - src/compilator/statements
+    - src/compilator/statements/src
 
 executables:
   inklusif-exe:
