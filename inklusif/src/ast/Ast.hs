@@ -44,9 +44,8 @@ module Ast
 
 -- Position dans le parsing pour les cas d'erreurs
 data SourcePos = SourcePos
-  { line :: Int
-  , column :: Int
-  , filename :: String
+  { srcLine :: Int
+  , srcColumn :: Int
   } deriving (Show, Eq)
 
 -- Enum
@@ -131,7 +130,7 @@ data VarDecl = VarDecl
   } deriving (Show, Eq)
 
 data Assignment = Assignment
-  { assignTarget :: Expr
+  { assignTarget :: String
   , assignValue :: Expr
   } deriving (Show, Eq)
 
@@ -149,7 +148,7 @@ data WhileStmt = WhileStmt
 data ForStmt = ForStmt
   { forInit :: Maybe Statement
   , forCondition :: Expr
-  , forUpdate :: [Expr]
+  , forUpdate :: Expr
   , forBody :: [Statement]
   } deriving (Show, Eq)
 
