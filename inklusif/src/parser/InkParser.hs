@@ -42,6 +42,13 @@ parseVarDecl = VarDeclStmt <$> varDecl
         <*> pure False
         <*> pure False
 
+parseForAssignment :: Parser Statement
+parseForAssignment = AssignmentStmt <$> assignment
+    where 
+    assignment = Assignment
+        <$> identifier
+        <*> (symbol '=' *> parseExpression)
+
 parseAssignment :: Parser Statement
 parseAssignment = AssignmentStmt <$> assignment
     where 
@@ -64,15 +71,24 @@ parseWhileStmt = WhileStatement <$> whileStmt
         <$> (keyword "while" *> parseExpression)
         <*> parseBlock
 
+parseForUpdate :: Parser ForUpdate
+parseForUpdate =
+        ForUpdateStmt <$> parseForAssignment
+    <|> ForUpdateExpr <$> parseExpression
+
+initFor :: Parser (Maybe Statement)
+initFor =
+        (Just <$> parseVarDecl)
+    <|> (symbol ';' *> pure Nothing)
+
 parseForStmt :: Parser Statement
 parseForStmt = ForStatement <$> forStmt
-    where 
+  where
     forStmt = ForStmt
-        <$> (keyword "for" *> symbol '(' *> optional parseVarDecl <* symbol ';')
-        <*> (parseExpression <* symbol ';')
-        <*>  parseExpression
-        <*> (symbol ')' *> parseBlock)
-
+            <$> (keyword "for" *> symbol '(' *> initFor)
+            <*> parseExpression
+            <*> (symbol ';' *> parseForUpdate)
+            <*> (symbol ')' *> parseBlock)
 parseForEachStmt :: Parser Statement
 parseForEachStmt = ForEachStatement <$> forEachStmt
   where
@@ -127,7 +143,8 @@ parseExprStmt :: Parser Statement
 parseExprStmt = ExprStatement <$> exprStmt
   where
     exprStmt = ExprStmt <$> ((parseParens parseExpression)
-                        <|> (parseExpression <* symbol ';'))
+                        <|> (parseExpression <* symbol ';')
+                        <|> (parseExpression <* symbol ')'))
 
 parseParens :: Parser Expr -> Parser Expr
 parseParens p = 
@@ -172,8 +189,8 @@ parseFunction =
     Function <$> parseFunctionDecl
 
 
-parseInkFile :: String -> IO (Either String Declaration)
+parseInkFile :: String -> IO (Either String [Declaration])
 parseInkFile content =
-    case runParser parseDeclaration (initialState content) of
+    case runParser (parseMany parseDeclaration) (initialState content) of
         Right (decl, _) -> return $ Right decl
         Left err -> return $ Left err
