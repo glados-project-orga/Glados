@@ -40,6 +40,7 @@ module Ast
     MethodCallExpr(..),
     ArrayIndexExpr(..),
     FieldAccessExpr(..),
+    ForUpdate(..)
 ) where
 
 -- Position dans le parsing pour les cas d'erreurs
@@ -145,10 +146,15 @@ data WhileStmt = WhileStmt
   , whileBody :: [Statement]
   } deriving (Show, Eq)
 
+data ForUpdate
+    = ForUpdateExpr Expr
+    | ForUpdateStmt Statement
+    deriving (Show, Eq)
+
 data ForStmt = ForStmt
   { forInit :: Maybe Statement
   , forCondition :: Expr
-  , forUpdate :: Expr
+  , forUpdate :: ForUpdate 
   , forBody :: [Statement]
   } deriving (Show, Eq)
 
