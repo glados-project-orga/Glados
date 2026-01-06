@@ -20,6 +20,7 @@ import Parser (
     betweenSpaces,
     parseMany,
     parseInt,
+    parseArgSep,
     parseString
   )
 import Control.Applicative ((<|>))
@@ -50,13 +51,13 @@ parseKeyword [] = pure ()
 parseKeyword (c:cs) = parseChar c *> parseKeyword cs
 
 parseConstInt :: Parser Instr
-parseConstInt = parseKeyword "iconst" *> parseSpaces *> (IConstInt <$> parseInt)
+parseConstInt = parseKeyword "iconst" *> parseArgSep *> (IConstInt <$> parseInt)
 
 parseLoadInt :: Parser Instr
-parseLoadInt = parseKeyword "iload" *> parseSpaces *> (ILoadInt <$> parseInt)
+parseLoadInt = parseKeyword "iload" *> parseArgSep *> (ILoadInt <$> parseInt)
 
 parseStoreInt :: Parser Instr
-parseStoreInt = parseKeyword "istore" *> parseSpaces *> (IStoreInt <$> parseInt)
+parseStoreInt = parseKeyword "istore" *> parseArgSep *> (IStoreInt <$> parseInt)
 
 parseArithmetic :: Parser Instr
 parseArithmetic = (parseKeyword "iadd" *> pure IAddInt)
