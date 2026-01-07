@@ -11,6 +11,7 @@ module Data (
         Value(..),
         Instr(..),
         Handle,
+        IntOp(..),
         WhatDup(..),
         VMState(..),
         HeapValue(..)
@@ -39,62 +40,37 @@ data HeapValue = HObject (Map.Map String Value)
 
 type Heap = V.Vector HeapValue
 
+data IntOp = IAddInt 
+           | ISubInt | IMulInt | IDivInt | IRemInt
+           | INegInt | IAndInt | IOrInt | IXorInt
+           | IShlInt | IShrInt | IUshrInt
+           deriving(Show, Eq)
+
 data Instr = IConstInt Int
            | ILoadInt Int
            | IStoreInt Int
         
-           | IAddInt
-           | ISubInt
-           | IMulInt
-           | IDivInt
-           | IRemInt
-           | INegInt
-           | IOrInt
-           | IXorInt
-           | IShlInt
-           | IShrInt
+           | IOpInt IntOp 
 
-           | IPop
-           | IDup
-           | INop
-           | ISwap
-           | IDup2
-           | IPop2
-           | IDupX1
-           | IDupX2
-           | IDup2X1
-           | IDup2X2
+           | IPop | IDup | INop | ISwap | IDup2
+           | IPop2 | IDupX1 | IDupX2 | IDup2X1 | IDup2X2
+
            -------------------------------
-           | IAndInt
-           | IIncInt Int Int
-           | IGoto Int
-        
-           | IIfEq Int
-           | IIfACmpEq Int
-           | IIfACmpNe Int
 
-           | IIfGt Int
-           | IIfLt Int
-           | IIfICmpGt Int
-           | IIfICmpLt Int
+           | IIncInt Int Int | IGoto Int
+           | IIfEq Int | IIfACmpEq Int | IIfACmpNe Int
 
-           | IInvokeStatic String
-           | IInvokeVirtual String
-           | IInvokeSpecial String
+           | IIfGt Int | IIfLt Int | IIfICmpGt Int | IIfICmpLt Int
 
-           | IReturn
-           | IReturnInt
+           | IInvokeStatic String | IInvokeVirtual String | IInvokeSpecial String
+
+           | IReturn | IReturnInt
    
-           | INew String
-           | IGetField String
-           | IPutField String
+           | INew String | IGetField String | IPutField String
    
-           | INewArray
-           | IALoad
-           | IAStore
-           | IArrayLength
-
+           | INewArray | IALoad | IAStore | IArrayLength
            deriving (Show, Eq)
+
 
 data Frame = Frame
     { fLocals :: [Value]
