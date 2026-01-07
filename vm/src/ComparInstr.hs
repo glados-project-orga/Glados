@@ -8,12 +8,17 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 
-import Data
-import Data.Bits
-import HeapInstr
-import StackInstr
-import qualified Data.Vector as V
+module ComparInstr (
+    compIfEq,
+    compIfGt,
+    compIfLt,
+    compIfICmpGt,
+    compIfICmpLt,
+    compIfACmpEq,
+    compIfACmpNe
+) where
 
+import Data
 
 compIfEq :: Int -> VMState -> Either String VMState
 compIfEq n st@VMState{stack, ip} =
@@ -72,7 +77,7 @@ compIfACmpEq n st@VMState{stack, ip} =
             if a == b
                 then Right st { ip = ip + n, stack = rest }
                 else Right st { ip = ip + 1, stack = rest }
-        _ -> Left "IIfACmpEq: expected two refs on stack"
+        _ -> Left "IIfACmpEq: expected two value on stack"
 
 
 compIfACmpNe :: Int -> VMState -> Either String VMState
@@ -82,4 +87,4 @@ compIfACmpNe n st@VMState{stack, ip} =
             if a /= b
                 then Right st { ip = ip + n, stack = rest }
                 else Right st { ip = ip + 1, stack = rest }
-        _ -> Left "IIfACmpNe: expected two refs on stack"
+        _ -> Left "IIfACmpNe: expected two value on stack"

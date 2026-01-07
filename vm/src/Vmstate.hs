@@ -14,10 +14,10 @@ module Vmstate (
 ) where
 
 import Data
-import Data.Bits
 import HeapInstr
 import ArithmInt
 import StackInstr
+import ComparInstr
 import ControlFlowInstr
 import qualified Data.Vector as V
 
@@ -60,7 +60,22 @@ execInstr (IPutField fieldName) st = heapInstrPutField fieldName st
 
 execInstr (INew className) st = heapInstrNew className st
 
+execInstr (IIfEq n) st = compIfEq n st
+
+execInstr (IIfGt n) st = compIfGt n st
+
+execInstr (IIfLt n) st = compIfLt n st
+
+execInstr (IIfICmpGt n) st = compIfICmpGt n st
+
+execInstr (IIfICmpLt n) st = compIfICmpLt n st
+
+execInstr (IIfACmpEq n) st = compIfACmpEq n st
+
+execInstr (IIfACmpNe n) st = compIfACmpNe n st
+
 execInstr _  _ = Left "Invalid instruction or not yet implemented"
+
 
 exec :: VMState -> Either String VMState
 exec st@VMState{ip, code}
