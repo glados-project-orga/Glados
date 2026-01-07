@@ -33,12 +33,13 @@ runFile path = readFile path >>= \content ->
 runVM :: [Instr] -> IO()
 runVM instrs = 
   let initialState = VMState
-        { stack  = []
-        , locals = V.empty
-        , ip     = 0
-        , code   = V.fromList instrs
-        , heap   = V.empty
-        , frames = []
+        { stack     = []
+        , locals    = V.empty
+        , ip        = 0
+        , code      = V.fromList instrs
+        , constPool = V.empty
+        , heap      = V.empty
+        , frames    = []
         }
   in case compile initialState of 
     Left err -> print ("Error: " ++ err) >> exitWith (ExitFailure 84)
