@@ -24,7 +24,8 @@ module Parser (
     identifier,
     keyword,
     parseString,
-    chainl1
+    chainl1,
+    eof
 ) where
 
 import Ast
@@ -161,6 +162,13 @@ identifier =
     betweenSpaces $
         (:) <$> parseAnyChar (['a'..'z'] ++ ['A'..'Z'] ++ ['_'])
             <*> parseMany (parseAnyChar (['a'..'z'] ++ ['A'..'Z'] ++ ['0'..'9'] ++ ['_']))
+
+eof :: Parser ()
+eof = Parser $ \st ->
+    case input st of
+        [] -> Right ((), st)
+        _  -> Left $ "Unexpected input at "
+              ++ show (line st) ++ ":" ++ show (column st)
 
 chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
 chainl1 p op =
