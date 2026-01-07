@@ -211,6 +211,33 @@ execInstr (IALoad) st@VMState{stack, ip, heap} =
         _ -> Left "IALoad expects (index, arrayRef) on the stack"
 
 
+execInstr (IAStore) st@VMState{stack, ip, heap} =
+    case stack of
+        [] -> Left "Empty Stack in AStore"
+        (v3 : VInt v2: VInt v1: rest) ->
+            case heap V.!? v1 of
+                Just (HArray tabb) ->
+                        if v2 < 0 || v2 >= V.length tabb
+                            then Left "IAStore: array index out of bounds"
+                        else
+                            let newHArray = tabb V.// [(v2, v3)]
+                                newHeap = heap V.// [(v1, HArray newHArray)]
+                            in Right st {ip = ip + 1, heap = newHeap, stack = rest}
+                _ ->  Left "IAStore: reference is not an array"
+        _ -> Left "IAStore expects (value, index, arrayRef) on the stack" 
+
+
+execInstr (IArrayLength) st@VMState{stack, ip, heap} =
+    case stack of
+        (VInt ref : rest) ->
+            case heap V.!? ref of
+                Just (HArray arr) ->
+                    let len = V.length arr
+                    in Right st { ip = ip + 1 , stack = (VInt len : rest)}
+                _ -> Left "IArrayLength: reference is not an array"
+        _ -> Left "IArrayLength expects an array reference ( VInt) on the stack"
+
+
 execInstr _  _ = Left "Invalid instruction or not yet implemented"
 
 
