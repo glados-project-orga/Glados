@@ -197,6 +197,12 @@ execInstr IReturnInt st@VMState{stack, ip} =
         _ -> Left "IReturnInt expects an integer on top of the stack"
 
 
+execInstr (ILdc n) st@VMState{stack, ip, constPool} =
+    case constPool V.!? n of
+        Just val -> Right st { ip = ip + 1, stack = val : stack }
+        Nothing  -> Left ("Invalid constant pool index: " ++ show n)
+
+
 execInstr _  _ = Left "Invalid isntruction or not yet implemented"
 
 

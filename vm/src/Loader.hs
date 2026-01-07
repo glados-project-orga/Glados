@@ -36,6 +36,7 @@ parseInstrs = parseMany (betweenSpaces parseInstr)
 
 parseInstr :: Parser Instr
 parseInstr = parseConstInt
+         <|> parseLdc
          <|> parseLoadInt
          <|> parseStoreInt
          <|> parseArithmetic
@@ -52,6 +53,9 @@ parseKeyword (c:cs) = parseChar c *> parseKeyword cs
 
 parseConstInt :: Parser Instr
 parseConstInt = parseKeyword "iconst" *> parseArgSep *> (IConstInt <$> parseInt)
+
+parseLdc :: Parser Instr
+parseLdc = parseKeyword "ldc" *> parseSpaces *> (ILdc <$> parseInt)
 
 parseLoadInt :: Parser Instr
 parseLoadInt = parseKeyword "iload" *> parseArgSep *> (ILoadInt <$> parseInt)

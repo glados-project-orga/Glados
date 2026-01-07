@@ -36,6 +36,7 @@ data HeapValue = HObject (Map.Map String Value)
 type Heap = V.Vector HeapValue
 
 data Instr = IConstInt Int
+           | ILdc Int
            | ILoadInt Int
            | IStoreInt Int
         
@@ -86,7 +87,6 @@ data Instr = IConstInt Int
            | IALoad
            | IAStore
            | IArrayLength
-
            deriving (Show, Eq)
 
 data Frame = Frame
@@ -96,10 +96,11 @@ data Frame = Frame
 
 
 data VMState = VMState
-        {  stack  :: Stack,
-           locals :: V.Vector Value,
-           ip     :: Int,
-           code   :: V.Vector Instr,
-           heap   :: Heap,
-           frames :: [Frame]
+        {  stack     :: Stack,
+           locals    :: V.Vector Value,
+           ip        :: Int,
+           code      :: V.Vector Instr,
+           constPool :: V.Vector Value,
+           heap      :: Heap,
+           frames    :: [Frame]
         } deriving(Show)
