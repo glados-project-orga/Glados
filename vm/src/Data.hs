@@ -36,6 +36,8 @@ data HeapValue = HObject (Map.Map String Value)
 type Heap = V.Vector HeapValue
 
 data Instr = IConstInt Int
+           | IBipush Int
+           | ISipush Int
            | ILdc Int
            | ILoadInt Int
            | IStoreInt Int

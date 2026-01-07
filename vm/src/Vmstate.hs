@@ -18,7 +18,16 @@ import qualified Data.Vector as V
 execInstr :: Instr -> VMState -> Either String VMState
 
 execInstr (IConstInt n) st@VMState{stack, ip} =
-    Right st { ip = ip + 1, stack = (VInt n : stack)}
+    Right st {ip = ip + 1, stack = VInt n : stack}
+
+
+execInstr (IBipush n) st@VMState{stack, ip} =
+    Right st {ip = ip + 1, stack = VInt n : stack}
+
+
+execInstr (ISipush n) st@VMState{stack, ip} =
+    Right st {ip = ip + 1, stack = VInt n : stack}
+
 
 execInstr (ILoadInt n) st@VMState{stack, ip, locals} =
     case locals V.!? n of
@@ -193,13 +202,13 @@ execInstr IReturn st@VMState{ip} =
 execInstr IReturnInt st@VMState{stack, ip} =
     case stack of
         [] -> Left "Stack underflow in IReturnInt"
-        (VInt _:_) -> Right st { ip = ip + 1 }
+        (VInt _:_) -> Right st {ip = ip + 1}
         _ -> Left "IReturnInt expects an integer on top of the stack"
 
 
 execInstr (ILdc n) st@VMState{stack, ip, constPool} =
     case constPool V.!? n of
-        Just val -> Right st { ip = ip + 1, stack = val : stack }
+        Just val -> Right st {ip = ip + 1, stack = val : stack}
         Nothing  -> Left ("Invalid constant pool index: " ++ show n)
 
 
