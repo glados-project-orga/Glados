@@ -8,6 +8,7 @@
 module StatementParser (
     parseStatement,
     parseBlock,
+    parseLiteral,
     parseType
 ) where
 
