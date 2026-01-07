@@ -246,6 +246,13 @@ execInstr (IPutField fieldName) st@VMState{stack, ip, heap} =
         _ -> Left "IPutField expects value and object reference on the stack"
 
 
+execInstr (INew _className) st@VMState{stack, ip, heap} =
+    let handle = V.length heap
+        newObj = HObject Map.empty
+        newHeap = V.snoc heap newObj
+    in Right st { ip = ip + 1, stack = VHandle handle : stack, heap = newHeap }
+
+
 execInstr _  _ = Left "Invalid isntruction or not yet implemented"
 
 
