@@ -12,11 +12,13 @@ module InkParser (
 import Ast
 import Parser
 import FunctionParsing
+import Control.Applicative
+import EnumParsing
 
 parseDeclaration :: Parser Declaration
 parseDeclaration =
         parseFunction
---     <|> parseEnum
+       <|> parseEnum
 --     <|> parseStruct
 --     <|> parseTypedef
 
