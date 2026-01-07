@@ -195,14 +195,14 @@ execInstr (ISwap) st@VMState{stack, ip} =
 execInstr (INop) st = Right st
 
 
-execInstr IReturn st@VMState{ip} =
-    Right st { ip = ip + 1 }
+execInstr IReturn st@VMState{code} =
+    Right st { ip = V.length code }
 
 
-execInstr IReturnInt st@VMState{stack, ip} =
+execInstr IReturnInt st@VMState{stack, code} =
     case stack of
         [] -> Left "Stack underflow in IReturnInt"
-        (VInt _:_) -> Right st {ip = ip + 1}
+        (VInt _:_) -> Right st { ip = V.length code }
         _ -> Left "IReturnInt expects an integer on top of the stack"
 
 
@@ -210,6 +210,10 @@ execInstr (ILdc n) st@VMState{stack, ip, constPool} =
     case constPool V.!? n of
         Just val -> Right st {ip = ip + 1, stack = val : stack}
         Nothing  -> Left ("Invalid constant pool index: " ++ show n)
+
+
+execInstr (IGoto offset) st =
+    Right st { ip = offset }
 
 
 execInstr _  _ = Left "Invalid isntruction or not yet implemented"
