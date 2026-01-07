@@ -14,17 +14,17 @@ import Parser
 import FunctionParsing
 import Control.Applicative
 import EnumParsing
+import StructParser
 
 parseDeclaration :: Parser Declaration
 parseDeclaration =
         parseFunction
        <|> parseEnum
---     <|> parseStruct
+       <|> parseStruct
 --     <|> parseTypedef
-
 
 parseInkFile :: String -> IO (Either String [Declaration])
 parseInkFile content =
-    case runParser (parseMany parseDeclaration) (initialState content) of
-        Right (decl, _) -> return $ Right decl
-        Left err -> return $ Left err
+    case runParser (parseMany parseDeclaration <* eof) (initialState content) of
+        Right (decls, _) -> return $ Right decls
+        Left err        -> return $ Left err
