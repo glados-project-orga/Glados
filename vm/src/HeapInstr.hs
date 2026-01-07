@@ -12,10 +12,14 @@ module HeapInstr (
       heapInstrALoad,
       heapInstrAStore,
       heapInstrNewArray,
-      heapInstrArrayLength
+      heapInstrArrayLength,
+      heapInstrNew,
+      heapInstrGetField,
+      heapInstrPutField
 ) where
 
 import Data
+import qualified Data.Map as Map
 import qualified Data.Vector as V
 
 heapInstrNewArray:: VMState -> Either String VMState
@@ -71,3 +75,42 @@ heapInstrArrayLength st@VMState{stack, ip, heap} =
                 in Right st { ip = ip + 1 , stack = (VInt len : rest)}
             _ -> Left "IArrayLength: reference is not an array"
       _ -> Left "IArrayLength expects an array reference ( VInt) on the stack"
+
+
+heapInstrNew :: String -> VMState -> Either String VMState
+heapInstrNew _className st@VMState{stack, ip, heap} =
+    let handle = V.length heap
+        newObj = HObject Map.empty
+        newHeap = V.snoc heap newObj
+    in Right st { ip = ip + 1, stack = VHandle handle : stack, heap = newHeap }
+
+
+heapInstrGetField :: String -> VMState -> Either String VMState
+heapInstrGetField fieldName st@VMState{stack, ip, heap} =
+    case stack of
+        (VHandle h : rest) ->
+            case heap V.!? h of
+                Just (HObject fields) ->
+                    case Map.lookup fieldName fields of
+                        Just val -> Right st {ip = ip + 1, stack = val : rest}
+                        Nothing  -> Left ("Field not found: " ++ fieldName)
+                Just (HArray _) -> Left "getfield: expected object, got array"
+                Nothing -> Left ("Invalid heap handle: " ++ show h)
+        [] -> Left "Stack underflow in IGetField"
+        _ -> Left "IGetField expects an object reference on the stack"
+
+
+heapInstrPutField :: String -> VMState -> Either String VMState
+heapInstrPutField fieldName st@VMState{stack, ip, heap} =
+    case stack of
+        (val : VHandle h : rest) ->
+            case heap V.!? h of
+                Just (HObject fields) ->
+                    let newFields = Map.insert fieldName val fields
+                        newHeap = heap V.// [(h, HObject newFields)]
+                    in Right st {ip = ip + 1, stack = rest, heap = newHeap}
+                Just (HArray _) -> Left "putfield: expected object, got array"
+                Nothing -> Left ("Invalid heap handle: " ++ show h)
+        [_] -> Left "Stack underflow in IPutField (need value and object ref)"
+        [] -> Left "Stack underflow in IPutField"
+        _ -> Left "IPutField expects value and object reference on the stack"

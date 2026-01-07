@@ -18,13 +18,19 @@ import Data.Bits
 import HeapInstr
 import ArithmInt
 import StackInstr
+import ControlFlowInstr
 import qualified Data.Vector as V
 
 
 execInstr :: Instr -> VMState -> Either String VMState
 
-execInstr (IConstInt n) st@VMState{stack, ip} =
-    Right st {ip = (ip + 1), stack = (VInt n : stack)}
+execInstr (IConstInt n) st = stackInstrConstInt n st
+
+execInstr (IBipush n) st = stackInstrBipush n st
+
+execInstr (ISipush n) st = stackInstrSipush n st
+
+execInstr (ILdc n) st = stackInstrLdc n st
 
 execInstr (ILoadInt n) st = stackInstrLoadInt n st
 
@@ -42,10 +48,22 @@ execInstr (IArrayLength) st = heapInstrArrayLength st
 
 execInstr (IOpInt op) st = intArith op st
 
+execInstr IReturn st = controlFlowReturn st
+
+execInstr IReturnInt st = controlFlowReturnInt st
+
+execInstr (IGoto offset) st = controlFlowGoto offset st
+
+execInstr (IGetField fieldName) st = heapInstrGetField fieldName st
+
+execInstr (IPutField fieldName) st = heapInstrPutField fieldName st
+
+execInstr (INew className) st = heapInstrNew className st
 
 execInstr _  _ = Left "Invalid instruction or not yet implemented"
+
 exec :: VMState -> Either String VMState
-exec st@VMState{stack, locals, ip, code, heap, frames}
+exec st@VMState{ip, code}
     | Just instr <- code V.!? ip = execInstr instr st
     | otherwise = Left ("Invalid instruction ip: " ++ show ip)
 

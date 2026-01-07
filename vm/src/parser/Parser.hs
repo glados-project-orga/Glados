@@ -17,6 +17,7 @@ module Parser (
     parseMany,
     parseUInt,
     parseInt,
+    parseArgSep,
     parseCharIf,
     parseString
 ) where
@@ -92,6 +93,9 @@ parseUInt = read <$> some (parseAnyChar ['0'..'9'])
 
 parseInt :: Parser Int
 parseInt = (negate <$> (parseChar '-' *> parseUInt)) <|> parseUInt
+
+parseArgSep :: Parser ()
+parseArgSep = (parseChar '_' *> pure ()) <|> parseSpaces
 
 parseCharIf :: (Char -> Bool) -> Parser Char
 parseCharIf char = Parser f

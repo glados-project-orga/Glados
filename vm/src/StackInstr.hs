@@ -14,13 +14,39 @@ module StackInstr (
       stackInstrSwap,
       stackInstrPop,
       stackInstrDup,
+      stackInstrConstInt,
+      stackInstrBipush,
+      stackInstrSipush,
+      stackInstrLdc,
       stack_All_Instr
 ) where
 
 
 import Data
-import qualified Data.Map as Map
 import qualified Data.Vector as V
+
+
+stackInstrConstInt :: Int -> VMState -> Either String VMState
+stackInstrConstInt n st@VMState{stack, ip} =
+    Right st { ip = ip + 1, stack = VInt n : stack }
+
+
+stackInstrBipush :: Int -> VMState -> Either String VMState
+stackInstrBipush n st@VMState{stack, ip} =
+    Right st { ip = ip + 1, stack = VInt n : stack }
+
+
+stackInstrSipush :: Int -> VMState -> Either String VMState
+stackInstrSipush n st@VMState{stack, ip} =
+    Right st { ip = ip + 1, stack = VInt n : stack }
+
+
+stackInstrLdc :: Int -> VMState -> Either String VMState
+stackInstrLdc n st@VMState{stack, ip, constPool} =
+    case constPool V.!? n of
+        Just val -> Right st { ip = ip + 1, stack = val : stack }
+        Nothing  -> Left ("Invalid constant pool index: " ++ show n)
+
 
 stackInstrLoadInt :: Int -> VMState -> Either String VMState
 stackInstrLoadInt n st@VMState{stack, ip, locals} =

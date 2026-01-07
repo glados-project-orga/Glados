@@ -52,6 +52,9 @@ data StackIns = IPop | IDup | INop | ISwap | IDup2
            deriving(Show, Eq)
 
 data Instr = IConstInt Int
+           | IBipush Int
+           | ISipush Int
+           | ILdc Int
            | ILoadInt Int
            | IStoreInt Int
         
@@ -81,10 +84,11 @@ data Frame = Frame
 
 
 data VMState = VMState
-        {  stack  :: Stack,
-           locals :: V.Vector Value,
-           ip     :: Int,
-           code   :: V.Vector Instr,
-           heap   :: Heap,
-           frames :: [Frame]
+        {  stack     :: Stack,
+           locals    :: V.Vector Value,
+           ip        :: Int,
+           code      :: V.Vector Instr,
+           constPool :: V.Vector Value,
+           heap      :: Heap,
+           frames    :: [Frame]
         } deriving(Show)
