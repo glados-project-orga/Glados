@@ -11,7 +11,7 @@ module Loader (
     parseInstrs
 ) where
 
-import Data (Instr(..))
+import Data
 import Parser (
     Parser(..),
     runParser,
@@ -72,17 +72,17 @@ parseStoreInt :: Parser Instr
 parseStoreInt = parseKeyword "istore" *> parseArgSep *> (IStoreInt <$> parseInt)
 
 parseArithmetic :: Parser Instr
-parseArithmetic = (parseKeyword "iadd" *> pure IAddInt)
-              <|> (parseKeyword "isub" *> pure ISubInt)
-              <|> (parseKeyword "imul" *> pure IMulInt)
-              <|> (parseKeyword "idiv" *> pure IDivInt)
-              <|> (parseKeyword "irem" *> pure IRemInt)
-              <|> (parseKeyword "ineg" *> pure INegInt)
-              <|> (parseKeyword "iand" *> pure IAndInt)
-              <|> (parseKeyword "ior" *> pure IOrInt)
-              <|> (parseKeyword "ixor" *> pure IXorInt)
-              <|> (parseKeyword "ishl" *> pure IShlInt)
-              <|> (parseKeyword "ishr" *> pure IShrInt)
+parseArithmetic = (parseKeyword "iadd" *> pure (IOpInt IAddInt))
+              <|> (parseKeyword "isub" *> pure (IOpInt ISubInt))
+              <|> (parseKeyword "imul" *> pure (IOpInt IMulInt))
+              <|> (parseKeyword "idiv" *> pure (IOpInt IDivInt))
+              <|> (parseKeyword "irem" *> pure (IOpInt IRemInt))
+              <|> (parseKeyword "ineg" *> pure (IOpInt INegInt))
+              <|> (parseKeyword "iand" *> pure (IOpInt IAndInt))
+              <|> (parseKeyword "ior" *>  pure (IOpInt IOrInt))
+              <|> (parseKeyword "ixor" *> pure (IOpInt IXorInt))
+              <|> (parseKeyword "ishl" *> pure (IOpInt IShlInt))
+              <|> (parseKeyword "ishr" *> pure (IOpInt IShrInt))
               <|> parseIncInt
 
 parseIncInt :: Parser Instr
@@ -90,16 +90,16 @@ parseIncInt = parseKeyword "iinc" *> parseSpaces *>
               (IIncInt <$> parseInt <*> (parseSpaces *> parseInt))
 
 parseStack :: Parser Instr
-parseStack = (parseKeyword "dup2_x2" *> pure IDup2X2)
-         <|> (parseKeyword "dup2_x1" *> pure IDup2X1)
-         <|> (parseKeyword "dup_x2" *> pure IDupX2)
-         <|> (parseKeyword "dup_x1" *> pure IDupX1)
-         <|> (parseKeyword "dup2" *> pure IDup2)
-         <|> (parseKeyword "dup" *> pure IDup)
-         <|> (parseKeyword "pop2" *> pure IPop2)
-         <|> (parseKeyword "pop" *> pure IPop)
-         <|> (parseKeyword "swap" *> pure ISwap)
-         <|> (parseKeyword "nop" *> pure INop)
+parseStack = (parseKeyword "dup2_x2" *> pure (IStck IDup2X2))
+         <|> (parseKeyword "dup2_x1" *> pure (IStck IDup2X1))
+         <|> (parseKeyword "dup_x2" *> pure (IStck IDupX2))
+         <|> (parseKeyword "dup_x1" *> pure (IStck IDupX1))
+         <|> (parseKeyword "dup2" *> pure (IStck IDup2))
+         <|> (parseKeyword "dup" *> pure (IStck IDup))
+         <|> (parseKeyword "pop2" *> pure (IStck IPop2))
+         <|> (parseKeyword "pop" *> pure (IStck IPop))
+         <|> (parseKeyword "swap" *> pure (IStck ISwap))
+         <|> (parseKeyword "nop" *> pure (IStck INop))
 
 parseControlFlow :: Parser Instr
 parseControlFlow = parseIfICmpGt

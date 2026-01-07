@@ -11,7 +11,10 @@ module Data (
         Value(..),
         Instr(..),
         Handle,
+        IntOp(..),
+        WhatDup(..),
         VMState(..),
+        StackIns(..),
         HeapValue(..)
 
 ) where
@@ -22,6 +25,7 @@ import qualified Data.Vector as V
 data Value = VInt  Int
           | VBool Bool
           | VString String
+          | VNull
           | VHandle Handle
           deriving (Show, Eq)
 
@@ -29,11 +33,23 @@ type Stack = [Value]
 
 type Handle = Int
 
+data WhatDup = Dup | Dup2 | DupX1 | DupX2 | Dup2X1 | Dup2X2
+
 data HeapValue = HObject (Map.Map String Value)
                |HArray (V.Vector Value) 
                deriving(Show, Eq)
 
 type Heap = V.Vector HeapValue
+
+data IntOp = IAddInt 
+           | ISubInt | IMulInt | IDivInt | IRemInt
+           | INegInt | IAndInt | IOrInt | IXorInt
+           | IShlInt | IShrInt | IUshrInt
+           deriving(Show, Eq)
+
+data StackIns = IPop | IDup | INop | ISwap | IDup2
+           | IPop2 | IDupX1 | IDupX2 | IDup2X1 | IDup2X2
+           deriving(Show, Eq)
 
 data Instr = IConstInt Int
            | IBipush Int
@@ -42,54 +58,24 @@ data Instr = IConstInt Int
            | ILoadInt Int
            | IStoreInt Int
         
-           | IAddInt
-           | ISubInt
-           | IMulInt
-           | IDivInt
-           | IRemInt
-           | INegInt
-           | IOrInt
-           | IXorInt
-           | IShlInt
-           | IShrInt
-
-           | IPop
-           | IDup
-           | INop
-           | ISwap
-           | IDup2
-           | IPop2
-           | IDupX1
-           | IDupX2
-           | IDup2X1
-           | IDup2X2
-
+           | IOpInt IntOp 
+           | IStck StackIns
            -------------------------------
-           | IAndInt
-           | IIncInt Int Int
-           | IGoto Int
-           | IIfEq Int
-           | IIfGt Int
-           | IIfLt Int
-           | IIfICmpGt Int
-           | IIfICmpLt Int
-   
-           | IInvokeStatic String
-           | IInvokeVirtual String
-           | IInvokeSpecial String
 
-           | IReturn
-           | IReturnInt
+           | IIncInt Int Int | IGoto Int
+           | IIfEq Int | IIfACmpEq Int | IIfACmpNe Int
+
+           | IIfGt Int | IIfLt Int | IIfICmpGt Int | IIfICmpLt Int
+
+           | IInvokeStatic String | IInvokeVirtual String | IInvokeSpecial String
+
+           | IReturn | IReturnInt
    
-           | INew String
-           | IGetField String
-           | IPutField String
-   
-           | INewArray
-           | IALoad
-           | IAStore
-           | IArrayLength
+           | INew String | IGetField String | IPutField String
+
+           | INewArray | IALoad | IAStore | IArrayLength
            deriving (Show, Eq)
+
 
 data Frame = Frame
     { fLocals :: [Value]
