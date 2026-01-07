@@ -185,6 +185,18 @@ execInstr (ISwap) st@VMState{stack, ip} =
 
 execInstr (INop) st = Right st
 
+
+execInstr IReturn st@VMState{ip} =
+    Right st { ip = ip + 1 }
+
+
+execInstr IReturnInt st@VMState{stack, ip} =
+    case stack of
+        [] -> Left "Stack underflow in IReturnInt"
+        (VInt _:_) -> Right st { ip = ip + 1 }
+        _ -> Left "IReturnInt expects an integer on top of the stack"
+
+
 execInstr _  _ = Left "Invalid isntruction or not yet implemented"
 
 
