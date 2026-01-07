@@ -13,6 +13,7 @@ module Vmstate (
 
 import Data
 import Data.Bits
+import qualified Data.Map as Map
 import qualified Data.Vector as V
 
 execInstr :: Instr -> VMState -> Either String VMState
@@ -214,6 +215,35 @@ execInstr (ILdc n) st@VMState{stack, ip, constPool} =
 
 execInstr (IGoto offset) st =
     Right st { ip = offset }
+
+
+execInstr (IGetField fieldName) st@VMState{stack, ip, heap} =
+    case stack of
+        (VHandle h : rest) ->
+            case heap V.!? h of
+                Just (HObject fields) ->
+                    case Map.lookup fieldName fields of
+                        Just val -> Right st {ip = ip + 1, stack = val : rest}
+                        Nothing  -> Left ("Field not found: " ++ fieldName)
+                Just (HArray _) -> Left "getfield: expected object, got array"
+                Nothing -> Left ("Invalid heap handle: " ++ show h)
+        [] -> Left "Stack underflow in IGetField"
+        _ -> Left "IGetField expects an object reference on the stack"
+
+
+execInstr (IPutField fieldName) st@VMState{stack, ip, heap} =
+    case stack of
+        (val : VHandle h : rest) ->
+            case heap V.!? h of
+                Just (HObject fields) ->
+                    let newFields = Map.insert fieldName val fields
+                        newHeap = heap V.// [(h, HObject newFields)]
+                    in Right st {ip = ip + 1, stack = rest, heap = newHeap}
+                Just (HArray _) -> Left "putfield: expected object, got array"
+                Nothing -> Left ("Invalid heap handle: " ++ show h)
+        [_] -> Left "Stack underflow in IPutField (need value and object ref)"
+        [] -> Left "Stack underflow in IPutField"
+        _ -> Left "IPutField expects value and object reference on the stack"
 
 
 execInstr _  _ = Left "Invalid isntruction or not yet implemented"
