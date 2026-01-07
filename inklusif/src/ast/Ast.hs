@@ -265,11 +265,11 @@ data LoopBranch
   deriving (Show, Eq)
 
 data LoopResult
-  = LoopReturn Expr  -- => expr
+  = LoopReturn Expr 
   | LoopContinue [Statement]
   deriving (Show, Eq)
 
--- je crée des valeurs litéralles parce que comme ça à la compialation on sait à 100% que c'est des const et utiliser en pattern matching
+-- je crée des valeurs litéralles parce que comme ça à la compilation on sait à 100% que c'est des const et utiliser en pattern matching
 data Literal
   = IntLit Int
   | FloatLit Double
