@@ -22,6 +22,7 @@ import qualified Data.Vector as V
 data Value = VInt  Int
           | VBool Bool
           | VString String
+          | VNull
           | VHandle Handle
           deriving (Show, Eq)
 
@@ -65,12 +66,16 @@ data Instr = IConstInt Int
            | IAndInt
            | IIncInt Int Int
            | IGoto Int
+        
            | IIfEq Int
+           | IIfACmpEq Int
+           | IIfACmpNe Int
+
            | IIfGt Int
            | IIfLt Int
            | IIfICmpGt Int
            | IIfICmpLt Int
-   
+
            | IInvokeStatic String
            | IInvokeVirtual String
            | IInvokeSpecial String
