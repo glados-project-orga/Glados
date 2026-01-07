@@ -157,8 +157,7 @@ execInstr (IDupX2) st@VMState{stack, ip} =
         _ -> Left "IDupX2 expects at least three stack values"
 
 
-
-execInstr IDup2X1 st@VMState{stack, ip} =
+execInstr (IDup2X1) st@VMState{stack, ip} =
     case stack of
         (v1:v2:v3:rest) ->
             let newStack = v2:v1:v3:v2:v1:rest
@@ -185,7 +184,35 @@ execInstr (ISwap) st@VMState{stack, ip} =
 
 execInstr (INop) st = Right st
 
-execInstr _  _ = Left "Invalid isntruction or not yet implemented"
+execInstr (INewArray) st@VMState{stack, ip, heap} =
+    case stack of
+        (VInt size : rest) ->
+            if size < 0 then
+                Left "INewArray: negative array size"
+            else
+                let handle   = V.length heap
+                    newArray = HArray (V.replicate size (VInt 0))
+                    newHeap  = V.snoc heap newArray
+                in Right st { ip = ip + 1, heap = newHeap , stack = (VInt handle : rest)}
+
+        _ -> Left "INewArray expects an integer size on the stack"
+
+
+execInstr (IALoad) st@VMState{stack, ip, heap} =
+    case stack of
+        (VInt v2 :  VInt v1 : rest) ->
+            case heap V.!? v1 of
+                Just (HArray arr) ->
+                    case arr V.!? v2 of
+                        Just val ->
+                            Right st { ip = ip + 1, stack = (val : rest)}
+                        Nothing -> Left "IALoad: array index out of bounds"
+                _ -> Left "IALoad: reference is not an array"
+        _ -> Left "IALoad expects (index, arrayRef) on the stack"
+
+
+execInstr _  _ = Left "Invalid instruction or not yet implemented"
+
 
 
 
