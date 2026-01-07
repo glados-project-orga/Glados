@@ -249,7 +249,7 @@ execInstr (IIfEq n) st@VMState{stack, ip} =
 
 execInstr (IIfACmpEq n) st@VMState{stack, ip} =
     case stack of
-        (VRef b : VRef a : rest) ->
+        (VInt b : VInt a : rest) ->
             if a == b
                 then Right st { ip = ip + n, stack = rest }
                 else Right st { ip = ip + 1, stack = rest }
@@ -258,7 +258,7 @@ execInstr (IIfACmpEq n) st@VMState{stack, ip} =
 
 execInstr (IIfACmpNe n) st@VMState{stack, ip} =
     case stack of
-        (VRef b : VRef a : rest) ->
+        (VInt b : VInt a : rest) ->
             if a /= b
                 then Right st { ip = ip + n, stack = rest }
                 else Right st { ip = ip + 1, stack = rest }
