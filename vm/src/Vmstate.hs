@@ -238,6 +238,33 @@ execInstr (IArrayLength) st@VMState{stack, ip, heap} =
         _ -> Left "IArrayLength expects an array reference ( VInt) on the stack"
 
 
+execInstr (IIfEq n) st@VMState{stack, ip} =
+    case stack of
+        (VInt v : rest) ->
+            if v == 0
+                then Right st { ip = ip + n, stack = rest }
+                else Right st { ip = ip + 1, stack = rest }
+        _ -> Left "IIfEq expects an integer on the stack"
+
+
+execInstr (IIfACmpEq n) st@VMState{stack, ip} =
+    case stack of
+        (VRef b : VRef a : rest) ->
+            if a == b
+                then Right st { ip = ip + n, stack = rest }
+                else Right st { ip = ip + 1, stack = rest }
+        _ -> Left "if_acmpeq expects two references"
+
+
+execInstr (IIfACmpNe n) st@VMState{stack, ip} =
+    case stack of
+        (VRef b : VRef a : rest) ->
+            if a /= b
+                then Right st { ip = ip + n, stack = rest }
+                else Right st { ip = ip + 1, stack = rest }
+        _ -> Left "if_acmpne expects two references"
+
+
 execInstr _  _ = Left "Invalid instruction or not yet implemented"
 
 
