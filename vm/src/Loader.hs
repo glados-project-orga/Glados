@@ -77,16 +77,16 @@ parseIncInt = parseKeyword "iinc" *> parseSpaces *>
               (IIncInt <$> parseInt <*> (parseSpaces *> parseInt))
 
 parseStack :: Parser Instr
-parseStack = (parseKeyword "dup2_x2" *> pure IDup2X2)
-         <|> (parseKeyword "dup2_x1" *> pure IDup2X1)
-         <|> (parseKeyword "dup_x2" *> pure IDupX2)
-         <|> (parseKeyword "dup_x1" *> pure IDupX1)
-         <|> (parseKeyword "dup2" *> pure IDup2)
-         <|> (parseKeyword "dup" *> pure IDup)
-         <|> (parseKeyword "pop2" *> pure IPop2)
-         <|> (parseKeyword "pop" *> pure IPop)
-         <|> (parseKeyword "swap" *> pure ISwap)
-         <|> (parseKeyword "nop" *> pure INop)
+parseStack = (parseKeyword "dup2_x2" *> pure (IStck IDup2X2))
+         <|> (parseKeyword "dup2_x1" *> pure (IStck IDup2X1))
+         <|> (parseKeyword "dup_x2" *> pure (IStck IDupX2))
+         <|> (parseKeyword "dup_x1" *> pure (IStck IDupX1))
+         <|> (parseKeyword "dup2" *> pure (IStck IDup2))
+         <|> (parseKeyword "dup" *> pure (IStck IDup))
+         <|> (parseKeyword "pop2" *> pure (IStck IPop2))
+         <|> (parseKeyword "pop" *> pure (IStck IPop))
+         <|> (parseKeyword "swap" *> pure (IStck ISwap))
+         <|> (parseKeyword "nop" *> pure (IStck INop))
 
 parseControlFlow :: Parser Instr
 parseControlFlow = parseIfICmpGt

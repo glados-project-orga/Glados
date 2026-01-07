@@ -14,6 +14,7 @@ module Data (
         IntOp(..),
         WhatDup(..),
         VMState(..),
+        StackIns(..),
         HeapValue(..)
 
 ) where
@@ -32,7 +33,7 @@ type Stack = [Value]
 
 type Handle = Int
 
-data WhatDup = Dup | DupX1 | DupX2 | Dup2X1 | Dup2X2
+data WhatDup = Dup | Dup2 | DupX1 | DupX2 | Dup2X1 | Dup2X2
 
 data HeapValue = HObject (Map.Map String Value)
                |HArray (V.Vector Value) 
@@ -46,15 +47,16 @@ data IntOp = IAddInt
            | IShlInt | IShrInt | IUshrInt
            deriving(Show, Eq)
 
+data StackIns = IPop | IDup | INop | ISwap | IDup2
+           | IPop2 | IDupX1 | IDupX2 | IDup2X1 | IDup2X2
+           deriving(Show, Eq)
+
 data Instr = IConstInt Int
            | ILoadInt Int
            | IStoreInt Int
         
            | IOpInt IntOp 
-
-           | IPop | IDup | INop | ISwap | IDup2
-           | IPop2 | IDupX1 | IDupX2 | IDup2X1 | IDup2X2
-
+           | IStck StackIns
            -------------------------------
 
            | IIncInt Int Int | IGoto Int
@@ -67,7 +69,7 @@ data Instr = IConstInt Int
            | IReturn | IReturnInt
    
            | INew String | IGetField String | IPutField String
-   
+
            | INewArray | IALoad | IAStore | IArrayLength
            deriving (Show, Eq)
 

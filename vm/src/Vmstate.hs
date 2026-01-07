@@ -30,23 +30,7 @@ execInstr (ILoadInt n) st = stackInstrLoadInt n st
 
 execInstr (IStoreInt n) st = stackInstrStoreInt n st
 
-execInstr (IPop) st = stackInstrPop 1 st
-
-execInstr (IPop2) st = stackInstrPop 2 st
-
-execInstr (IDup) st =  stackInstrDup Dup st
-
-execInstr (IDupX1) st = stackInstrDup DupX1 st
-
-execInstr (IDupX2) st =  stackInstrDup DupX2 st
-
-execInstr (IDup2X1) st = stackInstrDup Dup2X1 st
-    
-execInstr (IDup2X2) st = stackInstrDup Dup2X2 st
-
-execInstr (ISwap) st = stackInstrSwap st
-
-execInstr (INop) st = Right st
+execInstr (IStck sst) st = stack_All_Instr sst st
 
 execInstr (INewArray) st = heapInstrNewArray st
 
@@ -67,10 +51,10 @@ exec st@VMState{stack, locals, ip, code, heap, frames}
 
 
 compile :: VMState -> Either String VMState
-compile vmst =
-  if ip vmst >= V.length (code vmst)
-    then Right vmst
+compile vmSt =
+  if ip vmSt >= V.length (code vmSt)
+    then Right vmSt
     else
-      case exec vmst of
+      case exec vmSt of
         Left err  -> Left err
-        Right newvmst -> compile newvmst
+        Right newvmSt -> compile newvmSt
