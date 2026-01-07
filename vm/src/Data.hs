@@ -11,6 +11,7 @@ module Data (
         Value(..),
         Instr(..),
         Handle,
+        WhatDup(..),
         VMState(..),
         HeapValue(..)
 
@@ -29,6 +30,8 @@ data Value = VInt  Int
 type Stack = [Value]
 
 type Handle = Int
+
+data WhatDup = Dup | DupX1 | DupX2 | Dup2X1 | Dup2X2
 
 data HeapValue = HObject (Map.Map String Value)
                |HArray (V.Vector Value) 
@@ -61,7 +64,6 @@ data Instr = IConstInt Int
            | IDupX2
            | IDup2X1
            | IDup2X2
-
            -------------------------------
            | IAndInt
            | IIncInt Int Int
