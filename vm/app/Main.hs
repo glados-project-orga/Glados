@@ -11,9 +11,9 @@ import System.Environment (getArgs)
 import System.Exit (exitWith, ExitCode(..))
 import System.IO (hPutStrLn, stderr)
 import Loader (loadBytecode)
-import Data (VMState(..), Value(..), Function(..), Instr(..))
+import Data (VMState(..), Value(..), Function(..))
 import Vmstate (compile)
-import Loader (loadBytecode)
+import Loader ()
 import qualified Data.Map as Map
 import qualified Data.Vector as V
 
@@ -30,18 +30,18 @@ runFile :: FilePath -> IO ()
 runFile path = readFile path >>= \content ->
   case loadBytecode content of
     Left err -> print ("Error: " ++ err) >> exitWith (ExitFailure 84)
-    Right functions -> runVM functions
+    Right parsedFuncs -> runVM parsedFuncs
 
 runVM :: Map.Map String Function -> IO()
-runVM functions = 
-  case Map.lookup "main" functions of
+runVM parsedFuncs = 
+  case Map.lookup "main" parsedFuncs of
     Nothing -> print "Error: No 'main' function found" >> exitWith (ExitFailure 84)
     Just _ -> 
       let initialState = VMState
             { stack      = []
             , locals     = V.replicate 10 (VInt 0)
             , ip         = 0
-            , functions  = functions
+            , functions  = parsedFuncs
             , currentFunc = "main"
             , constPool  = V.empty
             , heap       = V.empty
