@@ -26,10 +26,6 @@ execInstr :: Instr -> VMState -> Either String VMState
 
 execInstr (IConstInt n) st = stackInstrConstInt n st
 
-execInstr (IBipush n) st = stackInstrBipush n st
-
-execInstr (ISipush n) st = stackInstrSipush n st
-
 execInstr (ILdc n) st = stackInstrLdc n st
 
 execInstr (ILoadInt n) st = stackInstrLoadInt n st
@@ -61,10 +57,6 @@ execInstr (IPutField fieldName) st = heapInstrPutField fieldName st
 execInstr (INew className) st = heapInstrNew className st
 
 execInstr (IInvokeStatic funcName) st = controlFlowInvokeStatic funcName st
-
-execInstr (IInvokeVirtual methodName) st = controlFlowInvokeVirtual methodName st
-
-execInstr (IInvokeSpecial methodName) st = controlFlowInvokeSpecial methodName st
 
 execInstr _  _ = Left "Invalid instruction or not yet implemented"
 

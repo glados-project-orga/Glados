@@ -41,14 +41,12 @@ parseInstrs = parseMany (betweenSpaces parseInstr)
 parseInstr :: Parser Instr
 parseInstr = parseConstInt
          <|> parseLdc
-         <|> parseBipush
-         <|> parseSipush
          <|> parseLoadInt
          <|> parseStoreInt
          <|> parseArithmetic
          <|> parseStack
          <|> parseControlFlow
-         <|> parseInvoke
+         <|> parseInvokeStatic
          <|> parseReturn
          <|> parseArray
          <|> parseObject
@@ -62,12 +60,6 @@ parseConstInt = parseKeyword "iconst" *> parseArgSep *> (IConstInt <$> parseInt)
 
 parseLdc :: Parser Instr
 parseLdc = parseKeyword "ldc" *> parseSpaces *> (ILdc <$> parseInt)
-
-parseBipush :: Parser Instr
-parseBipush = parseKeyword "bipush" *> parseSpaces *> (IBipush <$> parseInt)
-
-parseSipush :: Parser Instr
-parseSipush = parseKeyword "sipush" *> parseSpaces *> (ISipush <$> parseInt)
 
 parseLoadInt :: Parser Instr
 parseLoadInt = parseKeyword "iload" *> parseArgSep *> (ILoadInt <$> parseInt)
@@ -131,19 +123,8 @@ parseIfICmpGt = parseKeyword "if_icmpgt" *> parseSpaces *> (IIfICmpGt <$> parseI
 parseIfICmpLt :: Parser Instr
 parseIfICmpLt = parseKeyword "if_icmplt" *> parseSpaces *> (IIfICmpLt <$> parseInt)
 
-parseInvoke :: Parser Instr
-parseInvoke = parseInvokeStatic
-          <|> parseInvokeVirtual
-          <|> parseInvokeSpecial
-
 parseInvokeStatic :: Parser Instr
 parseInvokeStatic = parseKeyword "invokestatic" *> (IInvokeStatic <$> parseString)
-
-parseInvokeVirtual :: Parser Instr
-parseInvokeVirtual = parseKeyword "invokevirtual" *> (IInvokeVirtual <$> parseString)
-
-parseInvokeSpecial :: Parser Instr
-parseInvokeSpecial = parseKeyword "invokespecial" *> (IInvokeSpecial <$> parseString)
 
 parseReturn :: Parser Instr
 parseReturn = (parseKeyword "ireturn" *> pure IReturnInt)

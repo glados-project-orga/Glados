@@ -15,8 +15,6 @@ module StackInstr (
       stackInstrPop,
       stackInstrDup,
       stackInstrConstInt,
-      stackInstrBipush,
-      stackInstrSipush,
       stackInstrLdc,
       stack_All_Instr
 ) where
@@ -28,18 +26,7 @@ import qualified Data.Vector as V
 
 stackInstrConstInt :: Int -> VMState -> Either String VMState
 stackInstrConstInt n st@VMState{stack, ip} =
-    Right st { ip = ip + 1, stack = VInt n : stack }
-
-
-stackInstrBipush :: Int -> VMState -> Either String VMState
-stackInstrBipush n st@VMState{stack, ip} =
-    Right st { ip = ip + 1, stack = VInt n : stack }
-
-
-stackInstrSipush :: Int -> VMState -> Either String VMState
-stackInstrSipush n st@VMState{stack, ip} =
-    Right st { ip = ip + 1, stack = VInt n : stack }
-
+    Right st {ip = ip + 1, stack = VInt n : stack}
 
 stackInstrLdc :: Int -> VMState -> Either String VMState
 stackInstrLdc n st@VMState{stack, ip, constPool} =
