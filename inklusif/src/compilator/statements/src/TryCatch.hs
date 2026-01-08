@@ -1,6 +1,6 @@
 module TryCatch (compileTryCatch) where
-import CompilerTypes (ProgramBinary)
+import CompilerTypes (ProgramLayer)
 import Ast (TryCatchStmt)
 
-compileTryCatch :: TryCatchStmt -> ProgramBinary -> ProgramBinary
+compileTryCatch :: TryCatchStmt -> ProgramLayer -> ProgramLayer
 compileTryCatch _ prog = prog

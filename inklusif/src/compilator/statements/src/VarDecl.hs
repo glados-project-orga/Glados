@@ -1,6 +1,6 @@
 module VarDecl (compileVarDecl) where
-import CompilerTypes (ProgramBinary)
+import CompilerTypes (ProgramLayer)
 import Ast (VarDecl)
 
-compileVarDecl :: VarDecl -> ProgramBinary -> ProgramBinary
+compileVarDecl :: VarDecl -> ProgramLayer -> ProgramLayer
 compileVarDecl _ prog = prog
