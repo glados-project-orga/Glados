@@ -21,10 +21,14 @@ module Data (
 
 import qualified Data.Map as Map
 import qualified Data.Vector as V
+import Data.Int (Int64)
 
 data Value = VInt  Int
           | VBool Bool
           | VString String
+          | VFloat Float
+          | VDouble Double
+          | VLong Int64
           | VNull
           | VHandle Handle
           deriving (Show, Eq)
@@ -44,7 +48,7 @@ type Heap = V.Vector HeapValue
 data IntOp = IAddInt 
            | ISubInt | IMulInt | IDivInt | IRemInt
            | INegInt | IAndInt | IOrInt | IXorInt
-           | IShlInt | IShrInt | IUshrInt
+           | IShlInt | IShrInt
            deriving (Show, Eq)
 
 data StackIns = IPop | IDup | INop | ISwap | IDup2
@@ -61,8 +65,12 @@ data Instr = IConstInt Int
            | IOpInt IntOp 
            | IStck StackIns
            
-           | IIfEq Int | IIfACmpEq Int | IIfACmpNe Int
-           | IIfGt Int | IIfLt Int | IIfICmpGt Int | IIfICmpLt Int
+           | IIfEq Int | IIfNe Int | IIfLt Int | IIfGe Int
+           | IIfGt Int | IIfLe Int | IIfACmpEq Int | IIfACmpNe Int           
+           | IIfICmpEq Int | IIfICmpNe Int | IIfICmpLt Int | IIfICmpGe Int
+           | IIfICmpGt Int | IIfICmpLe Int | ILcmp | IFcmpl
+           | IFcmpg | IDcmpl | IDcmpg
+
            -------------------------------
 
            | IIncInt Int Int| IGoto Int
