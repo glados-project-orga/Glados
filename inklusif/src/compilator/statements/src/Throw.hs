@@ -1,6 +1,6 @@
 module Throw (compileThrow) where
-import CompilerTypes (ProgramBinary)
+import CompilerTypes (ProgramLayer)
 import Ast (ThrowStmt)
 
-compileThrow :: ThrowStmt -> ProgramBinary -> ProgramBinary
+compileThrow :: ThrowStmt -> ProgramLayer -> ProgramLayer
 compileThrow _ prog = prog

@@ -1,6 +1,6 @@
 module If (compileIf) where
-import CompilerTypes (ProgramBinary)
+import CompilerTypes (ProgramLayer)
 import Ast (IfStmt)
 
-compileIf :: IfStmt -> ProgramBinary -> ProgramBinary
+compileIf :: IfStmt -> ProgramLayer -> ProgramLayer
 compileIf _ prog = prog

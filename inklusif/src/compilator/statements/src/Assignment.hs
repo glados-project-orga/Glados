@@ -1,6 +1,6 @@
 module Assignment (compileAssignment) where
-import CompilerTypes (ProgramBinary)
+import CompilerTypes (ProgramLayer)
 import Ast (Assignment)
 
-compileAssignment :: Assignment -> ProgramBinary -> ProgramBinary
+compileAssignment :: Assignment -> ProgramLayer -> ProgramLayer
 compileAssignment _ prog = prog

@@ -1,6 +1,6 @@
 module While (compileWhile) where
-import CompilerTypes (ProgramBinary)
+import CompilerTypes (ProgramLayer)
 import Ast (WhileStmt)
 
-compileWhile :: WhileStmt -> ProgramBinary -> ProgramBinary
+compileWhile :: WhileStmt -> ProgramLayer -> ProgramLayer
 compileWhile _ prog = prog

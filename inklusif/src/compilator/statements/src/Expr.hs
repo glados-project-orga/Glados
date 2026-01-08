@@ -1,6 +1,6 @@
 module Expr (compileExpr) where
-import CompilerTypes (ProgramBinary)
+import CompilerTypes (ProgramLayer)
 import Ast (ExprStmt)
 
-compileExpr :: ExprStmt -> ProgramBinary -> ProgramBinary
+compileExpr :: ExprStmt -> ProgramLayer -> ProgramLayer
 compileExpr _ prog = prog

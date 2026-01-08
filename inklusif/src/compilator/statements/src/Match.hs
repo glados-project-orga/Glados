@@ -1,6 +1,6 @@
 module Match (compileMatch) where
-import CompilerTypes (ProgramBinary)
+import CompilerTypes (ProgramLayer)
 import Ast (MatchStmt)
 
-compileMatch :: MatchStmt -> ProgramBinary -> ProgramBinary
+compileMatch :: MatchStmt -> ProgramLayer -> ProgramLayer
 compileMatch _ prog = prog

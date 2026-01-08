@@ -1,6 +1,6 @@
 module ForEach (compileForEach) where
-import CompilerTypes (ProgramBinary)
+import CompilerTypes (ProgramLayer)
 import Ast (ForEachStmt)
 
-compileForEach :: ForEachStmt -> ProgramBinary -> ProgramBinary
+compileForEach :: ForEachStmt -> ProgramLayer -> ProgramLayer
 compileForEach _ prog = prog

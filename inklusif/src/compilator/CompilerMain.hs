@@ -5,6 +5,7 @@ import Function (compileFunction)
 import Struct (compileStruct)
 import Enum (compileEnum)
 import Typedef (compileTypedef)
+import CompilerTools (appendDefines)
 
 compileDeclarations :: Declaration -> ProgramBinary -> ProgramBinary
 compileDeclarations (Function fun) prog = compileFunction fun prog
@@ -14,6 +15,7 @@ compileDeclarations (Typedef typedef) prog = compileTypedef typedef prog
 
 compilerMain :: Ast -> ProgramBinary -> ProgramBinary
 compilerMain [] prog = prog
-compilerMain (declaration:ast) prog = compilerMain ast n_prog
+compilerMain (declaration:ast) prog = compilerMain ast new_prog
     where
-        n_prog = compileDeclarations declaration prog
+        new_prog = appendDefines incomplete_new_prog [declaration]
+        incomplete_new_prog = compileDeclarations declaration prog

@@ -1,6 +1,6 @@
 module For (compileFor) where
-import CompilerTypes (ProgramBinary)
+import CompilerTypes (ProgramLayer)
 import Ast (ForStmt)
 
-compileFor :: ForStmt -> ProgramBinary -> ProgramBinary
+compileFor :: ForStmt -> ProgramLayer -> ProgramLayer
 compileFor _ prog = prog
