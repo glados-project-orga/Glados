@@ -6,10 +6,11 @@ module CompilerTypes (
     ProgramBinary
 ) where
 
-import Ast (Declaration)
+import Ast (Declaration, Declaration(..))
 
 type Ast = [Declaration]
 type ConstantPool = [String]
 type Bytecode = [String]
+type Defines = [Declaration]
 type SymbolTable = [(String, Int)]
-type ProgramBinary = (ConstantPool, Bytecode)
+type ProgramBinary = (ConstantPool, Defines, Bytecode)
