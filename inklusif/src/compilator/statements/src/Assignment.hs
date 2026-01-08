@@ -1,5 +1,6 @@
 module Assignment (compileAssignment) where
+import CompilerTypes (ProgramBinary)
 import Ast (Assignment)
 
-compileAssignment :: Assignment -> String
-compileAssignment _ = []
+compileAssignment :: Assignment -> ProgramBinary -> ProgramBinary
+compileAssignment _ prog = prog
