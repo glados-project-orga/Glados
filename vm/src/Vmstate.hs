@@ -83,8 +83,6 @@ execInstr (IDcmpg) st = compDCmpG st
 
 execInstr (IInvokeStatic funcName) st = controlFlowInvokeStatic funcName st
 
-execInstr _  _ = Left "Invalid instruction or not yet implemented"
-
 
 
 exec :: VMState -> Either String VMState

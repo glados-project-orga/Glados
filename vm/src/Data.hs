@@ -58,8 +58,6 @@ data StackIns = IPop | IDup | INop | ISwap | IDup2
            deriving (Show, Eq)
 
 data Instr = IConstInt Int
-           | IBipush Int
-           | ISipush Int
            | ILdc Int
            | ILoadInt Int
            | IStoreInt Int
@@ -75,9 +73,9 @@ data Instr = IConstInt Int
 
            -------------------------------
 
-           | IIncInt Int Int| IGoto Int
+           | IGoto Int
 
-           | IInvokeStatic String | IInvokeVirtual String | IInvokeSpecial String
+           | IInvokeStatic String
 
            | IReturn | IReturnInt
    
