@@ -293,5 +293,4 @@ data BinOp
   | GreaterEqual
   | And
   | Or
-  | Xor
   deriving (Show, Eq)
