@@ -12,16 +12,16 @@ module StructParser (
 import Ast
 import Parser
 import Control.Applicative
-import Debug.Trace (trace)
+-- import Debug.Trace (trace)
 import StatementParser (parseType)
 
-traceInput :: String -> Parser a -> Parser a
-traceInput label (Parser p) =
-    Parser $ \st ->
-        trace
-            (label ++ " | next input = " ++ take 40 (input st)
-             )
-            (p st)
+-- traceInput :: String -> Parser a -> Parser a
+-- traceInput label (Parser p) =
+--     Parser $ \st ->
+--         trace
+--             (label ++ " | next input = " ++ take 40 (input st)
+--              )
+--             (p st)
 
 parseStructField :: Parser StructField
 parseStructField =
