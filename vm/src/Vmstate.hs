@@ -62,6 +62,10 @@ execInstr (INew className) st = heapInstrNew className st
 
 execInstr (IInvokeStatic funcName) st = controlFlowInvokeStatic funcName st
 
+execInstr (IInvokeVirtual methodName) st = controlFlowInvokeVirtual methodName st
+
+execInstr (IInvokeSpecial methodName) st = controlFlowInvokeSpecial methodName st
+
 execInstr _  _ = Left "Invalid instruction or not yet implemented"
 
 exec :: VMState -> Either String VMState

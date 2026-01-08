@@ -11,7 +11,9 @@ module ControlFlowInstr (
     controlFlowReturn,
     controlFlowReturnInt,
     controlFlowGoto,
-    controlFlowInvokeStatic
+    controlFlowInvokeStatic,
+    controlFlowInvokeVirtual,
+    controlFlowInvokeSpecial
 ) where
 
 import Data
@@ -73,3 +75,11 @@ controlFlowInvokeStatic funcName st@VMState{functions, frames, currentFunc, ip} 
                 currentFunc = funcName,
                 frames = newFrame : frames
             }
+
+
+controlFlowInvokeVirtual :: String -> VMState -> Either String VMState
+controlFlowInvokeVirtual = controlFlowInvokeStatic
+
+
+controlFlowInvokeSpecial :: String -> VMState -> Either String VMState
+controlFlowInvokeSpecial = controlFlowInvokeStatic
