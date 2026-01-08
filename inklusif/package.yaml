@@ -44,6 +44,7 @@ library:
     - src/compilator/declarations
     - src/compilator/statements
     - src/compilator/statements/src
+    - src/compilator/utils
 
 executables:
   inklusif-exe:
