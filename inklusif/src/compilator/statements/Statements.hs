@@ -23,7 +23,7 @@ compileStatement (MatchStatement match) layer = compileMatch match layer
 compileStatement (TryCatchStatement tryCatch) layer = compileTryCatch tryCatch layer
 compileStatement (ThrowStatement throw) layer = compileThrow throw layer
 compileStatement (ExprStatement expr) layer = compileExpr expr layer
-compileStatement _ _ = (([], [], []), [])
+compileStatement _ _ = (([], ([], [], [], []), []), [])
 
 compileStatements :: [Statement] -> ProgramLayer -> ProgramBinary
 compileStatements [] (prog, _) = prog

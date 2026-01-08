@@ -1,19 +1,23 @@
 module CompilerTools (
-    appendProgramBinaries,
     appendHeader,
     appendDefines,
     appendBody) where
 import CompilerTypes(ProgramBinary, ConstantPool, Defines, Bytecode)
-
-appendProgramBinaries :: ProgramBinary -> ProgramBinary -> ProgramBinary
-appendProgramBinaries (head1, def1, body1) (head2, def2, body2) =
-    (head1 ++ head2, def1 ++ def2, body1 ++ body2)
+import Ast (Declaration(..))
 
 appendHeader :: ProgramBinary -> ConstantPool -> ProgramBinary
 appendHeader (header, def, body) newHead = (header ++ newHead, def, body)
 
-appendDefines :: ProgramBinary -> Defines -> ProgramBinary
-appendDefines (header, def, body) newDef = (header, def ++ newDef, body)
+appendDefine :: Declaration -> Defines -> Defines
+appendDefine (Function function) (fun, st, en, td) = (fun ++ [function], st, en, td)
+appendDefine (Struct struct) (fun, st, en, td) = (fun, st ++ [struct], en, td)
+appendDefine (Enum enum) (fun, st, en, td) = (fun, st, en ++ [enum], td)
+appendDefine (Typedef typedef) (fun, st, en, td) = (fun, st, en, td ++ [typedef])
+
+appendDefines :: ProgramBinary -> [Declaration] -> ProgramBinary
+appendDefines prog [] = prog
+appendDefines (header, def, body) (newDef:decl) = appendDefines new_prog decl
+    where new_prog = (header , appendDefine newDef def, body)
 
 appendBody :: ProgramBinary -> Bytecode -> ProgramBinary
 appendBody (header, def, body) newBody = (header, def, body ++ newBody)
