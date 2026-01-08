@@ -40,13 +40,13 @@ module Ast
     MethodCallExpr(..),
     ArrayIndexExpr(..),
     FieldAccessExpr(..),
+    ForUpdate(..)
 ) where
 
 -- Position dans le parsing pour les cas d'erreurs
 data SourcePos = SourcePos
-  { line :: Int
-  , column :: Int
-  , filename :: String
+  { srcLine :: Int
+  , srcColumn :: Int
   } deriving (Show, Eq)
 
 -- Enum
@@ -82,8 +82,8 @@ data EnumDecl = EnumDecl
 
 data TypedefDecl = TypedefDecl
   { typedefPos :: SourcePos
-  , typedefAlias :: String
   , typedefOriginal :: Type
+  , typedefAlias :: String
   } deriving (Show, Eq)
 
 data Declaration
@@ -131,7 +131,7 @@ data VarDecl = VarDecl
   } deriving (Show, Eq)
 
 data Assignment = Assignment
-  { assignTarget :: Expr
+  { assignTarget :: String
   , assignValue :: Expr
   } deriving (Show, Eq)
 
@@ -146,10 +146,15 @@ data WhileStmt = WhileStmt
   , whileBody :: [Statement]
   } deriving (Show, Eq)
 
+data ForUpdate
+    = ForUpdateExpr Expr
+    | ForUpdateStmt Statement
+    deriving (Show, Eq)
+
 data ForStmt = ForStmt
   { forInit :: Maybe Statement
   , forCondition :: Expr
-  , forUpdate :: [Expr]
+  , forUpdate :: ForUpdate 
   , forBody :: [Statement]
   } deriving (Show, Eq)
 
@@ -260,11 +265,11 @@ data LoopBranch
   deriving (Show, Eq)
 
 data LoopResult
-  = LoopReturn Expr  -- => expr
+  = LoopReturn Expr 
   | LoopContinue [Statement]
   deriving (Show, Eq)
 
--- je crée des valeurs litéralles parce que comme ça à la compialation on sait à 100% que c'est des const et utiliser en pattern matching
+-- je crée des valeurs litéralles parce que comme ça à la compilation on sait à 100% que c'est des const et utiliser en pattern matching
 data Literal
   = IntLit Int
   | FloatLit Double
@@ -288,5 +293,4 @@ data BinOp
   | GreaterEqual
   | And
   | Or
-  | Xor
   deriving (Show, Eq)

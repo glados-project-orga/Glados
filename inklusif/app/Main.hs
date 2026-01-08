@@ -17,4 +17,6 @@ main = getArgs >>= \args ->
     checkArgs args >>= either argErrorLog (\content -> 
         (putStrLn $ "File content loaded successfully:\n" ++ content) >>
             parseInkFile content >>=
-                either parsingErrorLog (\_ -> return ()))
+                either parsingErrorLog (\decl ->
+                    putStrLn $ "Parsed Declaration:\n" ++ show decl
+                ))

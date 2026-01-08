@@ -9,7 +9,23 @@ module InkParser (
     parseInkFile
     ) where
 
-import Ast (Declaration)
+import Ast
+import Parser
+import FunctionParsing
+import Control.Applicative
+import EnumParsing
+import StructParser
+import TypedefParser
 
-parseInkFile :: String -> IO (Either String Declaration)
-parseInkFile _ = return $ Left "Parsing not yet implemented."
+parseDeclaration :: Parser Declaration
+parseDeclaration =
+        parseFunction
+       <|> parseEnum
+       <|> parseStruct
+       <|> parseTypedef
+
+parseInkFile :: String -> IO (Either String [Declaration])
+parseInkFile content =
+    case runParser (parseMany parseDeclaration <* eof) (initialState content) of
+        Right (decls, _) -> return $ Right decls
+        Left err        -> return $ Left err
