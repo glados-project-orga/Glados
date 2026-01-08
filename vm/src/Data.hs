@@ -15,7 +15,9 @@ module Data (
         WhatDup(..),
         VMState(..),
         StackIns(..),
-        HeapValue(..)
+        HeapValue(..),
+        Function(..),
+        Frame(..)
 
 ) where
 
@@ -88,15 +90,23 @@ data Instr = IConstInt Int
 data Frame = Frame
     { fLocals :: [Value]
     , fIP     :: Int
+    , fFunction :: String
     } deriving (Show)
 
 
+data Function = Function
+    { funcName :: String
+    , funcCode :: V.Vector Instr
+    } deriving (Show, Eq)
+
+
 data VMState = VMState
-        {  stack     :: Stack,
-           locals    :: V.Vector Value,
-           ip        :: Int,
-           code      :: V.Vector Instr,
-           constPool :: V.Vector Value,
-           heap      :: Heap,
-           frames    :: [Frame]
+        {  stack        :: Stack,
+           locals       :: V.Vector Value,
+           ip           :: Int,
+           functions    :: Map.Map String Function,
+           currentFunc  :: String,
+           constPool    :: V.Vector Value,
+           heap         :: Heap,
+           frames       :: [Frame]
         } deriving(Show)

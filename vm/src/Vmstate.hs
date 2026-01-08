@@ -19,16 +19,13 @@ import ArithmInt
 import StackInstr
 import ComparInstr
 import ControlFlowInstr
+import qualified Data.Map as Map
 import qualified Data.Vector as V
 
 
 execInstr :: Instr -> VMState -> Either String VMState
 
 execInstr (IConstInt n) st = stackInstrConstInt n st
-
-execInstr (IBipush n) st = stackInstrBipush n st
-
-execInstr (ISipush n) st = stackInstrSipush n st
 
 execInstr (ILdc n) st = stackInstrLdc n st
 
@@ -84,21 +81,30 @@ execInstr (IFcmpg) st = compFCmpG st
 execInstr (IDcmpl) st = compDCmpL st
 execInstr (IDcmpg) st = compDCmpG st
 
+execInstr (IInvokeStatic funcName) st = controlFlowInvokeStatic funcName st
+
 execInstr _  _ = Left "Invalid instruction or not yet implemented"
 
 
 
 exec :: VMState -> Either String VMState
-exec st@VMState{ip, code}
-    | Just instr <- code V.!? ip = execInstr instr st
-    | otherwise = Left ("Invalid instruction ip: " ++ show ip)
+exec st@VMState{ip, functions, currentFunc} =
+    case Map.lookup currentFunc functions of
+        Nothing -> Left ("Function not found: " ++ currentFunc)
+        Just func ->
+            case (funcCode func) V.!? ip of
+                Nothing -> Left ("Invalid instruction ip: " ++ show ip ++ " in function: " ++ currentFunc)
+                Just instr -> execInstr instr st
 
 
 compile :: VMState -> Either String VMState
 compile vmSt =
-  if ip vmSt >= V.length (code vmSt)
-    then Right vmSt
-    else
-      case exec vmSt of
-        Left err  -> Left err
-        Right newvmSt -> compile newvmSt
+  case Map.lookup (currentFunc vmSt) (functions vmSt) of
+    Nothing -> Left ("Function not found: " ++ currentFunc vmSt)
+    Just func ->
+      if ip vmSt >= V.length (funcCode func)
+        then Right vmSt
+        else
+          case exec vmSt of
+            Left err  -> Left err
+            Right newvmSt -> compile newvmSt

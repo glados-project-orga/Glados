@@ -8,7 +8,9 @@
 module Loader (
     loadBytecode,
     parseInstr,
-    parseInstrs
+    parseInstrs,
+    parseFunction,
+    parseFunctions
 ) where
 
 import Data
@@ -23,13 +25,15 @@ import Parser (
     parseArgSep,
     parseString
   )
+import qualified Data.Map as Map
+import qualified Data.Vector as V
 import Control.Applicative ((<|>))
 
-loadBytecode :: String -> Either String [Instr]
+loadBytecode :: String -> Either String (Map.Map String Function)
 loadBytecode content =
-    case runParser parseInstrs content of
+    case runParser parseFunctions content of
         Left err -> Left err
-        Right (instrs, _) -> Right instrs
+        Right (funcs, _) -> Right (Map.fromList (map (\f -> (funcName f, f)) funcs))
 
 parseInstrs :: Parser [Instr]
 parseInstrs = parseMany (betweenSpaces parseInstr)
@@ -37,14 +41,12 @@ parseInstrs = parseMany (betweenSpaces parseInstr)
 parseInstr :: Parser Instr
 parseInstr = parseConstInt
          <|> parseLdc
-         <|> parseBipush
-         <|> parseSipush
          <|> parseLoadInt
          <|> parseStoreInt
          <|> parseArithmetic
          <|> parseStack
          <|> parseControlFlow
-         <|> parseInvoke
+         <|> parseInvokeStatic
          <|> parseReturn
          <|> parseArray
          <|> parseObject
@@ -58,12 +60,6 @@ parseConstInt = parseKeyword "iconst" *> parseArgSep *> (IConstInt <$> parseInt)
 
 parseLdc :: Parser Instr
 parseLdc = parseKeyword "ldc" *> parseSpaces *> (ILdc <$> parseInt)
-
-parseBipush :: Parser Instr
-parseBipush = parseKeyword "bipush" *> parseSpaces *> (IBipush <$> parseInt)
-
-parseSipush :: Parser Instr
-parseSipush = parseKeyword "sipush" *> parseSpaces *> (ISipush <$> parseInt)
 
 parseLoadInt :: Parser Instr
 parseLoadInt = parseKeyword "iload" *> parseArgSep *> (ILoadInt <$> parseInt)
@@ -127,19 +123,8 @@ parseIfICmpGt = parseKeyword "if_icmpgt" *> parseSpaces *> (IIfICmpGt <$> parseI
 parseIfICmpLt :: Parser Instr
 parseIfICmpLt = parseKeyword "if_icmplt" *> parseSpaces *> (IIfICmpLt <$> parseInt)
 
-parseInvoke :: Parser Instr
-parseInvoke = parseInvokeStatic
-          <|> parseInvokeVirtual
-          <|> parseInvokeSpecial
-
 parseInvokeStatic :: Parser Instr
 parseInvokeStatic = parseKeyword "invokestatic" *> (IInvokeStatic <$> parseString)
-
-parseInvokeVirtual :: Parser Instr
-parseInvokeVirtual = parseKeyword "invokevirtual" *> (IInvokeVirtual <$> parseString)
-
-parseInvokeSpecial :: Parser Instr
-parseInvokeSpecial = parseKeyword "invokespecial" *> (IInvokeSpecial <$> parseString)
 
 parseReturn :: Parser Instr
 parseReturn = (parseKeyword "ireturn" *> pure IReturnInt)
@@ -164,3 +149,14 @@ parseArray = (parseKeyword "newarray" *> pure INewArray)
          <|> (parseKeyword "iaload" *> pure IALoad)
          <|> (parseKeyword "iastore" *> pure IAStore)
          <|> (parseKeyword "arraylength" *> pure IArrayLength)
+
+parseFunctions :: Parser [Function]
+parseFunctions = parseMany (betweenSpaces parseFunction)
+
+parseFunction :: Parser Function
+parseFunction = 
+    parseKeyword "fun" *>
+    (Function <$> parseString 
+              <*> (parseChar '{' *> parseSpaces *> 
+                   (V.fromList <$> parseMany (betweenSpaces parseInstr)) 
+                   <* parseSpaces <* parseChar '}'))
