@@ -52,5 +52,6 @@ runVM parsedFuncs =
 
 handleResult :: [Value] -> IO ()
 handleResult [] = return ()
-handleResult (VInt code:_) = exitWith (if code == 0 then ExitSuccess else ExitFailure code)
+handleResult (VInt 0:_) = exitWith ExitSuccess
+handleResult (VInt code:_) = exitWith (ExitFailure code)
 handleResult _ = return ()
