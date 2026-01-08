@@ -1,5 +1,6 @@
 module ForEach (compileForEach) where
+import CompilerTypes (ProgramBinary)
 import Ast (ForEachStmt)
 
-compileForEach :: ForEachStmt -> String
-compileForEach _ = []
+compileForEach :: ForEachStmt -> ProgramBinary -> ProgramBinary
+compileForEach _ prog = prog
