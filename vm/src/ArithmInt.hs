@@ -14,9 +14,7 @@ module ArithmInt (
 
 import Data
 import Data.Bits
-import HeapInstr
-import StackInstr
-import qualified Data.Vector as V
+
 
 intArith :: IntOp -> VMState -> Either String VMState
 intArith op st@VMState{stack, ip} =

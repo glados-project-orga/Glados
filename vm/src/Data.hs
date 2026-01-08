@@ -8,10 +8,10 @@
 module Data (
         Heap,
         Stack,
-        Value(..),
-        Instr(..),
         Handle,
         IntOp(..),
+        Value(..),
+        Instr(..),
         WhatDup(..),
         VMState(..),
         StackIns(..),
@@ -23,10 +23,14 @@ module Data (
 
 import qualified Data.Map as Map
 import qualified Data.Vector as V
+import Data.Int (Int64)
 
 data Value = VInt  Int
           | VBool Bool
           | VString String
+          | VFloat Float
+          | VDouble Double
+          | VLong Int64
           | VNull
           | VHandle Handle
           deriving (Show, Eq)
@@ -39,19 +43,19 @@ data WhatDup = Dup | Dup2 | DupX1 | DupX2 | Dup2X1 | Dup2X2
 
 data HeapValue = HObject (Map.Map String Value)
                |HArray (V.Vector Value) 
-               deriving(Show, Eq)
+               deriving (Show, Eq)
 
 type Heap = V.Vector HeapValue
 
 data IntOp = IAddInt 
            | ISubInt | IMulInt | IDivInt | IRemInt
            | INegInt | IAndInt | IOrInt | IXorInt
-           | IShlInt | IShrInt | IUshrInt
-           deriving(Show, Eq)
+           | IShlInt | IShrInt
+           deriving (Show, Eq)
 
 data StackIns = IPop | IDup | INop | ISwap | IDup2
            | IPop2 | IDupX1 | IDupX2 | IDup2X1 | IDup2X2
-           deriving(Show, Eq)
+           deriving (Show, Eq)
 
 data Instr = IConstInt Int
            | IBipush Int
@@ -62,12 +66,16 @@ data Instr = IConstInt Int
         
            | IOpInt IntOp 
            | IStck StackIns
+           
+           | IIfEq Int | IIfNe Int | IIfLt Int | IIfGe Int
+           | IIfGt Int | IIfLe Int | IIfACmpEq Int | IIfACmpNe Int           
+           | IIfICmpEq Int | IIfICmpNe Int | IIfICmpLt Int | IIfICmpGe Int
+           | IIfICmpGt Int | IIfICmpLe Int | ILcmp | IFcmpl
+           | IFcmpg | IDcmpl | IDcmpg
+
            -------------------------------
 
-           | IIncInt Int Int | IGoto Int
-           | IIfEq Int | IIfACmpEq Int | IIfACmpNe Int
-
-           | IIfGt Int | IIfLt Int | IIfICmpGt Int | IIfICmpLt Int
+           | IIncInt Int Int| IGoto Int
 
            | IInvokeStatic String | IInvokeVirtual String | IInvokeSpecial String
 

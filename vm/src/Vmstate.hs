@@ -17,6 +17,7 @@ import Data
 import HeapInstr
 import ArithmInt
 import StackInstr
+import ComparInstr
 import ControlFlowInstr
 import qualified Data.Map as Map
 import qualified Data.Vector as V
@@ -56,9 +57,35 @@ execInstr (IPutField fieldName) st = heapInstrPutField fieldName st
 
 execInstr (INew className) st = heapInstrNew className st
 
+execInstr (IIfEq n) st = compIfEq n st
+execInstr (IIfNe n) st = compIfNe n st
+execInstr (IIfLt n) st = compIfLt n st
+execInstr (IIfGe n) st = compIfGe n st
+execInstr (IIfGt n) st = compIfGt n st
+execInstr (IIfLe n) st = compIfLe n st
+
+execInstr (IIfACmpEq n) st = compIfACmpEq n st
+execInstr (IIfACmpNe n) st = compIfACmpNe n st
+
+execInstr (IIfICmpEq n) st = compIfICmpEq n st
+execInstr (IIfICmpNe n) st = compIfICmpNe n st
+execInstr (IIfICmpLt n) st = compIfICmpLt n st
+execInstr (IIfICmpGe n) st = compIfICmpGe n st
+execInstr (IIfICmpGt n) st = compIfICmpGt n st
+execInstr (IIfICmpLe n) st = compIfICmpLe n st
+
+execInstr (ILcmp) st = compLCmp st
+execInstr (IFcmpl) st = compFCmpL st
+execInstr (IFcmpg) st = compFCmpG st
+
+execInstr (IDcmpl) st = compDCmpL st
+execInstr (IDcmpg) st = compDCmpG st
+
 execInstr (IInvokeStatic funcName) st = controlFlowInvokeStatic funcName st
 
 execInstr _  _ = Left "Invalid instruction or not yet implemented"
+
+
 
 exec :: VMState -> Either String VMState
 exec st@VMState{ip, functions, currentFunc} =
