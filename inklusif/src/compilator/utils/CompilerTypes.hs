@@ -8,12 +8,19 @@ module CompilerTypes (
     Defines
 ) where
 
-import Ast (Declaration(..), Literal(..))
+import Ast (
+    Declaration(..),
+    Literal(..),
+    FunctionDecl,
+    StructDecl,
+    EnumDecl,
+    TypedefDecl
+    )
 
 type Ast = [Declaration]
 type ConstantPool = [String]
 type Bytecode = [String]
-type Defines = [Declaration]
+type Defines = ([FunctionDecl], [StructDecl], [EnumDecl], [TypedefDecl])
 type SymbolTable = [(String, Literal)]
 type ProgramBinary = (ConstantPool, Defines, Bytecode)
 type ProgramLayer = (ProgramBinary, SymbolTable)
