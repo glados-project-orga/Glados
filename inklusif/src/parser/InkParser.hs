@@ -15,13 +15,14 @@ import FunctionParsing
 import Control.Applicative
 import EnumParsing
 import StructParser
+import TypedefParser
 
 parseDeclaration :: Parser Declaration
 parseDeclaration =
         parseFunction
        <|> parseEnum
        <|> parseStruct
---     <|> parseTypedef
+       <|> parseTypedef
 
 parseInkFile :: String -> IO (Either String [Declaration])
 parseInkFile content =
