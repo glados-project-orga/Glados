@@ -1,6 +1,94 @@
-module Expr (compileExpr) where
-import CompilerTypes (ProgramLayer)
-import Ast (Expr(..))
+{-
+-- EPITECH PROJECT, 2026
+-- glados
+-- File description:
+-- expre
+-}
 
-compileExpr :: Expr -> ProgramLayer -> ProgramLayer
-compileExpr _ prog = prog
+module Expr (compileExpr) where
+
+import Ast
+  ( Expr(..)
+  , Literal(..)
+  , BinOp(..)
+  , CallExpr(..)
+  , FunctionDecl(..)
+  )
+import CompilerTypes (ProgramLayer)
+import CompilerTools (appendBody)
+
+appendBC :: ProgramLayer -> [String] -> ProgramLayer
+appendBC prog bc = appendBody prog bc
+
+isFunctionDefined :: String -> ProgramLayer -> Bool
+isFunctionDefined name (_, (funs, _, _, _), _) =
+  any (\f -> funcName f == name) funs
+
+emitPushInt :: Int -> [String]
+emitPushInt n
+  | n == (-1) = ["iconst_m1"]
+  | n == 0    = ["iconst_0"]
+  | n == 1    = ["iconst_1"]
+  | n == 2    = ["iconst_2"]
+  | n == 3    = ["iconst_3"]
+  | n == 4    = ["iconst_4"]
+  | n == 5    = ["iconst_5"]
+  | n >= (-128) && n <= 127 = ["bipush " ++ show n]
+  | n >= (-32768) && n <= 32767 = ["sipush " ++ show n]
+  | otherwise = ["ldc " ++ show n]
+
+emitBinOp :: BinOp -> Either String [String]
+emitBinOp op =
+  case op of
+    Add -> Right ["iadd"]
+    Sub -> Right ["isub"]
+    Mul -> Right ["imul"]
+    Div -> Right ["idiv"]
+    Mod -> Right ["irem"]
+    _   -> Left ("BinOp not implemented yet: " ++ show op)
+
+emitCall :: String -> [String]
+emitCall fname = ["invokestatic " ++ fname] --  à relier avc vm
+
+compileExpr :: Expr -> ProgramLayer -> Either String ProgramLayer
+compileExpr expr prog =
+  case expr of
+    LitExpr (IntLit n) ->
+      Right (appendBC prog (emitPushInt n))
+
+    VarExpr name ->
+      Left ("VarExpr not handled yet: " ++ name) -- slot iload
+
+    BinOpExpr op a b ->
+      case compileExpr a prog of
+        Left err -> Left err
+        Right prog1 ->
+          case compileExpr b prog1 of
+            Left err -> Left err
+            Right prog2 ->
+              case emitBinOp op of
+                Left err -> Left err
+                Right bc ->
+                  Right (appendBC prog2 bc)
+
+    CallExpression (CallExpr fname args) ->
+      if not (isFunctionDefined fname prog)
+        then Left ("Undefined function: " ++ fname)
+        else
+          case compileArgs args prog of
+            Left err -> Left err
+            Right progArgs ->
+              Right (appendBC progArgs (emitCall fname))
+
+    _ ->
+      Left "expression not implemented yet"
+
+compileArgs :: [Expr] -> ProgramLayer -> Either String ProgramLayer
+compileArgs args prog =
+  case args of
+    [] -> Right prog
+    e : rest ->
+      case compileExpr e prog of
+        Left err -> Left err
+        Right prog' ->
+          compileArgs rest prog'
