@@ -1,17 +1,6 @@
 module CompilerMain (compilerMain) where
-import CompilerTypes (
-    ConstantPool,
-    Bytecode,
-    Ast,
-    ProgramBinary
-    )
-import Ast (
-    Declaration(..),
-    FunctionDecl(..),
-    StructDecl(..),
-    EnumDecl(..),
-    TypedefDecl(..)
-    )
+import CompilerTypes (ProgramBinary, Ast)
+import Ast (Declaration(..))
 import Function (compileFunction)
 import Struct (compileStruct)
 import Enum (compileEnum)
