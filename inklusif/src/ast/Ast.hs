@@ -82,8 +82,8 @@ data EnumDecl = EnumDecl
 
 data TypedefDecl = TypedefDecl
   { typedefPos :: SourcePos
-  , typedefAlias :: String
   , typedefOriginal :: Type
+  , typedefAlias :: String
   } deriving (Show, Eq)
 
 data Declaration
