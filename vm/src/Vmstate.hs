@@ -14,11 +14,11 @@ module Vmstate (
 ) where
 
 import Data
-import Data.Bits
 import HeapInstr
 import ArithmInt
 import StackInstr
 import ControlFlowInstr
+import qualified Data.Map as Map
 import qualified Data.Vector as V
 
 
@@ -60,19 +60,37 @@ execInstr (IPutField fieldName) st = heapInstrPutField fieldName st
 
 execInstr (INew className) st = heapInstrNew className st
 
+execInstr (IInvokeStatic funcName) st@VMState{functions, frames, currentFunc, ip} =
+    case Map.lookup funcName functions of
+        Nothing -> Left ("Function not found: " ++ funcName)
+        Just _ -> 
+            let newFrame = Frame {fLocals = [], fIP = ip + 1, fFunction = currentFunc}
+            in Right st { 
+                ip = 0,
+                currentFunc = funcName,
+                frames = newFrame : frames
+            }
+
 execInstr _  _ = Left "Invalid instruction or not yet implemented"
 
 exec :: VMState -> Either String VMState
-exec st@VMState{ip, code}
-    | Just instr <- code V.!? ip = execInstr instr st
-    | otherwise = Left ("Invalid instruction ip: " ++ show ip)
+exec st@VMState{ip, functions, currentFunc} =
+    case Map.lookup currentFunc functions of
+        Nothing -> Left ("Function not found: " ++ currentFunc)
+        Just func ->
+            case (funcCode func) V.!? ip of
+                Nothing -> Left ("Invalid instruction ip: " ++ show ip ++ " in function: " ++ currentFunc)
+                Just instr -> execInstr instr st
 
 
 compile :: VMState -> Either String VMState
 compile vmSt =
-  if ip vmSt >= V.length (code vmSt)
-    then Right vmSt
-    else
-      case exec vmSt of
-        Left err  -> Left err
-        Right newvmSt -> compile newvmSt
+  case Map.lookup (currentFunc vmSt) (functions vmSt) of
+    Nothing -> Left ("Function not found: " ++ currentFunc vmSt)
+    Just func ->
+      if ip vmSt >= V.length (funcCode func)
+        then Right vmSt
+        else
+          case exec vmSt of
+            Left err  -> Left err
+            Right newvmSt -> compile newvmSt

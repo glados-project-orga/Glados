@@ -8,7 +8,9 @@
 module Loader (
     loadBytecode,
     parseInstr,
-    parseInstrs
+    parseInstrs,
+    parseFunction,
+    parseFunctions
 ) where
 
 import Data
@@ -23,13 +25,15 @@ import Parser (
     parseArgSep,
     parseString
   )
+import qualified Data.Map as Map
+import qualified Data.Vector as V
 import Control.Applicative ((<|>))
 
-loadBytecode :: String -> Either String [Instr]
+loadBytecode :: String -> Either String (Map.Map String Function)
 loadBytecode content =
-    case runParser parseInstrs content of
+    case runParser parseFunctions content of
         Left err -> Left err
-        Right (instrs, _) -> Right instrs
+        Right (funcs, _) -> Right (Map.fromList (map (\f -> (funcName f, f)) funcs))
 
 parseInstrs :: Parser [Instr]
 parseInstrs = parseMany (betweenSpaces parseInstr)
@@ -164,3 +168,14 @@ parseArray = (parseKeyword "newarray" *> pure INewArray)
          <|> (parseKeyword "iaload" *> pure IALoad)
          <|> (parseKeyword "iastore" *> pure IAStore)
          <|> (parseKeyword "arraylength" *> pure IArrayLength)
+
+parseFunctions :: Parser [Function]
+parseFunctions = parseMany (betweenSpaces parseFunction)
+
+parseFunction :: Parser Function
+parseFunction = 
+    parseKeyword "fun" *>
+    (Function <$> parseString 
+              <*> (parseChar '{' *> parseSpaces *> 
+                   (V.fromList <$> parseMany (betweenSpaces parseInstr)) 
+                   <* parseSpaces <* parseChar '}'))

@@ -11,8 +11,10 @@ import System.Environment (getArgs)
 import System.Exit (exitWith, ExitCode(..))
 import System.IO (hPutStrLn, stderr)
 import Loader (loadBytecode)
-import Data (VMState(..), Value(..), Instr(..))
-import Vmstate(compile)
+import Data (VMState(..), Value(..), Function(..), Instr(..))
+import Vmstate (compile)
+import Loader (loadBytecode)
+import qualified Data.Map as Map
 import qualified Data.Vector as V
 
 main :: IO ()
@@ -28,19 +30,23 @@ runFile :: FilePath -> IO ()
 runFile path = readFile path >>= \content ->
   case loadBytecode content of
     Left err -> print ("Error: " ++ err) >> exitWith (ExitFailure 84)
-    Right instrs -> runVM instrs
+    Right functions -> runVM functions
 
-runVM :: [Instr] -> IO()
-runVM instrs = 
-  let initialState = VMState
-        { stack     = []
-        , locals    = V.empty
-        , ip        = 0
-        , code      = V.fromList instrs
-        , constPool = V.empty
-        , heap      = V.empty
-        , frames    = []
-        }
-  in case compile initialState of 
-    Left err -> print ("Error: " ++ err) >> exitWith (ExitFailure 84)
-    Right finalState -> print finalState
+runVM :: Map.Map String Function -> IO()
+runVM functions = 
+  case Map.lookup "main" functions of
+    Nothing -> print "Error: No 'main' function found" >> exitWith (ExitFailure 84)
+    Just _ -> 
+      let initialState = VMState
+            { stack      = []
+            , locals     = V.replicate 10 (VInt 0)
+            , ip         = 0
+            , functions  = functions
+            , currentFunc = "main"
+            , constPool  = V.empty
+            , heap       = V.empty
+            , frames     = []
+            }
+      in case compile initialState of 
+        Left err -> print ("Error: " ++ err) >> exitWith (ExitFailure 84)
+        Right finalState -> print finalState
