@@ -10,7 +10,8 @@
 module ControlFlowInstr (
     controlFlowReturn,
     controlFlowReturnInt,
-    controlFlowGoto
+    controlFlowGoto,
+    controlFlowInvokeStatic
 ) where
 
 import Data
@@ -59,3 +60,16 @@ controlFlowReturnInt st@VMState{stack, functions, currentFunc, frames} =
 controlFlowGoto :: Int -> VMState -> Either String VMState
 controlFlowGoto offset st =
     Right st {ip = offset}
+
+
+controlFlowInvokeStatic :: String -> VMState -> Either String VMState
+controlFlowInvokeStatic funcName st@VMState{functions, frames, currentFunc, ip} =
+    case Map.lookup funcName functions of
+        Nothing -> Left ("Function not found: " ++ funcName)
+        Just _ -> 
+            let newFrame = Frame {fLocals = [], fIP = ip + 1, fFunction = currentFunc}
+            in Right st { 
+                ip = 0,
+                currentFunc = funcName,
+                frames = newFrame : frames
+            }

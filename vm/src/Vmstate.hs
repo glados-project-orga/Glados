@@ -60,16 +60,7 @@ execInstr (IPutField fieldName) st = heapInstrPutField fieldName st
 
 execInstr (INew className) st = heapInstrNew className st
 
-execInstr (IInvokeStatic funcName) st@VMState{functions, frames, currentFunc, ip} =
-    case Map.lookup funcName functions of
-        Nothing -> Left ("Function not found: " ++ funcName)
-        Just _ -> 
-            let newFrame = Frame {fLocals = [], fIP = ip + 1, fFunction = currentFunc}
-            in Right st { 
-                ip = 0,
-                currentFunc = funcName,
-                frames = newFrame : frames
-            }
+execInstr (IInvokeStatic funcName) st = controlFlowInvokeStatic funcName st
 
 execInstr _  _ = Left "Invalid instruction or not yet implemented"
 
