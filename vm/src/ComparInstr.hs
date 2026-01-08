@@ -317,3 +317,25 @@ compFCmpG st@VMState{stack, ip} =
                 else if a < b then -1 else if a > b then 1 else 0
       in Right st { ip = ip + 1, stack = VInt r : rest }
     _ -> Left "fcmpg expects two floats"
+
+
+compDCmpL :: VMState -> Either String VMState
+compDCmpL st@VMState{stack, ip} =
+  case stack of
+    (VDouble b : VDouble a : rest) ->
+      let r = if isNaN a || isNaN b
+                then -1
+                else if a < b then -1 else if a > b then 1 else 0
+      in Right st { ip = ip + 1, stack = VInt r : rest }
+    _ -> Left "dcmpl expects two doubles"
+
+
+compDCmpG :: VMState -> Either String VMState
+compDCmpG st@VMState{stack, ip} =
+  case stack of
+    (VDouble b : VDouble a : rest) ->
+      let r = if isNaN a || isNaN b
+                then 1
+                else if a < b then -1 else if a > b then 1 else 0
+      in Right st { ip = ip + 1, stack = VInt r : rest }
+    _ -> Left "dcmpg expects two doubles"
