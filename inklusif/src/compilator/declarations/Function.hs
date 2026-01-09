@@ -4,14 +4,16 @@ import Statements (compileStatements)
 import CompilerTypes (CompilerData)
 import CompilerTools (appendBody)
 import FunctionUtils (searchFunctions)
+import CompilerError (errPos)
 
 closeFunction :: Either String CompilerData -> Either String CompilerData
 closeFunction (Left err) = Left err
 closeFunction (Right prog) = Right (appendBody prog ["}\n"])
 
 compileFunction :: FunctionDecl -> CompilerData-> Either String CompilerData
-compileFunction (FunctionDecl _ name _ _ statements) (header, defs, body, _)
-    | searchFunctions name defs /= Nothing = Left ("Function " ++ name ++ " is already defined.")
+compileFunction (FunctionDecl pos name _ _ statements) (header, defs, body, _)
+    | searchFunctions name defs /= Nothing =
+        Left ((errPos pos) ++ "Function " ++ name ++ " is already defined.")
     | otherwise = new_prog
         where new_prog = closeFunction uncomplete_prog
               uncomplete_prog = compileStatements statements (Right open_fun)

@@ -1,5 +1,9 @@
-module FunctionUtils where
-import CompilerTypes (CompilerData, Defines, SymbolTable)
+module FunctionUtils (
+    getFunctions,
+    findFunction,
+    searchFunctions
+  ) where
+import CompilerTypes (Defines)
 import Ast (FunctionDecl(..))
 
 getFunctions :: Defines -> [FunctionDecl]
