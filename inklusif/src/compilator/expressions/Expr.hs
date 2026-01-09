@@ -15,7 +15,7 @@ import Ast
   , FunctionDecl(..)
   , Parameter(..)
   )
-import CompilerTypes (CompilerData, SymbolTable, Defines)
+import CompilerTypes (CompilerData, SymbolTable)
 import CompilerTools (appendBody)
 import Call (compileCallInstr)
 import FunctionUtils (findFunction, getFunctions)
