@@ -18,7 +18,7 @@ import Ast
 import CompilerTypes (CompilerData, SymbolTable, Defines)
 import CompilerTools (appendBody)
 import Call (compileCallInstr)
-
+import FunctionUtils (findFunction, getFunctions)
 -- petit helper pour éviter de répéter left right left right left right partout
 bindE :: Either String a -> (a -> Either String b) -> Either String b
 bindE (Left err) _ = Left err
@@ -41,14 +41,7 @@ emitLoadIdx 2 = "iload_2"
 emitLoadIdx 3 = "iload_3"
 emitLoadIdx n = "iload " ++ show n
 
-getFunctions :: Defines -> [FunctionDecl]
-getFunctions (funs, _, _, _) = funs
 
-findFunction :: String -> [FunctionDecl] -> Maybe FunctionDecl
-findFunction _ [] = Nothing
-findFunction name (f:fs)
-  | funcName f == name = Just f
-  | otherwise          = findFunction name fs
 
 checkArity :: String -> [Parameter] -> [Expr] -> Either String ()
 checkArity fname params args

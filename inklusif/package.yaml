@@ -42,10 +42,12 @@ library:
     - src/ast
     - src/compilator
     - src/compilator/declarations
+    - src/compilator/declarations/utils
     - src/compilator/statements
     - src/compilator/statements/src
     - src/compilator/utils
     - src/compilator/expressions
+    - src/compilator/expressions/src
 
 executables:
   inklusif-exe:
