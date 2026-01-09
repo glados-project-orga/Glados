@@ -1,0 +1,9 @@
+fun main {
+    iconst 42
+    invokestatic doNothing
+    ireturn
+}
+
+fun doNothing {
+    return
+}

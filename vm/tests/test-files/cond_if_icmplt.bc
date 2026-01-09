@@ -1,0 +1,9 @@
+fun main {
+    iconst 10
+    iconst 3
+    if_icmplt 5
+    iconst 0
+    ireturn
+    iconst 1
+    ireturn
+}
