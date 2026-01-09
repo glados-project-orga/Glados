@@ -1,6 +1,6 @@
 module While (compileWhile) where
-import CompilerTypes (ProgramLayer)
+import CompilerTypes (CompilerData)
 import Ast (WhileStmt)
 
-compileWhile :: WhileStmt -> ProgramLayer -> Either String ProgramLayer
+compileWhile :: WhileStmt -> CompilerData -> Either String CompilerData
 compileWhile _ prog = Right prog

@@ -3,8 +3,7 @@ module CompilerTypes (
     Bytecode,
     SymbolTable,
     Ast,
-    ProgramBinary,
-    ProgramLayer,
+    CompilerData,
     Defines
 ) where
 
@@ -21,5 +20,4 @@ type ConstantPool = [String]
 type Bytecode = [String]
 type Defines = ([FunctionDecl], [StructDecl], [EnumDecl], [TypedefDecl])
 type SymbolTable = [(String, Int)]
-type ProgramBinary = (ConstantPool, Defines, Bytecode)
-type ProgramLayer = (ProgramBinary, SymbolTable)
+type CompilerData = (ConstantPool, Defines, Bytecode, SymbolTable)

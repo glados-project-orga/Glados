@@ -1,6 +1,6 @@
 module TryCatch (compileTryCatch) where
-import CompilerTypes (ProgramLayer)
+import CompilerTypes (CompilerData)
 import Ast (TryCatchStmt)
 
-compileTryCatch :: TryCatchStmt -> ProgramLayer -> Either String ProgramLayer
+compileTryCatch :: TryCatchStmt -> CompilerData -> Either String CompilerData
 compileTryCatch _ prog = Right prog

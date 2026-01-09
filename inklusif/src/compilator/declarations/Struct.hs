@@ -1,6 +1,6 @@
 module Struct (compileStruct) where
 import Ast (StructDecl(..))
-import CompilerTypes (ProgramBinary)
+import CompilerTypes (CompilerData)
 
-compileStruct :: StructDecl -> ProgramBinary -> Either String ProgramBinary
+compileStruct :: StructDecl -> CompilerData -> Either String CompilerData
 compileStruct _ prog = Right prog

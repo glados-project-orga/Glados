@@ -1,6 +1,6 @@
 module Match (compileMatch) where
-import CompilerTypes (ProgramLayer)
+import CompilerTypes (CompilerData)
 import Ast (MatchStmt)
 
-compileMatch :: MatchStmt -> ProgramLayer -> Either String ProgramLayer
+compileMatch :: MatchStmt -> CompilerData -> Either String CompilerData
 compileMatch _ prog = Right prog

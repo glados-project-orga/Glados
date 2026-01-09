@@ -1,6 +1,6 @@
 module Enum (compileEnum) where
 import Ast (EnumDecl(..))
-import CompilerTypes (ProgramBinary)
+import CompilerTypes (CompilerData)
 
-compileEnum :: EnumDecl -> ProgramBinary -> Either String ProgramBinary
+compileEnum :: EnumDecl -> CompilerData -> Either String CompilerData
 compileEnum _ prog = Right prog

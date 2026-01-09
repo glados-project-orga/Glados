@@ -1,6 +1,6 @@
 module VarDecl (compileVarDecl) where
-import CompilerTypes (ProgramLayer)
+import CompilerTypes (CompilerData)
 import Ast (VarDecl)
 
-compileVarDecl :: VarDecl -> ProgramLayer -> Either String ProgramLayer
+compileVarDecl :: VarDecl -> CompilerData -> Either String CompilerData
 compileVarDecl _ prog = Right prog

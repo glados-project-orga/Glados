@@ -1,17 +1,16 @@
 module Function (compileFunction) where
 import Ast (FunctionDecl(..))
 import Statements (compileStatements)
-import CompilerTypes (ProgramBinary)
-
-closeFunction :: Either String ProgramBinary -> Either String ProgramBinary
+import CompilerTypes (CompilerData)
+import CompilerTools (appendBody)
+closeFunction :: Either String CompilerData -> Either String CompilerData
 closeFunction (Left err) = Left err
-closeFunction (Right (new_head, new_defs, new_body)) =
-    Right (new_head, new_defs, new_body ++ ["}\n"])
+closeFunction (Right prog) = Right (appendBody prog ["}\n"])
 
-compileFunction :: FunctionDecl -> ProgramBinary-> Either String ProgramBinary
-compileFunction (FunctionDecl _ name _ _ statements) (header, defs, body)
+compileFunction :: FunctionDecl -> CompilerData-> Either String CompilerData
+compileFunction (FunctionDecl _ name _ _ statements) (header, defs, body, _)
     = new_prog
         where
           new_prog = closeFunction uncomplete_prog
-          uncomplete_prog = compileStatements statements (Right (open_fun, []))
-          open_fun = (header, defs, body ++ ["fun ++ " ++ name ++ " {\n"])
+          uncomplete_prog = compileStatements statements (Right open_fun)
+          open_fun = (header, defs, body ++ ["fun" ++ " " ++ name ++ " {\n"], [])

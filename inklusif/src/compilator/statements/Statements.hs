@@ -1,6 +1,6 @@
 module Statements (compileStatements) where
 import Ast (Statement(..), ExprStmt(..))
-import CompilerTypes (ProgramBinary, ProgramLayer)
+import CompilerTypes (CompilerData, CompilerData)
 import VarDecl (compileVarDecl)
 import Assignment (compileAssignment)
 import If (compileIf)
@@ -12,7 +12,7 @@ import TryCatch (compileTryCatch)
 import Throw (compileThrow)
 import Expr (compileExpr)
 
-compileStatement :: Statement -> ProgramLayer -> Either String ProgramLayer
+compileStatement :: Statement -> CompilerData -> Either String CompilerData
 compileStatement (VarDeclStmt vr_dcl) layer = compileVarDecl vr_dcl layer
 compileStatement (AssignmentStmt assign) layer = compileAssignment assign layer
 compileStatement (IfStatement if_st) layer = compileIf if_st layer
@@ -25,9 +25,9 @@ compileStatement (ThrowStatement throw) layer = compileThrow throw layer
 compileStatement (ExprStatement (ExprStmt expr)) layer = compileExpr expr layer
 compileStatement _ _ = Left "Unsupported statement type in compileStatement"
 
-compileStatements :: [Statement] -> Either String ProgramLayer -> Either String ProgramBinary
+compileStatements :: [Statement] -> Either String CompilerData -> Either String CompilerData
 compileStatements _ (Left err) = Left err
-compileStatements [] (Right (prog, _)) = Right prog
+compileStatements [] (Right prog) = Right prog
 compileStatements (stmt:stmts) (Right layer) = compileStatements stmts n_layer
     where
         n_layer = compileStatement stmt layer

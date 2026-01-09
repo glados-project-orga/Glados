@@ -1,6 +1,6 @@
 module Assignment (compileAssignment) where
-import CompilerTypes (ProgramLayer)
+import CompilerTypes (CompilerData)
 import Ast (Assignment)
 
-compileAssignment :: Assignment -> ProgramLayer -> Either String ProgramLayer
+compileAssignment :: Assignment -> CompilerData -> Either String CompilerData
 compileAssignment _ prog = Right prog

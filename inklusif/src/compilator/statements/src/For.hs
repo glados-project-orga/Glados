@@ -1,6 +1,6 @@
 module For (compileFor) where
-import CompilerTypes (ProgramLayer)
+import CompilerTypes (CompilerData)
 import Ast (ForStmt)
 
-compileFor :: ForStmt -> ProgramLayer -> Either String ProgramLayer
+compileFor :: ForStmt -> CompilerData -> Either String CompilerData
 compileFor _ prog = Right prog

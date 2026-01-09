@@ -1,6 +1,6 @@
 module Throw (compileThrow) where
-import CompilerTypes (ProgramLayer)
+import CompilerTypes (CompilerData)
 import Ast (ThrowStmt)
 
-compileThrow :: ThrowStmt -> ProgramLayer -> Either String ProgramLayer
+compileThrow :: ThrowStmt -> CompilerData -> Either String CompilerData
 compileThrow _ prog = Right prog

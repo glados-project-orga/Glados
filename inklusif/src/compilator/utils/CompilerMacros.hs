@@ -1,5 +1,5 @@
 module CompilerMacros (onlyBody) where
-import CompilerTypes (ProgramBinary)
+import CompilerTypes (CompilerData)
 
-onlyBody :: [String] -> ProgramBinary
-onlyBody code = ([], ([], [], [], []), code)
+onlyBody :: [String] -> CompilerData
+onlyBody code = ([], ([], [], [], []), code, [])

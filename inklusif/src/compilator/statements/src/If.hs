@@ -1,6 +1,6 @@
 module If (compileIf) where
-import CompilerTypes (ProgramLayer)
+import CompilerTypes (CompilerData)
 import Ast (IfStmt)
 
-compileIf :: IfStmt -> ProgramLayer -> Either String ProgramLayer
+compileIf :: IfStmt -> CompilerData -> Either String CompilerData
 compileIf _ prog = Right prog

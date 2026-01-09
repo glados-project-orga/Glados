@@ -14,14 +14,14 @@ import Ast
   , CallExpr(..)
   , FunctionDecl(..)
   )
-import CompilerTypes (ProgramLayer)
+import CompilerTypes (CompilerData)
 import CompilerTools (appendBody)
 
-appendBC :: ProgramLayer -> [String] ->ProgramLayer
-appendBC (prog, symblTable) bc = (appendBody prog bc, symblTable)
+appendBC :: CompilerData -> [String] ->CompilerData
+appendBC prog bc = appendBody prog bc
 
-isFunctionDefined :: String -> ProgramLayer -> Bool
-isFunctionDefined name ((_, (funs, _, _, _), _) , _) =
+isFunctionDefined :: String -> CompilerData -> Bool
+isFunctionDefined name (_, (funs, _, _, _),_ ,_) =
   any (\f -> funcName f == name) funs
 
 emitPushInt :: Int -> [String]
@@ -50,7 +50,7 @@ emitBinOp op =
 emitCall :: String -> [String]
 emitCall fname = ["invokestatic " ++ fname] --  à relier avc vm
 
-compileExpr :: Expr -> ProgramLayer -> Either String ProgramLayer
+compileExpr :: Expr -> CompilerData -> Either String CompilerData
 compileExpr expr layer =
   case expr of
     LitExpr (IntLit n) ->
@@ -83,7 +83,7 @@ compileExpr expr layer =
     _ ->
       Left "expression not implemented yet"
 
-compileArgs :: [Expr] -> ProgramLayer -> Either String ProgramLayer
+compileArgs :: [Expr] -> CompilerData -> Either String CompilerData
 compileArgs args layer =
   case args of
     [] -> Right layer

@@ -1,6 +1,6 @@
 module ForEach (compileForEach) where
-import CompilerTypes (ProgramLayer)
+import CompilerTypes (CompilerData)
 import Ast (ForEachStmt)
 
-compileForEach :: ForEachStmt -> ProgramLayer -> Either String ProgramLayer
+compileForEach :: ForEachStmt -> CompilerData -> Either String CompilerData
 compileForEach _ prog = Right prog
