@@ -2,7 +2,7 @@
 -- EPITECH PROJECT, 2026
 -- glados
 -- File description:
--- expre
+-- expr
 -}
 
 module Expr (compileExpr) where
@@ -13,82 +13,106 @@ import Ast
   , BinOp(..)
   , CallExpr(..)
   , FunctionDecl(..)
+  , Parameter(..)
   )
-import CompilerTypes (ProgramLayer)
+import CompilerTypes (ProgramLayer, ProgramBinary, SymbolTable)
 import CompilerTools (appendBody)
+import Call (compileCallInstr)
 
-appendBC :: ProgramLayer -> [String] ->ProgramLayer
-appendBC (prog, symblTable) bc = (appendBody prog bc, symblTable)
+-- petit helper pour éviter de répéter left right left right left right partout
+bindE :: Either String a -> (a -> Either String b) -> Either String b
+bindE (Left err) _ = Left err
+bindE (Right x)  f = f x
 
-isFunctionDefined :: String -> ProgramLayer -> Bool
-isFunctionDefined name ((_, (funs, _, _, _), _) , _) =
-  any (\f -> funcName f == name) funs
+addBody :: [String] -> ProgramLayer -> ProgramLayer
+addBody bc (bin, st) = (appendBody bin bc, st)
+
+
+emitLoadVar :: String -> SymbolTable -> Either String [String]
+emitLoadVar name st =
+  case lookup name st of
+    Nothing  -> Left ("Undefined variable: " ++ name)
+    Just idx -> Right [emitLoadIdx idx]
+
+emitLoadIdx :: Int -> String
+emitLoadIdx 0 = "iload_0"
+emitLoadIdx 1 = "iload_1"
+emitLoadIdx 2 = "iload_2"
+emitLoadIdx 3 = "iload_3"
+emitLoadIdx n = "iload " ++ show n
+
+getFunctions :: ProgramBinary -> [FunctionDecl]
+getFunctions (_, (funs, _, _, _), _) = funs
+
+findFunction :: String -> [FunctionDecl] -> Maybe FunctionDecl
+findFunction _ [] = Nothing
+findFunction name (f:fs)
+  | funcName f == name = Just f
+  | otherwise          = findFunction name fs
+
+checkArity :: String -> [Parameter] -> [Expr] -> Either String ()
+checkArity fname params args
+  | length params == length args = Right ()
+  | otherwise                    = Left ("wrong number of arguments for " ++ fname)
 
 emitPushInt :: Int -> [String]
+emitPushInt (-1) = ["iconst_m1"]
+emitPushInt 0    = ["iconst_0"]
+emitPushInt 1    = ["iconst_1"]
+emitPushInt 2    = ["iconst_2"]
+emitPushInt 3    = ["iconst_3"]
+emitPushInt 4    = ["iconst_4"]
+emitPushInt 5    = ["iconst_5"]
 emitPushInt n
-  | n == (-1) = ["iconst_m1"]
-  | n == 0    = ["iconst_0"]
-  | n == 1    = ["iconst_1"]
-  | n == 2    = ["iconst_2"]
-  | n == 3    = ["iconst_3"]
-  | n == 4    = ["iconst_4"]
-  | n == 5    = ["iconst_5"]
-  | n >= (-128) && n <= 127 = ["bipush " ++ show n]
-  | n >= (-32768) && n <= 32767 = ["sipush " ++ show n]
-  | otherwise = ["ldc " ++ show n]
+  | n >= (-128) && n <= 127       = ["bipush " ++ show n]
+  | n >= (-32768) && n <= 32767   = ["sipush " ++ show n]
+  | otherwise                     = ["ldc " ++ show n]
 
 emitBinOp :: BinOp -> Either String [String]
-emitBinOp op =
-  case op of
-    Add -> Right ["iadd"]
-    Sub -> Right ["isub"]
-    Mul -> Right ["imul"]
-    Div -> Right ["idiv"]
-    Mod -> Right ["irem"]
-    _   -> Left ("BinOp not implemented yet: " ++ show op)
-
-emitCall :: String -> [String]
-emitCall fname = ["invokestatic " ++ fname] --  à relier avc vm
-
-compileExpr :: Expr -> ProgramLayer -> Either String ProgramLayer
-compileExpr expr layer =
-  case expr of
-    LitExpr (IntLit n) ->
-       (Right (appendBC layer (emitPushInt n)))
-
-    VarExpr name ->
-      Left ("VarExpr not handled yet: " ++ name) -- slot iload
-
-    BinOpExpr op a b ->
-      case compileExpr a layer of
-        Left err -> Left err
-        Right prog1 ->
-          case compileExpr b prog1 of
-            Left err -> Left err
-            Right prog2 ->
-              case emitBinOp op of
-                Left err -> Left err
-                Right bc ->
-                  Right (appendBC prog2 bc)
-
-    CallExpression (CallExpr fname args) ->
-      if not (isFunctionDefined fname layer)
-        then Left ("Undefined function: " ++ fname)
-        else
-            case compileArgs args layer of
-              Left err -> Left err
-              Right n_layer ->
-                 Right (appendBC n_layer (emitCall fname))
-
-    _ ->
-      Left "expression not implemented yet"
+emitBinOp Add = Right ["iadd"]
+emitBinOp Sub = Right ["isub"]
+emitBinOp Mul = Right ["imul"]
+emitBinOp Div = Right ["idiv"]
+emitBinOp Mod = Right ["irem"]
+emitBinOp op  = Left ("BinOp not implemented yet: " ++ show op)
 
 compileArgs :: [Expr] -> ProgramLayer -> Either String ProgramLayer
-compileArgs args layer =
-  case args of
-    [] -> Right layer
-    e : rest ->
-      case compileExpr e layer of
-        Left err -> Left err
-        Right layer' ->
-          compileArgs rest layer'
+compileArgs [] layer = Right layer
+compileArgs (e:es) layer =
+  bindE (compileExpr e layer) (\layer' -> compileArgs es layer')
+
+compileCall :: CallExpr -> ProgramLayer -> Either String ProgramLayer
+compileCall (CallExpr fname args) layer@(bin, _) =
+  compileCallChecked (findFunction fname (getFunctions bin)) fname args layer
+
+compileCallChecked :: Maybe FunctionDecl -> String -> [Expr] -> ProgramLayer -> Either String ProgramLayer
+compileCallChecked Nothing fname _ _ =
+  Left ("Undefined function: " ++ fname)
+compileCallChecked (Just fdecl) fname args layer =
+  bindE (checkArity fname (funcParams fdecl) args) (\_ ->
+    bindE (compileArgs args layer) (\layerArgs ->
+      Right (compileCallInstr fname layerArgs)
+    )
+  )
+
+compileExpr :: Expr -> ProgramLayer -> Either String ProgramLayer
+compileExpr (LitExpr (IntLit n)) layer =
+  Right (addBody (emitPushInt n) layer)
+
+compileExpr (VarExpr name) (bin, st) =
+  bindE (emitLoadVar name st) (\bc -> Right (addBody bc (bin, st)))
+
+compileExpr (BinOpExpr op a b) layer =
+  bindE (compileExpr a layer) (\layer1 ->
+    bindE (compileExpr b layer1) (\layer2 ->
+      bindE (emitBinOp op) (\bc ->
+        Right (addBody bc layer2)
+      )
+    )
+  )
+
+compileExpr (CallExpression call) layer =
+  compileCall call layer
+
+compileExpr _ _ =
+  Left "Expression not implemented yet"
