@@ -7,15 +7,21 @@ import Enum (compileEnum)
 import Typedef (compileTypedef)
 import CompilerTools (appendDefines)
 
-compileDeclarations :: Declaration -> ProgramBinary -> ProgramBinary
+compileDeclarations :: Declaration -> ProgramBinary -> Either String ProgramBinary
 compileDeclarations (Function fun) prog = compileFunction fun prog
 compileDeclarations (Struct struct) prog = compileStruct struct prog
 compileDeclarations (Enum enum) prog = compileEnum enum prog
 compileDeclarations (Typedef typedef) prog = compileTypedef typedef prog
 
-compilerMain :: Ast -> ProgramBinary -> ProgramBinary
-compilerMain [] prog = prog
-compilerMain (declaration:ast) prog = compilerMain ast new_prog
+completeMainProg :: Either String ProgramBinary -> Declaration -> Either String ProgramBinary
+completeMainProg (Left err) _ = Left err
+completeMainProg (Right incomplete_new_prog) declaration = 
+    Right(appendDefines incomplete_new_prog [declaration])
+
+compilerMain :: Ast -> Either String ProgramBinary -> Either String ProgramBinary
+compilerMain _ (Left err) = Left err
+compilerMain [] (Right prog) = Right prog
+compilerMain (declaration:ast) (Right prog) = compilerMain ast new_prog
     where
-        new_prog = appendDefines incomplete_new_prog [declaration]
+        new_prog = completeMainProg incomplete_new_prog declaration
         incomplete_new_prog = compileDeclarations declaration prog

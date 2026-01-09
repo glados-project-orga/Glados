@@ -17,7 +17,7 @@ appendDefine (Typedef typedef) (fun, st, en, td) = (fun, st, en, td ++ [typedef]
 appendDefines :: ProgramBinary -> [Declaration] -> ProgramBinary
 appendDefines prog [] = prog
 appendDefines (header, def, body) (newDef:decl) = appendDefines new_prog decl
-    where new_prog = (header , appendDefine newDef def, body)
+    where new_prog =  (header, appendDefine newDef def, body)
 
 appendBody :: ProgramBinary -> Bytecode -> ProgramBinary
 appendBody (header, def, body) newBody = (header, def, body ++ newBody)

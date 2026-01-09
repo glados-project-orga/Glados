@@ -17,11 +17,11 @@ import Ast
 import CompilerTypes (ProgramLayer)
 import CompilerTools (appendBody)
 
-appendBC :: ProgramLayer -> [String] -> ProgramLayer
-appendBC prog bc = appendBody prog bc
+appendBC :: ProgramLayer -> [String] ->ProgramLayer
+appendBC (prog, symblTable) bc = (appendBody prog bc, symblTable)
 
 isFunctionDefined :: String -> ProgramLayer -> Bool
-isFunctionDefined name (_, (funs, _, _, _), _) =
+isFunctionDefined name ((_, (funs, _, _, _), _) , _) =
   any (\f -> funcName f == name) funs
 
 emitPushInt :: Int -> [String]
@@ -51,16 +51,16 @@ emitCall :: String -> [String]
 emitCall fname = ["invokestatic " ++ fname] --  à relier avc vm
 
 compileExpr :: Expr -> ProgramLayer -> Either String ProgramLayer
-compileExpr expr prog =
+compileExpr expr layer =
   case expr of
     LitExpr (IntLit n) ->
-      Right (appendBC prog (emitPushInt n))
+       (Right (appendBC layer (emitPushInt n)))
 
     VarExpr name ->
       Left ("VarExpr not handled yet: " ++ name) -- slot iload
 
     BinOpExpr op a b ->
-      case compileExpr a prog of
+      case compileExpr a layer of
         Left err -> Left err
         Right prog1 ->
           case compileExpr b prog1 of
@@ -72,23 +72,23 @@ compileExpr expr prog =
                   Right (appendBC prog2 bc)
 
     CallExpression (CallExpr fname args) ->
-      if not (isFunctionDefined fname prog)
+      if not (isFunctionDefined fname layer)
         then Left ("Undefined function: " ++ fname)
         else
-          case compileArgs args prog of
-            Left err -> Left err
-            Right progArgs ->
-              Right (appendBC progArgs (emitCall fname))
+            case compileArgs args layer of
+              Left err -> Left err
+              Right n_layer ->
+                 Right (appendBC n_layer (emitCall fname))
 
     _ ->
       Left "expression not implemented yet"
 
 compileArgs :: [Expr] -> ProgramLayer -> Either String ProgramLayer
-compileArgs args prog =
+compileArgs args layer =
   case args of
-    [] -> Right prog
+    [] -> Right layer
     e : rest ->
-      case compileExpr e prog of
+      case compileExpr e layer of
         Left err -> Left err
-        Right prog' ->
-          compileArgs rest prog'
+        Right layer' ->
+          compileArgs rest layer'

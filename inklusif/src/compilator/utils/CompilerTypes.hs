@@ -10,7 +10,6 @@ module CompilerTypes (
 
 import Ast (
     Declaration(..),
-    Literal(..),
     FunctionDecl,
     StructDecl,
     EnumDecl,
@@ -21,6 +20,6 @@ type Ast = [Declaration]
 type ConstantPool = [String]
 type Bytecode = [String]
 type Defines = ([FunctionDecl], [StructDecl], [EnumDecl], [TypedefDecl])
-type SymbolTable = [(String, Literal)]
+type SymbolTable = [(String, Int)]
 type ProgramBinary = (ConstantPool, Defines, Bytecode)
 type ProgramLayer = (ProgramBinary, SymbolTable)

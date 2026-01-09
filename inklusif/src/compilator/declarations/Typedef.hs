@@ -2,5 +2,5 @@ module Typedef (compileTypedef) where
 import Ast (TypedefDecl(..))
 import CompilerTypes (ProgramBinary)
 
-compileTypedef :: TypedefDecl  -> ProgramBinary -> ProgramBinary
-compileTypedef _ prog = prog
+compileTypedef :: TypedefDecl  -> ProgramBinary -> Either String ProgramBinary
+compileTypedef _ prog = Right prog
