@@ -7,7 +7,6 @@
 
 module Expr (compileExpr) where
 
-<<<<<<< HEAD
 import Ast (Expr(..))
 import CompilerTypes (CompilerData)
 
