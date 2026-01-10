@@ -13,7 +13,7 @@ module Vmstate (
     compile
 ) where
 
-import Data
+import Data 
 import HeapInstr
 import ArithmInt
 import StackInstr

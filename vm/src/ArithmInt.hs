@@ -21,7 +21,7 @@ intArith op st@VMState{stack, ip} =
 
     case (op, stack) of
         (INegInt, (VInt i : rest)) ->
-            Right st { ip = (ip + 1) ,stack = (VInt (-i):rest)}
+            Right st { ip = (ip + 1) , stack = (VInt (-i):rest)}
 
         (_, (VInt i2 : VInt i1 : rest)) ->
             let result = case op of

@@ -1,7 +1,5 @@
 fun main {
     iconst 1
     nop
-    nop
-    nop
     ireturn
 }

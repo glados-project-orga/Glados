@@ -16,6 +16,7 @@ module StackInstr (
       stackInstrDup,
       stackInstrConstInt,
       stackInstrLdc,
+      stackInstrINop,
       stack_All_Instr
 ) where
 
@@ -94,6 +95,9 @@ stackInstrDup dup st@VMState{stack, ip} =
         _ -> Left "Invalid stack shape for DUP instruction"
 
 
+stackInstrINop :: VMState -> Either String VMState
+stackInstrINop st@VMState{ip} = Right st {ip = ip + 1}
+
 
 stack_All_Instr :: StackIns -> VMState -> Either String VMState
 stack_All_Instr ins st =
@@ -109,4 +113,4 @@ stack_All_Instr ins st =
         IDup2X2   -> stackInstrDup Dup2X2 st
 
         ISwap     -> stackInstrSwap st
-        INop      -> Right st
+        INop      -> stackInstrINop st
