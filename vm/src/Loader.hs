@@ -79,11 +79,6 @@ parseArithmetic = (parseKeyword "iadd" *> pure (IOpInt IAddInt))
               <|> (parseKeyword "ixor" *> pure (IOpInt IXorInt))
               <|> (parseKeyword "ishl" *> pure (IOpInt IShlInt))
               <|> (parseKeyword "ishr" *> pure (IOpInt IShrInt))
-              <|> parseIncInt
-
-parseIncInt :: Parser Instr
-parseIncInt = parseKeyword "iinc" *> parseSpaces *>
-              (IIncInt <$> parseInt <*> (parseSpaces *> parseInt))
 
 parseStack :: Parser Instr
 parseStack = (parseKeyword "dup2_x2" *> pure (IStck IDup2X2))

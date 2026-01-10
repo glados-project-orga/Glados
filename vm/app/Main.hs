@@ -13,7 +13,6 @@ import System.IO (hPutStrLn, stderr)
 import Loader (loadBytecode)
 import Data (VMState(..), Value(..), Function(..))
 import Vmstate (compile)
-import Loader ()
 import qualified Data.Map as Map
 import qualified Data.Vector as V
 
@@ -29,13 +28,13 @@ usage = hPutStrLn stderr "Usage: glados-vm <bytecode-file>"
 runFile :: FilePath -> IO ()
 runFile path = readFile path >>= \content ->
   case loadBytecode content of
-    Left err -> print ("Error: " ++ err) >> exitWith (ExitFailure 84)
+    Left err -> hPutStrLn stderr ("Error: " ++ err) >> exitWith (ExitFailure 84)
     Right parsedFuncs -> runVM parsedFuncs
 
 runVM :: Map.Map String Function -> IO()
 runVM parsedFuncs = 
   case Map.lookup "main" parsedFuncs of
-    Nothing -> print "Error: No 'main' function found" >> exitWith (ExitFailure 84)
+    Nothing -> hPutStrLn stderr "Error: No 'main' function found" >> exitWith (ExitFailure 84)
     Just _ -> 
       let initialState = VMState
             { stack      = []
@@ -48,5 +47,11 @@ runVM parsedFuncs =
             , frames     = []
             }
       in case compile initialState of 
-        Left err -> print ("Error: " ++ err) >> exitWith (ExitFailure 84)
-        Right finalState -> print finalState
+        Left err -> hPutStrLn stderr ("Error: " ++ err) >> exitWith (ExitFailure 84)
+        Right finalState -> handleResult (stack finalState)
+
+handleResult :: [Value] -> IO ()
+handleResult [] = return ()
+handleResult (VInt 0:_) = exitWith ExitSuccess
+handleResult (VInt code:_) = exitWith (ExitFailure code)
+handleResult _ = return ()
