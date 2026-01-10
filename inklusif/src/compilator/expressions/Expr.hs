@@ -13,7 +13,7 @@ import CompilerTypes (CompilerData)
 import Literal (compileLiteralExpr)
 import Var (compileVarExpr)
 import BinOp (compileBinOpExpr)
-import Compile (compileCallExpr)
+import Call (compileCallExpr)
 
 compileExpr :: Expr -> CompilerData -> Either String CompilerData
 compileExpr (LitExpr lit) prog = compileLiteralExpr lit prog

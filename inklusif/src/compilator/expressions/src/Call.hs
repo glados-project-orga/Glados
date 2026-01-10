@@ -2,19 +2,23 @@
 -- EPITECH PROJECT, 2026
 -- glados
 -- File description:
--- expr
+-- Call.hs
 -}
 
-module Compile (compileCallExpr) where
+module Call (compileCallExpr) where
 
 import Ast (Expr(..), CallExpr(..), FunctionDecl(..))
 import CompilerTypes (CompilerData)
-import Call (compileCallInstr)
-
 import Lookup (getFunctions, findFunction)
 import Arity (checkArity)
 import ExprArgs (compileArgs)
+import CompilerTools (appendBody)
 
+emitCall :: String -> [String]
+emitCall fname = ["invokestatic " ++ fname]
+
+compileCallInstr :: String -> CompilerData -> CompilerData
+compileCallInstr fname prog = (appendBody prog (emitCall fname))
 compileCallExpr
   :: (Expr -> CompilerData -> Either String CompilerData)
   -> CallExpr
