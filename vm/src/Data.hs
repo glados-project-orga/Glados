@@ -9,16 +9,19 @@ module Data (
         Heap,
         Stack,
         Handle,
+        Frame(..),
         IntOp(..),
         Value(..),
         Instr(..),
+        LongOp(..),
+        ConvOp(..),
+        FloatOp(..),
         WhatDup(..),
         VMState(..),
         StackIns(..),
-        HeapValue(..),
+        DoubleOp(..),
         Function(..),
-        Frame(..)
-
+        HeapValue(..)
 ) where
 
 import qualified Data.Map as Map
@@ -67,20 +70,32 @@ data LongOp = LAddLong
            | LShlLong | LShrLong
            deriving (Show, Eq)
 
-
+data ConvOp = I2b | I2c | I2s | I2l | I2f | I2d
+            | L2i | L2f | L2d
+            | F2i | F2l | F2d
+            | D2i | D2l | D2f
+            deriving (Show, Eq)
+        
 data StackIns = IPop | IDup | INop | ISwap | IDup2
            | IPop2 | IDupX1 | IDupX2 | IDup2X1 | IDup2X2
            deriving (Show, Eq)
 
-data Instr = IConstInt Int
-           | ILdc Int
+data Instr = ILdc Int
+
+           | IConstInt Int
            | ILoadInt Int
            | IStoreInt Int
-        
+
+           | IFload Int | IFstore Int 
+           | ILload Int | ILstore Int
+           | ALoad Int  | AStore  Int
+
            | IOpInt IntOp 
            | IOpFloat FloatOp
            | IOpDouble DoubleOp
            | IOpLong LongOp
+
+           |IConv ConvOp
 
            | IStck StackIns
            
@@ -92,12 +107,9 @@ data Instr = IConstInt Int
 
            -------------------------------
 
-           | IGoto Int
-
+           | IGoto Int | IGoto_w Int
            | IInvokeStatic String
-
-           | IReturn | IReturnInt
-   
+           | IReturn | IReturnInt | IReturnDouble | IReturnFloat
            | INew String | IGetField String | IPutField String
 
            | INewArray | IALoad | IAStore | IArrayLength

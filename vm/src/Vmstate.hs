@@ -25,36 +25,30 @@ import qualified Data.Vector as V
 
 execInstr :: Instr -> VMState -> Either String VMState
 
-execInstr (IConstInt n) st = stackInstrConstInt n st
-
 execInstr (ILdc n) st = stackInstrLdc n st
-
 execInstr (ILoadInt n) st = stackInstrLoadInt n st
-
+execInstr (IConstInt n) st = stackInstrConstInt n st
 execInstr (IStoreInt n) st = stackInstrStoreInt n st
 
 execInstr (IStck sst) st = stack_All_Instr sst st
 
 execInstr (INewArray) st = heapInstrNewArray st
-
 execInstr (IALoad) st = heapInstrALoad st
-
 execInstr (IAStore) st = heapInstrAStore st
-
 execInstr (IArrayLength) st = heapInstrArrayLength st
 
 execInstr (IOpInt op) st = intArith op st
+execInstr (IOpLong op) st = longArith op st
+execInstr (IOpFloat op) st = floatArith op st
+execInstr (IOpDouble op) st = doubleArith op st
 
-execInstr IReturn st = controlFlowReturn st
-
-execInstr IReturnInt st = controlFlowReturnInt st
+execInstr (IReturn) st = controlFlowReturn st
+execInstr (IReturnInt) st = controlFlowReturnInt st
 
 execInstr (IGoto offset) st = controlFlowGoto offset st
 
 execInstr (IGetField fieldName) st = heapInstrGetField fieldName st
-
 execInstr (IPutField fieldName) st = heapInstrPutField fieldName st
-
 execInstr (INew className) st = heapInstrNew className st
 
 execInstr (IIfEq n) st = compIfEq n st
