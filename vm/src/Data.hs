@@ -53,6 +53,21 @@ data IntOp = IAddInt
            | IShlInt | IShrInt
            deriving (Show, Eq)
 
+data DoubleOp = DAddDouble | DSubDouble | DMulDouble 
+           | DDivDouble | DRemDouble | DNegDouble
+           deriving (Show, Eq)
+
+data FloatOp = FAddFloat | FSubFloat | FMulFloat 
+            | FDivFloat | FRemFloat | FNegFloat
+           deriving (Show, Eq)
+
+data LongOp = LAddLong 
+           | LSubLong | LMulLong | LDivLong | LRemLong
+           | LNegLong | LAndLong | LOrLong | LXorLong
+           | LShlLong | LShrLong
+           deriving (Show, Eq)
+
+
 data StackIns = IPop | IDup | INop | ISwap | IDup2
            | IPop2 | IDupX1 | IDupX2 | IDup2X1 | IDup2X2
            deriving (Show, Eq)
@@ -63,6 +78,10 @@ data Instr = IConstInt Int
            | IStoreInt Int
         
            | IOpInt IntOp 
+           | IOpFloat FloatOp
+           | IOpDouble DoubleOp
+           | IOpLong LongOp
+
            | IStck StackIns
            
            | IIfEq Int | IIfNe Int | IIfLt Int | IIfGe Int
