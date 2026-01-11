@@ -41,8 +41,12 @@ execInstr (IOpDouble op) st = doubleArith op st
 
 execInstr (IReturn) st = controlFlowReturn st
 execInstr (IReturnInt) st = controlFlowReturnInt st
+execInstr (IReturnLong) st = controlFlowReturnLong st
+execInstr (IReturnFloat) st = controlFlowReturnFloat st
+execInstr (IReturnDouble) st = controlFlowReturnDouble st
 
 execInstr (IGoto offset) st = controlFlowGoto offset st
+execInstr (IGoto_w offset) st = controlFlowGoto_w offset st
 
 execInstr (IGetField fieldName) st = heapInstrGetField fieldName st
 execInstr (IPutField fieldName) st = heapInstrPutField fieldName st

@@ -109,7 +109,7 @@ data Instr = ILdc Int
 
            | IGoto Int | IGoto_w Int
            | IInvokeStatic String
-           | IReturn | IReturnInt | IReturnDouble | IReturnFloat
+           | IReturn | IReturnInt | IReturnDouble | IReturnFloat | IReturnLong
            | INew String | IGetField String | IPutField String
 
            | INewArray | IALoad | IAStore | IArrayLength

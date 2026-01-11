@@ -61,6 +61,24 @@ stackInstrLoadLong n st@VMState{stack, ip, locals} =
         Nothing -> Left ("Invalid local index: " ++ show n)
 
 
+stackInstrALoad :: Int -> VMState -> Either String VMState
+stackInstrALoad n st@VMState{stack, ip, locals} =
+    case locals V.!? n of
+        Just (VInt v) -> Right st { ip = ip + 1 , stack = (VInt v : stack)}
+        Just _ -> Left ("aload: expected reference at local index " ++ show n)
+        Nothing -> Left ("Invalid local index: " ++ show n)
+
+
+stackInstrAStore :: Int -> VMState -> Either String VMState
+stackInstrAStore n st@VMState{stack, ip, locals} =
+    case stack of
+        (VInt v : rest) ->
+            Right st { ip = ip + 1, stack = rest, locals = (locals V.// [(n, VInt v)])}
+        (_ : _) ->
+            Left ("astore: expected reference on stack for local index " ++ show n)
+        [] -> Left "astore: empty stack"
+
+
 stackInstrStoreInt :: Int -> VMState -> Either String VMState
 stackInstrStoreInt n st@VMState{stack, ip, locals} =
     case stack of
@@ -152,8 +170,8 @@ stack_All_Instr ins st =
 stack_chargement :: StackCharg -> VMState -> Either String VMState
 stack_chargement ins st =
     case ins of
-        -- AStore n      ->
-        -- ALoad  n      ->
+        AStore n      ->  stackInstrAStore n st
+        ALoad  n      ->  stackInstrALoad n st
 
         IStoreFloat n   -> stackInstrStoreFloat n st
         ILoadFloat  n   -> stackInstrLoadFloat n st
