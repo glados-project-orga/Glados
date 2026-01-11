@@ -56,16 +56,16 @@ parseKeyword [] = pure ()
 parseKeyword (c:cs) = parseChar c *> parseKeyword cs
 
 parseConstInt :: Parser Instr
-parseConstInt = parseKeyword "iconst" *> parseArgSep *> (IConstInt <$> parseInt)
+parseConstInt = parseKeyword "iconst" *> parseArgSep *> ((IStck_1 . IConstInt) <$> parseInt)
 
 parseLdc :: Parser Instr
 parseLdc = parseKeyword "ldc" *> parseSpaces *> (ILdc <$> parseInt)
 
 parseLoadInt :: Parser Instr
-parseLoadInt = parseKeyword "iload" *> parseArgSep *> (ILoadInt <$> parseInt)
+parseLoadInt = parseKeyword "iload" *> parseArgSep *> ((IStck_1 . ILoadInt) <$> parseInt)
 
 parseStoreInt :: Parser Instr
-parseStoreInt = parseKeyword "istore" *> parseArgSep *> (IStoreInt <$> parseInt)
+parseStoreInt = parseKeyword "istore" *> parseArgSep *> ((IStck_1 . IStoreInt) <$> parseInt)
 
 parseArithmetic :: Parser Instr
 parseArithmetic = (parseKeyword "iadd" *> pure (IOpInt IAddInt))

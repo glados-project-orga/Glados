@@ -55,6 +55,40 @@ stackInstrStoreInt n st@VMState{stack, ip, locals} =
                     in Right st {ip = (ip + 1), stack = rest, locals = newLocals}
 
 
+stackInstrFload :: Int -> VMState -> Either String VMState
+stackInstrFload n st@VMState{stack, ip, locals} =
+    case locals V.!? n of
+        Just (VFloat f) -> Right st {ip = (ip + 1), stack = (VFloat f: stack)}
+        Just _ -> Left ("fload: expected float at local index " ++ show n) 
+        Nothing -> Left ("Invalid local index: " ++ show n)
+
+
+stackInstrLload :: Int -> VMState -> Either String VMState
+stackInstrLload n st@VMState{stack, ip, locals} =
+    case locals V.!? n of
+        Just (VLong l) -> Right st {ip = (ip + 1), stack = (VLong l: stack)}
+        Just _ -> Left ("lload: expected long at local index " ++ show n) 
+        Nothing -> Left ("Invalid local index: " ++ show n)
+
+
+stackInstrFstore :: Int -> VMState -> Either String VMState
+stackInstrFstore n st@VMState{stack, ip, locals} =
+    case stack of
+        (VFloat f: rest) ->
+            let newlocals = locals V.//[(n, VFloat f)] 
+            in Right st {ip = (ip + 1), stack = rest, locals = newlocals}
+        _ -> Left ("fstore: expected float on stack for local index " ++ show n)
+
+
+stackInstrLstore :: Int -> VMState -> Either String VMState
+stackInstrLstore n st@VMState{stack, ip, locals} =
+    case stack of
+        (VLong l: rest) ->
+            let newlocals = locals V.//[(n, VLong l)] 
+            in Right st {ip = (ip + 1), stack = rest, locals = newlocals}
+        _ -> Left ("lstore: expected long on stack for local index " ++ show n)
+
+
 stackInstrSwap :: VMState -> Either String VMState
 stackInstrSwap st@VMState{stack, ip} =
     case stack of

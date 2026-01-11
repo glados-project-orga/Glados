@@ -21,7 +21,8 @@ module Data (
         StackIns(..),
         DoubleOp(..),
         Function(..),
-        HeapValue(..)
+        HeapValue(..),
+        StackCharg(..)
 ) where
 
 import qualified Data.Map as Map
@@ -80,23 +81,22 @@ data StackIns = IPop | IDup | INop | ISwap | IDup2
            | IPop2 | IDupX1 | IDupX2 | IDup2X1 | IDup2X2
            deriving (Show, Eq)
 
+data StackCharg =  ILoadInt Int 
+                | IStoreInt Int | IConstInt Int
+                | IFload Int | IFstore Int 
+                | ILload Int | ILstore Int
+                | ALoad Int  | AStore  Int
+           deriving (Show, Eq)
+
 data Instr = ILdc Int
-
-           | IConstInt Int
-           | ILoadInt Int
-           | IStoreInt Int
-
-           | IFload Int | IFstore Int 
-           | ILload Int | ILstore Int
-           | ALoad Int  | AStore  Int
 
            | IOpInt IntOp 
            | IOpFloat FloatOp
            | IOpDouble DoubleOp
            | IOpLong LongOp
 
-           |IConv ConvOp
-
+           | IConv ConvOp
+           | IStck_1 StackCharg
            | IStck StackIns
            
            | IIfEq Int | IIfNe Int | IIfLt Int | IIfGe Int

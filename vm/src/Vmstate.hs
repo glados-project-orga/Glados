@@ -26,10 +26,6 @@ import qualified Data.Vector as V
 execInstr :: Instr -> VMState -> Either String VMState
 
 execInstr (ILdc n) st = stackInstrLdc n st
-execInstr (ILoadInt n) st = stackInstrLoadInt n st
-execInstr (IConstInt n) st = stackInstrConstInt n st
-execInstr (IStoreInt n) st = stackInstrStoreInt n st
-
 execInstr (IStck sst) st = stack_All_Instr sst st
 
 execInstr (INewArray) st = heapInstrNewArray st
