@@ -9,7 +9,9 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module ArithmInt (
-    intArith
+    intArith,
+    floatArith,
+    doubleArith,
 ) where
 
 import Data
@@ -40,6 +42,7 @@ intArith op st@VMState{stack, ip} =
                                 let s = i2 .&. 0x1F 
                                 in i1 `shiftR` s
             in Right st { ip = ip + 1, stack = (VInt result : rest)}
+    
         _ -> Left "intArith: invalid operands"
 
 
@@ -48,7 +51,7 @@ doubleArith :: DoubleOp -> VMState -> Either String VMState
 doubleArith op st@VMState{stack, ip} =
     case (op, stack) of
         (DNegDouble, (VDouble i : rest)) ->
-            Right st { ip = ip + 1, stack = VDouble (-i) : rest }
+            Right st { ip = ip + 1, stack = (VDouble (-i) : rest)}
 
         (_, (VDouble i2 : VDouble i1 : rest)) ->
             let result = case op of
@@ -57,6 +60,25 @@ doubleArith op st@VMState{stack, ip} =
                     DMulDouble -> i1 * i2
                     DDivDouble -> i1 / i2
                     DRemDouble -> i1 `mod'` i2
-            in Right st { ip = ip + 1, stack = (VDouble result : rest) }
+            in Right st { ip = ip + 1, stack = (VDouble result : rest)}
 
         _ -> Left "doubleArith: invalid operands"
+
+
+floatArith :: FloatOp -> VMState -> Either String VMState
+floatArith op st@VMState{stack, ip} =
+    case (op, stack) of
+    
+        (FNegFloat, (VFloat x : rest)) ->
+            Right st { ip = ip + 1, stack = (VFloat (-x) : rest)}
+
+        (_, (VFloat y : VFloat x : rest)) ->
+            let result = case op of
+                    FAddFloat -> x + y
+                    FSubFloat -> x - y
+                    FMulFloat -> x * y
+                    FDivFloat -> x / y
+                    FRemFloat -> x `mod'` y
+            in Right st { ip = ip + 1, stack = (VFloat result : rest)}
+    
+        _ -> Left "floatArith: invalid operands"
