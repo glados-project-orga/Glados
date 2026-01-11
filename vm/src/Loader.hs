@@ -96,8 +96,11 @@ parseControlFlow :: Parser Instr
 parseControlFlow = parseIfICmpGt
                <|> parseIfICmpLt
                <|> parseIfEq
+               <|> parseIfNe
                <|> parseIfGt
+               <|> parseIfGe
                <|> parseIfLt
+               <|> parseIfLe
                <|> parseGoto
 
 parseGoto :: Parser Instr
@@ -106,11 +109,20 @@ parseGoto = parseKeyword "goto" *> parseSpaces *> (IGoto <$> parseInt)
 parseIfEq :: Parser Instr
 parseIfEq = parseKeyword "ifeq" *> parseSpaces *> (IIfEq <$> parseInt)
 
+parseIfNe :: Parser Instr
+parseIfNe = parseKeyword "ifne" *> parseSpaces *> (IIfNe <$> parseInt)
+
 parseIfGt :: Parser Instr
 parseIfGt = parseKeyword "ifgt" *> parseSpaces *> (IIfGt <$> parseInt)
 
+parseIfGe :: Parser Instr
+parseIfGe = parseKeyword "ifge" *> parseSpaces *> (IIfGe <$> parseInt)
+
 parseIfLt :: Parser Instr
 parseIfLt = parseKeyword "iflt" *> parseSpaces *> (IIfLt <$> parseInt)
+
+parseIfLe :: Parser Instr
+parseIfLe = parseKeyword "ifle" *> parseSpaces *> (IIfLe <$> parseInt)
 
 parseIfICmpGt :: Parser Instr
 parseIfICmpGt = parseKeyword "if_icmpgt" *> parseSpaces *> (IIfICmpGt <$> parseInt)
