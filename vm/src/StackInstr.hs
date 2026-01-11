@@ -17,7 +17,8 @@ module StackInstr (
       stackInstrConstInt,
       stackInstrLdc,
       stackInstrINop,
-      stack_All_Instr
+      stack_All_Instr,
+      stack_chargement
 ) where
 
 
@@ -39,40 +40,38 @@ stackInstrLdc n st@VMState{stack, ip, constPool} =
 stackInstrLoadInt :: Int -> VMState -> Either String VMState
 stackInstrLoadInt n st@VMState{stack, ip, locals} =
     case locals V.!? n of
-        Just val -> Right st {ip = (ip + 1), stack = (val : stack)}
+        Just (VInt val) -> Right st {ip = (ip + 1), stack = (VInt val : stack)}
+        Just _ -> Left ("iload: expected int at local index " ++ show n) 
         Nothing  -> Left ("Invalid local index: " ++ show n)
 
 
-stackInstrStoreInt :: Int -> VMState -> Either String VMState
-stackInstrStoreInt n st@VMState{stack, ip, locals} =
-    case stack of
-        [] -> Left "Stack underflow in IStoreInt"
-        (first:rest) ->
-            case locals V.!? n of
-                Nothing -> Left ("Invalid local index: " ++ show n)
-                Just _  ->
-                    let newLocals = locals V.// [(n, first)]
-                    in Right st {ip = (ip + 1), stack = rest, locals = newLocals}
-
-
-stackInstrFload :: Int -> VMState -> Either String VMState
-stackInstrFload n st@VMState{stack, ip, locals} =
+stackInstrLoadFloat :: Int -> VMState -> Either String VMState
+stackInstrLoadFloat n st@VMState{stack, ip, locals} =
     case locals V.!? n of
         Just (VFloat f) -> Right st {ip = (ip + 1), stack = (VFloat f: stack)}
         Just _ -> Left ("fload: expected float at local index " ++ show n) 
         Nothing -> Left ("Invalid local index: " ++ show n)
 
 
-stackInstrLload :: Int -> VMState -> Either String VMState
-stackInstrLload n st@VMState{stack, ip, locals} =
+stackInstrLoadLong :: Int -> VMState -> Either String VMState
+stackInstrLoadLong n st@VMState{stack, ip, locals} =
     case locals V.!? n of
         Just (VLong l) -> Right st {ip = (ip + 1), stack = (VLong l: stack)}
         Just _ -> Left ("lload: expected long at local index " ++ show n) 
         Nothing -> Left ("Invalid local index: " ++ show n)
 
 
-stackInstrFstore :: Int -> VMState -> Either String VMState
-stackInstrFstore n st@VMState{stack, ip, locals} =
+stackInstrStoreInt :: Int -> VMState -> Either String VMState
+stackInstrStoreInt n st@VMState{stack, ip, locals} =
+    case stack of
+        (VInt val : rest) ->
+            let newLocals = locals V.// [(n, VInt val)]
+            in Right st {ip = (ip + 1), stack = rest, locals = newLocals}
+        _ -> Left ("istore: expected int on stack for local index " ++ show n)
+
+
+stackInstrStoreFloat :: Int -> VMState -> Either String VMState
+stackInstrStoreFloat n st@VMState{stack, ip, locals} =
     case stack of
         (VFloat f: rest) ->
             let newlocals = locals V.//[(n, VFloat f)] 
@@ -80,8 +79,8 @@ stackInstrFstore n st@VMState{stack, ip, locals} =
         _ -> Left ("fstore: expected float on stack for local index " ++ show n)
 
 
-stackInstrLstore :: Int -> VMState -> Either String VMState
-stackInstrLstore n st@VMState{stack, ip, locals} =
+stackInstrStoreLong :: Int -> VMState -> Either String VMState
+stackInstrStoreLong n st@VMState{stack, ip, locals} =
     case stack of
         (VLong l: rest) ->
             let newlocals = locals V.//[(n, VLong l)] 
@@ -148,3 +147,20 @@ stack_All_Instr ins st =
 
         ISwap     -> stackInstrSwap st
         INop      -> stackInstrINop st
+
+
+stack_chargement :: StackCharg -> VMState -> Either String VMState
+stack_chargement ins st =
+    case ins of
+        -- AStore n      ->
+        -- ALoad  n      ->
+
+        IStoreFloat n   -> stackInstrStoreFloat n st
+        ILoadFloat  n   -> stackInstrLoadFloat n st
+    
+        IStoreLong  n   -> stackInstrStoreLong n st
+        ILoadLong   n   -> stackInstrLoadLong n st
+
+        ILoadInt n   -> stackInstrLoadInt n st
+        IConstInt n   -> stackInstrConstInt n st
+        IStoreInt n   -> stackInstrStoreInt n st

@@ -83,8 +83,8 @@ data StackIns = IPop | IDup | INop | ISwap | IDup2
 
 data StackCharg =  ILoadInt Int 
                 | IStoreInt Int | IConstInt Int
-                | IFload Int | IFstore Int 
-                | ILload Int | ILstore Int
+                | ILoadFloat Int | IStoreFloat Int 
+                | ILoadLong Int | IStoreLong Int
                 | ALoad Int  | AStore  Int
            deriving (Show, Eq)
 

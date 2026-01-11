@@ -27,6 +27,7 @@ execInstr :: Instr -> VMState -> Either String VMState
 
 execInstr (ILdc n) st = stackInstrLdc n st
 execInstr (IStck sst) st = stack_All_Instr sst st
+execInstr (IStck_1 sst) st = stack_chargement sst st
 
 execInstr (INewArray) st = heapInstrNewArray st
 execInstr (IALoad) st = heapInstrALoad st
