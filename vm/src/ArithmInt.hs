@@ -10,6 +10,7 @@
 
 module ArithmInt (
     intArith,
+    longArith,
     floatArith,
     doubleArith,
 ) where
@@ -44,7 +45,6 @@ intArith op st@VMState{stack, ip} =
             in Right st { ip = ip + 1, stack = (VInt result : rest)}
     
         _ -> Left "intArith: invalid operands"
-
 
 
 doubleArith :: DoubleOp -> VMState -> Either String VMState
@@ -82,3 +82,27 @@ floatArith op st@VMState{stack, ip} =
             in Right st { ip = ip + 1, stack = (VFloat result : rest)}
     
         _ -> Left "floatArith: invalid operands"
+
+
+longArith :: LongOp -> VMState -> Either String VMState
+longArith op st@VMState{stack, ip} =
+    case (op, stack) of
+    
+        (LNegLong, (VLong i : rest)) ->
+            Right st { ip = ip + 1, stack = (VLong (-i) : rest)}
+
+        (_, (VLong i2 : VLong i1 : rest)) ->
+            let result = case op of
+                    LAddLong -> i1 + i2
+                    LSubLong -> i1 - i2
+                    LMulLong -> i1 * i2
+                    LDivLong -> i1 `div` i2
+                    LRemLong -> i1 `mod` i2
+                    LAndLong -> i1 .&. i2
+                    LOrLong  -> i1 .|. i2
+                    LXorLong -> i1 `xor` i2
+                    LShlLong -> i1 `shiftL` fromIntegral i2
+                    LShrLong -> i1 `shiftR` fromIntegral i2
+            in Right st {ip = ip + 1, stack = (VLong result : rest)}
+
+        _ -> Left "longArith: invalid operands"
