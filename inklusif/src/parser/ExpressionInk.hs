@@ -70,8 +70,24 @@ parseAtom =
         parseLiteralExpr
     <|> parseFunctionCall
     <|> parseStructLiteral
+    <|> parseAssignmentExpr
     <|> (VarExpr <$> identifier)
     <|> parenthesized
+
+-- traceInput :: String -> Parser a -> Parser a
+-- traceInput label (Parser p) =
+--     Parser $ \st ->
+--         trace
+--             (label ++ " | next input = " ++ take 40 (input st)
+--              )
+--             (p st)
+
+parseAssignmentExpr :: Parser Expr
+parseAssignmentExpr =
+    AssignmentExpr
+        <$> (Assignment
+                <$> identifier
+                <*> ((symbol '=' *> parseExpression)))
 
 parseStringLiteral :: Parser String
 parseStringLiteral = 
