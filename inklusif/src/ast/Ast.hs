@@ -185,14 +185,12 @@ data MatchStmt = MatchStmt
 
 data TryCatchStmt = TryCatchStmt
   { tryBody :: [Statement]
-  , catchType :: String
-  , catchVar :: String
+  , catchVar :: Maybe String
   , catchBody :: [Statement]
   } deriving (Show, Eq)
 
 data ThrowStmt = ThrowStmt
-  { throwType :: String
-  , throwMessage :: Expr
+  { throwMessage :: Expr
   } deriving (Show, Eq)
 
 data ReturnStmt = ReturnStmt
