@@ -11,14 +11,30 @@ module FunctionParsing (
 
 import Ast
 import Parser
+import Control.Applicative
 import StatementParser (parseType, parseBlock)
+
+parseIsRef :: Parser Bool
+parseIsRef = (symbol '&' *> pure True)
+            <|> pure False
+
+parseParam :: Parser Parameter
+parseParam =
+    (\isRef name typ -> Parameter name typ isRef)
+        <$> parseIsRef
+        <*> identifier
+        <*> (keyword "->" *> parseType)
+
+parseParams :: Parser [Parameter]
+parseParams = symbol '(' *> sepBy parseParam comma <* symbol ')'
 
 parseFunctionDecl :: Parser FunctionDecl
 parseFunctionDecl =
     FunctionDecl
         <$> getSourcePos
         <*> (keyword "fun" *> identifier)
-        <*> (symbol '(' *> symbol ')' *> pure [])
+        <*>((parseParams)
+            <|> (symbol '(' *> symbol ')' *> pure []))
         <*> (symbol ':' *> parseType)
         <*> parseBlock
 
