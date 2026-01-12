@@ -25,17 +25,33 @@ parseType =
     <|> (keyword "string" *> pure StringType)
     <|> (keyword "float" *> pure FloatType)
     <|> (keyword "char" *> pure CharType)
+    <|> (pure CustomType) <*> identifier
+
+parseIsConst :: Parser Bool
+parseIsConst = (keyword "const" *> pure True)
+                <|> (keyword "let" *> pure False)
+
+parseIsRef :: Parser Bool
+parseIsRef = (symbol '&' *> pure True)
+            <|> pure False
 
 parseVarDecl :: Parser Statement
-parseVarDecl = VarDeclStmt <$> varDecl
-  where
-    varDecl = VarDecl
-        <$> ((keyword "let" *> identifier)
-             <|> (keyword "const" *> identifier))
-        <*> (keyword "->" *> parseType)
-        <*> (symbol '=' *> parseExpression <* symbol ';')
-        <*> pure False
-        <*> pure False
+parseVarDecl =
+    VarDeclStmt
+        <$> ((\isConst isRef name typ val ->
+                VarDecl
+                    { varName    = name
+                    , varType    = typ
+                    , varValue   = val
+                    , varIsConst = isConst
+                    , varIsRef   = isRef
+                    }
+            )
+            <$> parseIsConst
+            <*> parseIsRef
+            <*> identifier
+            <*> (keyword "->" *> parseType)
+            <*> (symbol '=' *> parseExpression <* symbol ';'))
 
 parseForAssignment :: Parser Statement
 parseForAssignment = AssignmentStmt <$> assignment
@@ -98,14 +114,14 @@ parseMatchStmt = MatchStatement <$> matchStmt
   where
     matchStmt = MatchStmt
         <$> (keyword "match" *> parseExpression)
-        <*> parseMany parseMatchCase
+        <*> (symbol '{' *> parseMany parseMatchCase <* symbol '}')
 
 parseMatchCase :: Parser MatchCase
 parseMatchCase = matchCase
   where
     matchCase = MatchCase
         <$> (parsePattern <* keyword "=>")
-        <*> parseExpression
+        <*> (parseExpression) <* symbol ';'
 
 parsePattern :: Parser Pattern
 parsePattern = literalPattern <|> defaultPattern
@@ -138,13 +154,7 @@ parseReturnStmt = ReturnStatement <$> returnStmt
 parseExprStmt :: Parser Statement
 parseExprStmt = ExprStatement <$> exprStmt
   where
-    exprStmt = ExprStmt <$> ((parseParens parseExpression)
-                        <|> (parseExpression <* symbol ';')
-                        <|> (parseExpression <* symbol ')'))
-
-parseParens :: Parser Expr -> Parser Expr
-parseParens p = 
-    (symbol '(' *> p <* symbol ')')
+    exprStmt = ExprStmt <$> parseExpression <* symbol ';'
 
 parseStatement :: Parser Statement
 parseStatement = parseVarDecl

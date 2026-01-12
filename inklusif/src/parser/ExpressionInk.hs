@@ -69,8 +69,41 @@ parseAtom :: Parser Expr
 parseAtom =
         parseLiteralExpr
     <|> parseFunctionCall
+    <|> parseStructLiteral
+    <|> parseAssignmentExpr
     <|> (VarExpr <$> identifier)
     <|> parenthesized
+
+-- traceInput :: String -> Parser a -> Parser a
+-- traceInput label (Parser p) =
+--     Parser $ \st ->
+--         trace
+--             (label ++ " | next input = " ++ take 40 (input st)
+--              )
+--             (p st)
+
+parseAssignmentExpr :: Parser Expr
+parseAssignmentExpr =
+    AssignmentExpr
+        <$> (Assignment
+                <$> identifier
+                <*> ((symbol '=' *> parseExpression)))
+
+parseStringLiteral :: Parser String
+parseStringLiteral = 
+    parseChar '"' *> parseMany stringChar <* parseChar '"'
+  where
+    stringChar = parseAnyChar (filter (/= '"') (map toEnum [32..126]))
+
+parseStructLiteral :: Parser Expr
+parseStructLiteral =
+    StructLiteral <$> parseStructFields
+
+parseStructFields :: Parser [(String, Expr)]
+parseStructFields =
+    symbol '{' *> sepBy structField comma <* symbol '}'
+  where
+    structField = (,) <$> identifier <*> (symbol ':' *> parseExpression)
 
 parenthesized :: Parser Expr
 parenthesized =
@@ -84,6 +117,7 @@ parseLiteral :: Parser Literal
 parseLiteral =
         (IntLit <$> parseInt)
     <|> (BoolLit True  <$ keyword "true")
+    <|> (StringLit <$> parseStringLiteral)
     <|> (BoolLit False <$ keyword "false")
 
 parseFunctionCall :: Parser Expr
@@ -99,7 +133,3 @@ callExpr =
 arguments :: Parser [Expr]
 arguments =
     symbol '(' *> sepBy parseExpression comma <* symbol ')'
-
-comma :: Parser ()
-comma =
-    symbol ',' *> pure ()

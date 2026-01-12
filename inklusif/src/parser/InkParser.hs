@@ -14,14 +14,14 @@ import Parser
 import FunctionParsing
 import Control.Applicative
 import EnumParsing
-import StructParser
+import ClassParser
 import TypedefParser
 
 parseDeclaration :: Parser Declaration
 parseDeclaration =
         parseFunction
        <|> parseEnum
-       <|> parseStruct
+       <|> parseClass
        <|> parseTypedef
 
 parseInkFile :: String -> IO (Either String [Declaration])
