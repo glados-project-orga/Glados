@@ -117,7 +117,3 @@ callExpr =
 arguments :: Parser [Expr]
 arguments =
     symbol '(' *> sepBy parseExpression comma <* symbol ')'
-
-comma :: Parser ()
-comma =
-    symbol ',' *> pure ()
