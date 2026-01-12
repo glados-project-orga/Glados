@@ -138,9 +138,7 @@ parseReturnStmt = ReturnStatement <$> returnStmt
 parseExprStmt :: Parser Statement
 parseExprStmt = ExprStatement <$> exprStmt
   where
-    exprStmt = ExprStmt <$> ((parseParens parseExpression)
-                        <|> (parseExpression <* symbol ';')
-                        <|> (parseExpression <* symbol ')'))
+    exprStmt = ExprStmt <$> parseExpression <* symbol ';'
 
 parseParens :: Parser Expr -> Parser Expr
 parseParens p = 
