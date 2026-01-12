@@ -27,16 +27,31 @@ parseType =
     <|> (keyword "char" *> pure CharType)
     <|> (pure CustomType) <*> identifier
 
+parseIsConst :: Parser Bool
+parseIsConst = (keyword "const" *> pure True)
+                <|> (keyword "let" *> pure False)
+
+parseIsRef :: Parser Bool
+parseIsRef = (symbol '&' *> pure True)
+            <|> pure False
+
 parseVarDecl :: Parser Statement
-parseVarDecl = VarDeclStmt <$> varDecl
-  where
-    varDecl = VarDecl
-        <$> ((keyword "let" *> identifier)
-             <|> (keyword "const" *> identifier))
-        <*> (keyword "->" *> parseType)
-        <*> (symbol '=' *> parseExpression <* symbol ';')
-        <*> pure False
-        <*> pure False
+parseVarDecl =
+    VarDeclStmt
+        <$> ((\isConst isRef name typ val ->
+                VarDecl
+                    { varName    = name
+                    , varType    = typ
+                    , varValue   = val
+                    , varIsConst = isConst
+                    , varIsRef   = isRef
+                    }
+            )
+            <$> parseIsConst
+            <*> parseIsRef
+            <*> identifier
+            <*> (keyword "->" *> parseType)
+            <*> (symbol '=' *> parseExpression <* symbol ';'))
 
 parseForAssignment :: Parser Statement
 parseForAssignment = AssignmentStmt <$> assignment
