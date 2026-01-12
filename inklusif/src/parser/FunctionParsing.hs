@@ -6,7 +6,8 @@
 -}
 
 module FunctionParsing (
-    parseFunction
+    parseFunction,
+    parseParams
     ) where
 
 import Ast
@@ -33,7 +34,7 @@ parseFunctionDecl =
     FunctionDecl
         <$> getSourcePos
         <*> (keyword "fun" *> identifier)
-        <*>((parseParams)
+        <*> ((parseParams)
             <|> (symbol '(' *> symbol ')' *> pure []))
         <*> (symbol ':' *> parseType)
         <*> parseBlock
