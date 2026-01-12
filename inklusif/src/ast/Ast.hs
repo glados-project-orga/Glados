@@ -22,7 +22,7 @@ module Ast
     BinOp(..),
     SourcePos(..),
     FunctionDecl(..),
-    StructDecl(..),
+    ClassDecl(..),
     EnumDecl(..),
     TypedefDecl(..),
     VarDecl(..),
@@ -86,11 +86,18 @@ data TypedefDecl = TypedefDecl
   , typedefAlias :: String
   } deriving (Show, Eq)
 
+data ClassDecl = ClassDecl
+  { classPos :: SourcePos
+  , className :: String
+  , classFields :: [StructField]
+  , classMethods :: [FunctionDecl]
+  } deriving (Show, Eq)
+
 data Declaration
   = Function FunctionDecl
-  | Struct StructDecl
   | Enum EnumDecl
   | Typedef TypedefDecl
+  | Class ClassDecl
   deriving (Show, Eq)
 
 -- Params d'une fonction
@@ -114,11 +121,8 @@ data Type
   | CharType
   | BoolType
   | ArrayType Type
-  | TupleType [Type]
-  | LambdaType [Type] Type  -- Je crois on a aucun exemple de celui-ci donc je me dis liste de params + return type ?
   | CustomType String  -- (struct, enum, typedef)
   | VoidType -- iel
-  | RefType Type
   deriving (Show, Eq)
 
 -- Déclarations
@@ -131,7 +135,7 @@ data VarDecl = VarDecl
   } deriving (Show, Eq)
 
 data Assignment = Assignment
-  { assignTarget :: String
+  { assignTarget :: String 
   , assignValue :: Expr
   } deriving (Show, Eq)
 
