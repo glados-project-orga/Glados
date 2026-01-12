@@ -248,6 +248,7 @@ data Expr
   | UnaryOpExpr String Expr
   | CallExpression CallExpr
   | MethodCallExpression MethodCallExpr
+  | AssignmentExpr Assignment
   | ArrayLiteral [Expr]
   | ArrayIndexExpression ArrayIndexExpr
   | FieldAccessExpression FieldAccessExpr
