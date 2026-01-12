@@ -114,14 +114,14 @@ parseMatchStmt = MatchStatement <$> matchStmt
   where
     matchStmt = MatchStmt
         <$> (keyword "match" *> parseExpression)
-        <*> parseMany parseMatchCase
+        <*> (symbol '{' *> parseMany parseMatchCase <* symbol '}')
 
 parseMatchCase :: Parser MatchCase
 parseMatchCase = matchCase
   where
     matchCase = MatchCase
         <$> (parsePattern <* keyword "=>")
-        <*> parseExpression
+        <*> (parseExpression) <* symbol ';'
 
 parsePattern :: Parser Pattern
 parsePattern = literalPattern <|> defaultPattern
