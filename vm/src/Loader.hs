@@ -41,8 +41,7 @@ parseInstrs = parseMany (betweenSpaces parseInstr)
 parseInstr :: Parser Instr
 parseInstr = parseConstInt
          <|> parseLdc
-         <|> parseLoadInt
-         <|> parseStoreInt
+         <|> parseLoadStore
          <|> parseArithmetic
          <|> parseStack
          <|> parseControlFlow
@@ -50,6 +49,8 @@ parseInstr = parseConstInt
          <|> parseReturn
          <|> parseArray
          <|> parseObject
+         <|> parseConversion
+         <|> parseComparison
 
 parseKeyword :: String -> Parser ()
 parseKeyword [] = pure ()
@@ -61,14 +62,48 @@ parseConstInt = parseKeyword "iconst" *> parseArgSep *> ((IStck_1 . IConstInt) <
 parseLdc :: Parser Instr
 parseLdc = parseKeyword "ldc" *> parseSpaces *> (ILdc <$> parseInt)
 
+parseLoadStore :: Parser Instr
+parseLoadStore = parseLoadInt
+             <|> parseStoreInt
+             <|> parseLoadFloat
+             <|> parseStoreFloat
+             <|> parseLoadLong
+             <|> parseStoreLong
+             <|> parseALoad
+             <|> parseAStore
+
 parseLoadInt :: Parser Instr
 parseLoadInt = parseKeyword "iload" *> parseArgSep *> ((IStck_1 . ILoadInt) <$> parseInt)
 
 parseStoreInt :: Parser Instr
 parseStoreInt = parseKeyword "istore" *> parseArgSep *> ((IStck_1 . IStoreInt) <$> parseInt)
 
+parseLoadFloat :: Parser Instr
+parseLoadFloat = parseKeyword "fload" *> parseArgSep *> ((IStck_1 . ILoadFloat) <$> parseInt)
+
+parseStoreFloat :: Parser Instr
+parseStoreFloat = parseKeyword "fstore" *> parseArgSep *> ((IStck_1 . IStoreFloat) <$> parseInt)
+
+parseLoadLong :: Parser Instr
+parseLoadLong = parseKeyword "lload" *> parseArgSep *> ((IStck_1 . ILoadLong) <$> parseInt)
+
+parseStoreLong :: Parser Instr
+parseStoreLong = parseKeyword "lstore" *> parseArgSep *> ((IStck_1 . IStoreLong) <$> parseInt)
+
+parseALoad :: Parser Instr
+parseALoad = parseKeyword "aload" *> parseArgSep *> ((IStck_1 . ALoad) <$> parseInt)
+
+parseAStore :: Parser Instr
+parseAStore = parseKeyword "astore" *> parseArgSep *> ((IStck_1 . AStore) <$> parseInt)
+
 parseArithmetic :: Parser Instr
-parseArithmetic = (parseKeyword "iadd" *> pure (IOpInt IAddInt))
+parseArithmetic = parseIntArithmetic
+              <|> parseFloatArithmetic
+              <|> parseDoubleArithmetic
+              <|> parseLongArithmetic
+
+parseIntArithmetic :: Parser Instr
+parseIntArithmetic = (parseKeyword "iadd" *> pure (IOpInt IAddInt))
               <|> (parseKeyword "isub" *> pure (IOpInt ISubInt))
               <|> (parseKeyword "imul" *> pure (IOpInt IMulInt))
               <|> (parseKeyword "idiv" *> pure (IOpInt IDivInt))
@@ -79,6 +114,35 @@ parseArithmetic = (parseKeyword "iadd" *> pure (IOpInt IAddInt))
               <|> (parseKeyword "ixor" *> pure (IOpInt IXorInt))
               <|> (parseKeyword "ishl" *> pure (IOpInt IShlInt))
               <|> (parseKeyword "ishr" *> pure (IOpInt IShrInt))
+
+parseFloatArithmetic :: Parser Instr
+parseFloatArithmetic = (parseKeyword "fadd" *> pure (IOpFloat FAddFloat))
+              <|> (parseKeyword "fsub" *> pure (IOpFloat FSubFloat))
+              <|> (parseKeyword "fmul" *> pure (IOpFloat FMulFloat))
+              <|> (parseKeyword "fdiv" *> pure (IOpFloat FDivFloat))
+              <|> (parseKeyword "frem" *> pure (IOpFloat FRemFloat))
+              <|> (parseKeyword "fneg" *> pure (IOpFloat FNegFloat))
+
+parseDoubleArithmetic :: Parser Instr
+parseDoubleArithmetic = (parseKeyword "dadd" *> pure (IOpDouble DAddDouble))
+              <|> (parseKeyword "dsub" *> pure (IOpDouble DSubDouble))
+              <|> (parseKeyword "dmul" *> pure (IOpDouble DMulDouble))
+              <|> (parseKeyword "ddiv" *> pure (IOpDouble DDivDouble))
+              <|> (parseKeyword "drem" *> pure (IOpDouble DRemDouble))
+              <|> (parseKeyword "dneg" *> pure (IOpDouble DNegDouble))
+
+parseLongArithmetic :: Parser Instr
+parseLongArithmetic = (parseKeyword "ladd" *> pure (IOpLong LAddLong))
+              <|> (parseKeyword "lsub" *> pure (IOpLong LSubLong))
+              <|> (parseKeyword "lmul" *> pure (IOpLong LMulLong))
+              <|> (parseKeyword "ldiv" *> pure (IOpLong LDivLong))
+              <|> (parseKeyword "lrem" *> pure (IOpLong LRemLong))
+              <|> (parseKeyword "lneg" *> pure (IOpLong LNegLong))
+              <|> (parseKeyword "land" *> pure (IOpLong LAndLong))
+              <|> (parseKeyword "lor" *>  pure (IOpLong LOrLong))
+              <|> (parseKeyword "lxor" *> pure (IOpLong LXorLong))
+              <|> (parseKeyword "lshl" *> pure (IOpLong LShlLong))
+              <|> (parseKeyword "lshr" *> pure (IOpLong LShrLong))
 
 parseStack :: Parser Instr
 parseStack = (parseKeyword "dup2_x2" *> pure (IStck IDup2X2))
@@ -95,16 +159,26 @@ parseStack = (parseKeyword "dup2_x2" *> pure (IStck IDup2X2))
 parseControlFlow :: Parser Instr
 parseControlFlow = parseIfICmpGt
                <|> parseIfICmpLt
+               <|> parseIfICmpEq
+               <|> parseIfICmpNe
+               <|> parseIfICmpGe
+               <|> parseIfICmpLe
+               <|> parseIfACmpEq
+               <|> parseIfACmpNe
                <|> parseIfEq
                <|> parseIfNe
                <|> parseIfGt
                <|> parseIfGe
                <|> parseIfLt
                <|> parseIfLe
+               <|> parseGotoW
                <|> parseGoto
 
 parseGoto :: Parser Instr
 parseGoto = parseKeyword "goto" *> parseSpaces *> (IGoto <$> parseInt)
+
+parseGotoW :: Parser Instr
+parseGotoW = parseKeyword "goto_w" *> parseSpaces *> (IGoto_w <$> parseInt)
 
 parseIfEq :: Parser Instr
 parseIfEq = parseKeyword "ifeq" *> parseSpaces *> (IIfEq <$> parseInt)
@@ -130,11 +204,32 @@ parseIfICmpGt = parseKeyword "if_icmpgt" *> parseSpaces *> (IIfICmpGt <$> parseI
 parseIfICmpLt :: Parser Instr
 parseIfICmpLt = parseKeyword "if_icmplt" *> parseSpaces *> (IIfICmpLt <$> parseInt)
 
+parseIfICmpEq :: Parser Instr
+parseIfICmpEq = parseKeyword "if_icmpeq" *> parseSpaces *> (IIfICmpEq <$> parseInt)
+
+parseIfICmpNe :: Parser Instr
+parseIfICmpNe = parseKeyword "if_icmpne" *> parseSpaces *> (IIfICmpNe <$> parseInt)
+
+parseIfICmpGe :: Parser Instr
+parseIfICmpGe = parseKeyword "if_icmpge" *> parseSpaces *> (IIfICmpGe <$> parseInt)
+
+parseIfICmpLe :: Parser Instr
+parseIfICmpLe = parseKeyword "if_icmple" *> parseSpaces *> (IIfICmpLe <$> parseInt)
+
+parseIfACmpEq :: Parser Instr
+parseIfACmpEq = parseKeyword "if_acmpeq" *> parseSpaces *> (IIfACmpEq <$> parseInt)
+
+parseIfACmpNe :: Parser Instr
+parseIfACmpNe = parseKeyword "if_acmpne" *> parseSpaces *> (IIfACmpNe <$> parseInt)
+
 parseInvokeStatic :: Parser Instr
 parseInvokeStatic = parseKeyword "invokestatic" *> (IInvokeStatic <$> parseString)
 
 parseReturn :: Parser Instr
 parseReturn = (parseKeyword "ireturn" *> pure IReturnInt)
+          <|> (parseKeyword "dreturn" *> pure IReturnDouble)
+          <|> (parseKeyword "freturn" *> pure IReturnFloat)
+          <|> (parseKeyword "lreturn" *> pure IReturnLong)
           <|> (parseKeyword "return" *> pure IReturn)
 
 parseObject :: Parser Instr
@@ -156,6 +251,30 @@ parseArray = (parseKeyword "newarray" *> pure INewArray)
          <|> (parseKeyword "iaload" *> pure IALoad)
          <|> (parseKeyword "iastore" *> pure IAStore)
          <|> (parseKeyword "arraylength" *> pure IArrayLength)
+
+parseConversion :: Parser Instr
+parseConversion = (parseKeyword "i2b" *> pure (IConv I2b))
+              <|> (parseKeyword "i2c" *> pure (IConv I2c))
+              <|> (parseKeyword "i2s" *> pure (IConv I2s))
+              <|> (parseKeyword "i2l" *> pure (IConv I2l))
+              <|> (parseKeyword "i2f" *> pure (IConv I2f))
+              <|> (parseKeyword "i2d" *> pure (IConv I2d))
+              <|> (parseKeyword "l2i" *> pure (IConv L2i))
+              <|> (parseKeyword "l2f" *> pure (IConv L2f))
+              <|> (parseKeyword "l2d" *> pure (IConv L2d))
+              <|> (parseKeyword "f2i" *> pure (IConv F2i))
+              <|> (parseKeyword "f2l" *> pure (IConv F2l))
+              <|> (parseKeyword "f2d" *> pure (IConv F2d))
+              <|> (parseKeyword "d2i" *> pure (IConv D2i))
+              <|> (parseKeyword "d2l" *> pure (IConv D2l))
+              <|> (parseKeyword "d2f" *> pure (IConv D2f))
+
+parseComparison :: Parser Instr
+parseComparison = (parseKeyword "lcmp" *> pure ILcmp)
+              <|> (parseKeyword "fcmpl" *> pure IFcmpl)
+              <|> (parseKeyword "fcmpg" *> pure IFcmpg)
+              <|> (parseKeyword "dcmpl" *> pure IDcmpl)
+              <|> (parseKeyword "dcmpg" *> pure IDcmpg)
 
 parseFunctions :: Parser [Function]
 parseFunctions = parseMany (betweenSpaces parseFunction)
