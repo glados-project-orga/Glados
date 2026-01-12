@@ -25,6 +25,7 @@ parseType =
     <|> (keyword "string" *> pure StringType)
     <|> (keyword "float" *> pure FloatType)
     <|> (keyword "char" *> pure CharType)
+    <|> (pure CustomType) <*> identifier
 
 parseVarDecl :: Parser Statement
 parseVarDecl = VarDeclStmt <$> varDecl
