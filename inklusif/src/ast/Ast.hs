@@ -251,7 +251,7 @@ data Expr
   | ArrayLiteral [Expr]
   | ArrayIndexExpression ArrayIndexExpr
   | FieldAccessExpression FieldAccessExpr
-  | StructLiteral String [(String, Expr)]
+  | StructLiteral [(String, Expr)]
   | Lambda [Parameter] [Statement]
   | LoopExpr [LoopBranch] LoopResult
   deriving (Show, Eq)
