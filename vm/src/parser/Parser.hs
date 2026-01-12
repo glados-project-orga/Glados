@@ -8,6 +8,7 @@
 module Parser (
     Parser(..),
     parseChar,
+    parseSingleChar,
     sepBy,
     parseAnyChar,
     parseSpaces,
@@ -17,6 +18,12 @@ module Parser (
     parseMany,
     parseUInt,
     parseInt,
+    parseULong,
+    parseLong,
+    parseUFloat,
+    parseFloat,
+    parseUDouble,
+    parseDouble,
     parseArgSep,
     parseCharIf,
     parseString
@@ -24,6 +31,7 @@ module Parser (
 
 import Data.Char (isSpace)
 import Control.Applicative
+import Data.Int (Int64)
 
 data Parser a = Parser {
     runParser :: String -> Either String (a, String)
@@ -91,8 +99,39 @@ parseSome p = some p
 parseUInt :: Parser Int
 parseUInt = read <$> some (parseAnyChar ['0'..'9'])
 
+parseULong :: Parser Int64
+parseULong = read <$> some (parseAnyChar ['0'..'9'])
+
+parseUFloat :: Parser Float
+parseUFloat = read <$>
+              ((\firstChar comma lastPart -> firstChar ++ [comma] ++ lastPart)
+                  <$> many (parseAnyChar ['0'..'9'])
+                  <*> parseChar '.'
+                  <*> some (parseAnyChar ['0'..'9']))
+
+parseUDouble :: Parser Double
+parseUDouble = read <$>
+              ((\firstChar comma lastPart -> firstChar ++ [comma] ++ lastPart)
+                  <$> many (parseAnyChar ['0'..'9'])
+                  <*> parseChar '.'
+                  <*> some (parseAnyChar ['0'..'9']))
+
 parseInt :: Parser Int
 parseInt = (negate <$> (parseChar '-' *> parseUInt)) <|> parseUInt
+
+parseLong :: Parser Int64
+parseLong = (negate <$> (parseChar '-' *> parseULong)) <|> parseULong
+
+parseFloat :: Parser Float
+parseFloat = (negate <$> (parseChar '-' *> parseUFloat)) <|> parseUFloat
+
+parseDouble :: Parser Double
+parseDouble = (negate <$> (parseChar '-' *> parseUDouble)) <|> parseUDouble
+
+parseSingleChar :: Parser Char
+parseSingleChar = Parser f
+    where f [] = Left  "reached end of input"
+          f (x:xs) = Right (x, xs)
 
 parseArgSep :: Parser ()
 parseArgSep = (parseChar '_' *> pure ()) <|> parseSpaces

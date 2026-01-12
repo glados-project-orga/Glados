@@ -22,6 +22,10 @@ import Parser (
     betweenSpaces,
     parseMany,
     parseInt,
+    parseLong,
+    parseFloat,
+    parseDouble,
+    parseSingleChar,
     parseArgSep,
     parseString
   )
@@ -39,7 +43,7 @@ parseInstrs :: Parser [Instr]
 parseInstrs = parseMany (betweenSpaces parseInstr)
 
 parseInstr :: Parser Instr
-parseInstr = parseConstInt
+parseInstr = parseConsts
          <|> parseLdc
          <|> parseLoadStore
          <|> parseArithmetic
@@ -56,8 +60,27 @@ parseKeyword :: String -> Parser ()
 parseKeyword [] = pure ()
 parseKeyword (c:cs) = parseChar c *> parseKeyword cs
 
+parseConsts :: Parser Instr
+parseConsts = parseConstInt
+          <|> parseConstLong
+          <|> parseConstFloat
+          <|> parseConstDouble
+          <|> parseConstChar
+
 parseConstInt :: Parser Instr
 parseConstInt = parseKeyword "iconst" *> parseArgSep *> ((IStck_1 . IConstInt) <$> parseInt)
+
+parseConstLong :: Parser Instr
+parseConstLong = parseKeyword "lconst" *> parseArgSep *> ((IStck_1 . IConstLong) <$> parseLong)
+
+parseConstFloat :: Parser Instr
+parseConstFloat = parseKeyword "fconst" *> parseArgSep *> ((IStck_1 . IConstFloat) <$> parseFloat)
+
+parseConstDouble :: Parser Instr
+parseConstDouble = parseKeyword "dconst" *> parseArgSep *> ((IStck_1 . IConstDouble) <$> parseDouble)
+
+parseConstChar :: Parser Instr
+parseConstChar = parseKeyword "cconst" *> parseArgSep *> ((IStck_1 . IConstChar) <$> parseSingleChar)
 
 parseLdc :: Parser Instr
 parseLdc = parseKeyword "ldc" *> parseSpaces *> (ILdc <$> parseInt)
@@ -69,6 +92,10 @@ parseLoadStore = parseLoadInt
              <|> parseStoreFloat
              <|> parseLoadLong
              <|> parseStoreLong
+             <|> parseLoadDouble
+             <|> parseStoreDouble
+             <|> parseLoadChar
+             <|> parseStoreChar
              <|> parseALoad
              <|> parseAStore
 
@@ -89,6 +116,18 @@ parseLoadLong = parseKeyword "lload" *> parseArgSep *> ((IStck_1 . ILoadLong) <$
 
 parseStoreLong :: Parser Instr
 parseStoreLong = parseKeyword "lstore" *> parseArgSep *> ((IStck_1 . IStoreLong) <$> parseInt)
+
+parseLoadDouble :: Parser Instr
+parseLoadDouble = parseKeyword "dload" *> parseArgSep *> ((IStck_1 . ILoadDouble) <$> parseInt)
+
+parseStoreDouble :: Parser Instr
+parseStoreDouble = parseKeyword "dstore" *> parseArgSep *> ((IStck_1 . IStoreDouble) <$> parseInt)
+
+parseLoadChar :: Parser Instr
+parseLoadChar = parseKeyword "cload" *> parseArgSep *> ((IStck_1 . ILoadChar) <$> parseInt)
+
+parseStoreChar :: Parser Instr
+parseStoreChar = parseKeyword "cstore" *> parseArgSep *> ((IStck_1 . IStoreChar) <$> parseInt)
 
 parseALoad :: Parser Instr
 parseALoad = parseKeyword "aload" *> parseArgSep *> ((IStck_1 . ALoad) <$> parseInt)
