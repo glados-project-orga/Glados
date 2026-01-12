@@ -253,9 +253,7 @@ parseArray = (parseKeyword "newarray" *> pure INewArray)
          <|> (parseKeyword "arraylength" *> pure IArrayLength)
 
 parseConversion :: Parser Instr
-parseConversion = (parseKeyword "i2b" *> pure (IConv I2b))
-              <|> (parseKeyword "i2c" *> pure (IConv I2c))
-              <|> (parseKeyword "i2s" *> pure (IConv I2s))
+parseConversion = (parseKeyword "i2c" *> pure (IConv I2c))
               <|> (parseKeyword "i2l" *> pure (IConv I2l))
               <|> (parseKeyword "i2f" *> pure (IConv I2f))
               <|> (parseKeyword "i2d" *> pure (IConv I2d))
@@ -268,6 +266,7 @@ parseConversion = (parseKeyword "i2b" *> pure (IConv I2b))
               <|> (parseKeyword "d2i" *> pure (IConv D2i))
               <|> (parseKeyword "d2l" *> pure (IConv D2l))
               <|> (parseKeyword "d2f" *> pure (IConv D2f))
+              <|> (parseKeyword "c2i" *> pure (IConv C2i))
 
 parseComparison :: Parser Instr
 parseComparison = (parseKeyword "lcmp" *> pure ILcmp)

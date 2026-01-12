@@ -18,6 +18,7 @@ import HeapInstr
 import ArithmInt
 import StackInstr
 import ComparInstr
+import ConvInstr
 import ControlFlowInstr
 import qualified Data.Map as Map
 import qualified Data.Vector as V
@@ -77,6 +78,8 @@ execInstr (IDcmpl) st = compDCmpL st
 execInstr (IDcmpg) st = compDCmpG st
 
 execInstr (IInvokeStatic funcName) st = controlFlowInvokeStatic funcName st
+
+execInstr (IConv op) st = convOp op st
 
 
 

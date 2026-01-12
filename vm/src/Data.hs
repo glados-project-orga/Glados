@@ -31,6 +31,7 @@ import Data.Int (Int64)
 
 data Value = VInt  Int
           | VBool Bool
+          | VChar Char
           | VString String
           | VFloat Float
           | VDouble Double
@@ -71,10 +72,11 @@ data LongOp = LAddLong
            | LShlLong | LShrLong
            deriving (Show, Eq)
 
-data ConvOp = I2b | I2c | I2s | I2l | I2f | I2d
+data ConvOp = I2c | I2l | I2f | I2d
             | L2i | L2f | L2d
             | F2i | F2l | F2d
             | D2i | D2l | D2f
+            | C2i
             deriving (Show, Eq)
         
 data StackIns = IPop | IDup | INop | ISwap | IDup2
@@ -104,8 +106,6 @@ data Instr = ILdc Int
            | IIfICmpEq Int | IIfICmpNe Int | IIfICmpLt Int | IIfICmpGe Int
            | IIfICmpGt Int | IIfICmpLe Int | ILcmp | IFcmpl
            | IFcmpg | IDcmpl | IDcmpg
-
-           -------------------------------
 
            | IGoto Int | IGoto_w Int
            | IInvokeStatic String
