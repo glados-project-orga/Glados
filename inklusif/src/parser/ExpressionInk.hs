@@ -69,8 +69,25 @@ parseAtom :: Parser Expr
 parseAtom =
         parseLiteralExpr
     <|> parseFunctionCall
+    <|> parseStructLiteral
     <|> (VarExpr <$> identifier)
     <|> parenthesized
+
+parseStringLiteral :: Parser String
+parseStringLiteral = 
+    parseChar '"' *> parseMany stringChar <* parseChar '"'
+  where
+    stringChar = parseAnyChar (filter (/= '"') (map toEnum [32..126]))
+
+parseStructLiteral :: Parser Expr
+parseStructLiteral =
+    StructLiteral <$> parseStructFields
+
+parseStructFields :: Parser [(String, Expr)]
+parseStructFields =
+    symbol '{' *> sepBy structField comma <* symbol '}'
+  where
+    structField = (,) <$> identifier <*> (symbol ':' *> parseExpression)
 
 parenthesized :: Parser Expr
 parenthesized =
@@ -84,6 +101,7 @@ parseLiteral :: Parser Literal
 parseLiteral =
         (IntLit <$> parseInt)
     <|> (BoolLit True  <$ keyword "true")
+    <|> (StringLit <$> parseStringLiteral)
     <|> (BoolLit False <$ keyword "false")
 
 parseFunctionCall :: Parser Expr
