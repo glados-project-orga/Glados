@@ -25,7 +25,8 @@ module Parser (
     keyword,
     parseString,
     chainl1,
-    eof
+    eof,
+    comma
 ) where
 
 import Ast
@@ -168,7 +169,7 @@ identifier :: Parser String
 identifier =
     betweenSpaces $
         (:) <$> parseAnyChar (['a'..'z'] ++ ['A'..'Z'] ++ ['_'])
-            <*> parseMany (parseAnyChar (['a'..'z'] ++ ['A'..'Z'] ++ ['0'..'9'] ++ ['_']))
+            <*> parseMany (parseAnyChar (['a'..'z'] ++ ['A'..'Z'] ++ ['0'..'9'] ++ ['_'] ++ ['.']))
 
 eof :: Parser ()
 eof = Parser $ \st ->
@@ -180,3 +181,6 @@ chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
 chainl1 p op =
   foldl (\acc (f, x) -> f acc x) <$> p <*> many ((,) <$> op <*> p)
 
+comma :: Parser ()
+comma =
+    symbol ',' *> pure ()
