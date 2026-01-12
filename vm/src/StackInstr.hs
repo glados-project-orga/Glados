@@ -23,12 +23,29 @@ module StackInstr (
 
 
 import Data
+import Data.Int (Int64)
 import qualified Data.Vector as V
 
 
 stackInstrConstInt :: Int -> VMState -> Either String VMState
 stackInstrConstInt n st@VMState{stack, ip} =
     Right st {ip = ip + 1, stack = VInt n : stack}
+
+stackInstrConstFloat :: Float -> VMState -> Either String VMState
+stackInstrConstFloat f st@VMState{stack, ip} =
+    Right st {ip = ip + 1, stack = VFloat f : stack}
+
+stackInstrConstDouble :: Double -> VMState -> Either String VMState
+stackInstrConstDouble d st@VMState{stack, ip} =
+    Right st {ip = ip + 1, stack = VDouble d : stack}
+
+stackInstrConstLong :: Int64 -> VMState -> Either String VMState
+stackInstrConstLong l st@VMState{stack, ip} =
+    Right st {ip = ip + 1, stack = VLong l : stack}
+
+stackInstrConstChar :: Char -> VMState -> Either String VMState
+stackInstrConstChar c st@VMState{stack, ip} =
+    Right st {ip = ip + 1, stack = VChar c : stack}
 
 stackInstrLdc :: Int -> VMState -> Either String VMState
 stackInstrLdc n st@VMState{stack, ip, constPool} =
@@ -106,6 +123,40 @@ stackInstrStoreLong n st@VMState{stack, ip, locals} =
         _ -> Left ("lstore: expected long on stack for local index " ++ show n)
 
 
+stackInstrLoadDouble :: Int -> VMState -> Either String VMState
+stackInstrLoadDouble n st@VMState{stack, ip, locals} =
+    case locals V.!? n of
+        Just (VDouble d) -> Right st {ip = ip + 1, stack = VDouble d : stack}
+        Just _ -> Left ("dload: expected double at local index " ++ show n) 
+        Nothing -> Left ("Invalid local index: " ++ show n)
+
+
+stackInstrStoreDouble :: Int -> VMState -> Either String VMState
+stackInstrStoreDouble n st@VMState{stack, ip, locals} =
+    case stack of
+        (VDouble d : rest) ->
+            let newlocals = locals V.// [(n, VDouble d)] 
+            in Right st {ip = ip + 1, stack = rest, locals = newlocals}
+        _ -> Left ("dstore: expected double on stack for local index " ++ show n)
+
+
+stackInstrLoadChar :: Int -> VMState -> Either String VMState
+stackInstrLoadChar n st@VMState{stack, ip, locals} =
+    case locals V.!? n of
+        Just (VChar c) -> Right st {ip = ip + 1, stack = VChar c : stack}
+        Just _ -> Left ("cload: expected char at local index " ++ show n) 
+        Nothing -> Left ("Invalid local index: " ++ show n)
+
+
+stackInstrStoreChar :: Int -> VMState -> Either String VMState
+stackInstrStoreChar n st@VMState{stack, ip, locals} =
+    case stack of
+        (VChar c : rest) ->
+            let newlocals = locals V.// [(n, VChar c)] 
+            in Right st {ip = ip + 1, stack = rest, locals = newlocals}
+        _ -> Left ("cstore: expected char on stack for local index " ++ show n)
+
+
 stackInstrSwap :: VMState -> Either String VMState
 stackInstrSwap st@VMState{stack, ip} =
     case stack of
@@ -170,15 +221,25 @@ stack_All_Instr ins st =
 stack_chargement :: StackCharg -> VMState -> Either String VMState
 stack_chargement ins st =
     case ins of
-        AStore n      ->  stackInstrAStore n st
-        ALoad  n      ->  stackInstrALoad n st
+        AStore n        -> stackInstrAStore n st
+        ALoad  n        -> stackInstrALoad n st
 
+        ILoadInt n      -> stackInstrLoadInt n st
+        IStoreInt n     -> stackInstrStoreInt n st
+        IConstInt n     -> stackInstrConstInt n st
+
+        ILoadFloat n    -> stackInstrLoadFloat n st
         IStoreFloat n   -> stackInstrStoreFloat n st
-        ILoadFloat  n   -> stackInstrLoadFloat n st
+        IConstFloat f   -> stackInstrConstFloat f st
     
-        IStoreLong  n   -> stackInstrStoreLong n st
-        ILoadLong   n   -> stackInstrLoadLong n st
+        ILoadLong n     -> stackInstrLoadLong n st
+        IStoreLong n    -> stackInstrStoreLong n st
+        IConstLong l    -> stackInstrConstLong l st
 
-        ILoadInt n   -> stackInstrLoadInt n st
-        IConstInt n   -> stackInstrConstInt n st
-        IStoreInt n   -> stackInstrStoreInt n st
+        ILoadDouble n   -> stackInstrLoadDouble n st
+        IStoreDouble n  -> stackInstrStoreDouble n st
+        IConstDouble d  -> stackInstrConstDouble d st
+
+        ILoadChar n     -> stackInstrLoadChar n st
+        IStoreChar n    -> stackInstrStoreChar n st
+        IConstChar c    -> stackInstrConstChar c st
