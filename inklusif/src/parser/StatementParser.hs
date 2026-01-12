@@ -141,10 +141,6 @@ parseExprStmt = ExprStatement <$> exprStmt
   where
     exprStmt = ExprStmt <$> parseExpression <* symbol ';'
 
-parseParens :: Parser Expr -> Parser Expr
-parseParens p = 
-    (symbol '(' *> p <* symbol ')')
-
 parseStatement :: Parser Statement
 parseStatement = parseVarDecl
                 <|> parseAssignment
