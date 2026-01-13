@@ -118,6 +118,7 @@ data Type
   = IntType
   | FloatType -- j'espère on le fait pas
   | StringType
+  | DoubleType
   | CharType
   | BoolType
   | ArrayType Type
@@ -131,6 +132,7 @@ instance Show Type where
   show StringType = "string"
   show CharType = "char"
   show BoolType = "bool"
+  show DoubleType = "double"
   show (ArrayType t) = show t ++ "[]"
   show (CustomType s) = s
   show VoidType = "void"
@@ -285,7 +287,8 @@ data LoopResult
 -- je crée des valeurs litéralles parce que comme ça à la compilation on sait à 100% que c'est des const et utiliser en pattern matching
 data Literal
   = IntLit Int
-  | FloatLit Double
+  | FloatLit Float
+  | DoubleLit Double
   | StringLit String
   | CharLit Char
   | BoolLit Bool
