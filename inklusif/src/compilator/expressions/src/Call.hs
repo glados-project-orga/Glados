@@ -46,8 +46,7 @@ compileCallFound
   -> String -> [Expr] -> CompilerData
   -> Maybe FunctionDecl
   -> Either String CompilerData
-compileCallFound _ fname _ _ Nothing =
-  Left ("Undefined function: " ++ fname)
+compileCallFound _ fname _ _ Nothing = Left ("Undefined function: " ++ fname)
 compileCallFound rec fname args prog (Just fdecl) =
   thenE (checkArity fname (funcParams fdecl) args)
     (bindE (compileArgs rec args prog) (\pArgs ->
@@ -66,8 +65,7 @@ compileCallFoundT
   -> String -> [Expr] -> CompilerData
   -> Maybe FunctionDecl
   -> Either String (Type, CompilerData)
-compileCallFoundT _ fname _ _ Nothing =
-  Left ("Undefined function: " ++ fname)
+compileCallFoundT _ fname _ _ Nothing = Left ("Undefined function: " ++ fname)
 compileCallFoundT rec fname args prog (Just fdecl) =
   let expected = map paramType (funcParams fdecl)
       retT     = funcReturnType fdecl
@@ -77,13 +75,11 @@ compileCallFoundT rec fname args prog (Just fdecl) =
            (Right (retT, compileCallInstr fname pArgs))))
 
 checkArgTypes :: String -> [Type] -> [Type] -> Either String ()
-checkArgTypes fname expected given =
-  prefixErr ("Type error in call to " ++ fname ++ ": ") (checkPairs 1 expected given)
+checkArgTypes fname expected given = prefixErr ("Type error in call to " ++ fname ++ ": ") (checkPairs 1 expected given)
 
 checkPairs :: Int -> [Type] -> [Type] -> Either String ()
 checkPairs _ [] [] = Right ()
-checkPairs i (e:es) (g:gs) =
-  thenE (prefixArg i (expectType e g)) (checkPairs (i + 1) es gs)
+checkPairs i (e:es) (g:gs) = thenE (prefixArg i (expectType e g)) (checkPairs (i + 1) es gs)
 checkPairs _ _ _ = Left "arity mismatch (unexpected)"
 
 prefixArg :: Int -> Either String () -> Either String ()
