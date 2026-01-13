@@ -129,9 +129,11 @@ parseDouble :: Parser Double
 parseDouble = (negate <$> (parseChar '-' *> parseUDouble)) <|> parseUDouble
 
 parseSingleChar :: Parser Char
-parseSingleChar = Parser f
-    where f [] = Left  "reached end of input"
-          f (x:xs) = Right (x, xs)
+parseSingleChar = parseChar '\'' *> parseSingleChar' <* parseChar '\''
+  where
+    parseSingleChar' = Parser f
+    f [] = Left "reached end of input"
+    f (x:xs) = Right (x, xs)
 
 parseArgSep :: Parser ()
 parseArgSep = (parseChar '_' *> pure ()) <|> parseSpaces
