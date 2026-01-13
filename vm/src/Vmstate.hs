@@ -16,7 +16,7 @@ module Vmstate (
 import Data 
 import HeapInstr
 import ArithmInt
-import StackInstr
+import StackInstr (stack_All_Instr, stack_chargement, stackInstrLdc, stackInstrIinc)
 import ComparInstr
 import ConvInstr
 import ControlFlowInstr
@@ -80,6 +80,8 @@ execInstr (IDcmpg) st = compDCmpG st
 execInstr (IInvokeStatic funcName) st = controlFlowInvokeStatic funcName st
 
 execInstr (IConv op) st = convOp op st
+
+execInstr (IIinc idx inc) st = stackInstrIinc idx inc st
 
 
 

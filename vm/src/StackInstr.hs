@@ -17,6 +17,7 @@ module StackInstr (
       stackInstrConstInt,
       stackInstrLdc,
       stackInstrINop,
+      stackInstrIinc,
       stack_All_Instr,
       stack_chargement
 ) where
@@ -243,3 +244,13 @@ stack_chargement ins st =
         ILoadChar n     -> stackInstrLoadChar n st
         IStoreChar n    -> stackInstrStoreChar n st
         IConstChar c    -> stackInstrConstChar c st
+
+
+stackInstrIinc :: Int -> Int -> VMState -> Either String VMState
+stackInstrIinc idx inc st@VMState{ip, locals} =
+    case locals V.!? idx of
+        Just (VInt val) ->
+            let newLocals = locals V.// [(idx, VInt (val + inc))]
+            in Right st {ip = ip + 1, locals = newLocals}
+        Just _ -> Left ("iinc: expected int at local index " ++ show idx)
+        Nothing -> Left ("iinc: invalid local index " ++ show idx)
