@@ -1,7 +1,15 @@
+{-
+-- EPITECH PROJECT, 2026
+-- glados
+-- File description:
+-- comptype
+-}
+
 module CompilerTypes (
     ConstantPool,
     Bytecode,
     SymbolTable,
+    SymInfo(..),
     Ast,
     CompilerData,
     Defines
@@ -12,12 +20,21 @@ import Ast (
     FunctionDecl,
     StructDecl,
     EnumDecl,
-    TypedefDecl
+    TypedefDecl,
+    Type
     )
 
 type Ast = [Declaration]
 type ConstantPool = [String]
 type Bytecode = [String]
 type Defines = ([FunctionDecl], [StructDecl], [EnumDecl], [TypedefDecl])
-type SymbolTable = [(String, Int)]
+
+data SymInfo = SymInfo
+  { symIndex :: Int
+  , symType  :: Type
+  , symConst :: Bool
+  , symRef   :: Bool
+  } deriving (Show, Eq)
+  
+type SymbolTable = [(String, SymInfo)]
 type CompilerData = (ConstantPool, Defines, Bytecode, SymbolTable)
