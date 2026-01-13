@@ -24,6 +24,7 @@ parseType =
     <|> (keyword "bool" *> pure BoolType)
     <|> (keyword "string" *> pure StringType)
     <|> (keyword "float" *> pure FloatType)
+    <|> (keyword "double" *> pure DoubleType)
     <|> (keyword "char" *> pure CharType)
     <|> (pure CustomType) <*> identifier
 
@@ -134,16 +135,14 @@ parseTryCatchStmt = TryCatchStatement <$> tryCatchStmt
   where
     tryCatchStmt = TryCatchStmt
         <$> (keyword "try" *> parseBlock)
-        <*> (keyword "catch" *> identifier)
-        <*> identifier
+        <*> (keyword "catch" *> symbol '(' *> optional identifier <* symbol ')')
         <*> parseBlock
 
 parseThrowStmt :: Parser Statement
 parseThrowStmt = ThrowStatement <$> throwStmt
   where
     throwStmt = ThrowStmt
-        <$> (keyword "throw" *> identifier)
-        <*> parseExpression
+        <$> (keyword "throw" *> parseExpression <* symbol ';')
 
 parseReturnStmt :: Parser Statement
 parseReturnStmt = ReturnStatement <$> returnStmt

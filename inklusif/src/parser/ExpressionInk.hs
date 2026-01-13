@@ -114,8 +114,9 @@ parseLiteralExpr =
     LitExpr <$> parseLiteral
 
 parseLiteral :: Parser Literal
-parseLiteral =
-        (IntLit <$> parseInt)
+parseLiteral = (FloatLit <$> parseFloat)
+    <|> (DoubleLit <$> parseDouble)
+    <|> (IntLit <$> parseInt)
     <|> (BoolLit True  <$ keyword "true")
     <|> (StringLit <$> parseStringLiteral)
     <|> (BoolLit False <$ keyword "false")
