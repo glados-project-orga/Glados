@@ -1,0 +1,13 @@
+fun main {
+    iconst 5
+    iconst 10
+    iconst 15
+    iconst 20
+    dup2_x2
+    pop
+    pop
+    pop
+    pop
+    iadd
+    ireturn
+}

@@ -1,0 +1,7 @@
+fun main {
+    iconst 10
+    istore 0
+    iinc 0 5
+    iload 0
+    ireturn
+}

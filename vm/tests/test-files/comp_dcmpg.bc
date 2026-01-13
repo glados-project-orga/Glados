@@ -1,0 +1,6 @@
+fun main {
+    dconst 10.0
+    dconst 5.0
+    dcmpg
+    ireturn
+}
