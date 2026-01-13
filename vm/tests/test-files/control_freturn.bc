@@ -1,0 +1,10 @@
+fun getFloat {
+    fconst 42.0
+    freturn
+}
+
+fun main {
+    invokestatic getFloat
+    f2i
+    ireturn
+}

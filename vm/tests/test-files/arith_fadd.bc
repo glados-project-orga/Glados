@@ -1,0 +1,7 @@
+fun main {
+    fconst 3.5
+    fconst 2.5
+    fadd
+    f2i
+    ireturn
+}

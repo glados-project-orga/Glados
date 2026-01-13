@@ -1,0 +1,7 @@
+fun main {
+    lconst 3
+    lconst 2
+    ladd
+    l2i
+    ireturn
+}

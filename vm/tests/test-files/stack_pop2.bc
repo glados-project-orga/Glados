@@ -1,0 +1,7 @@
+fun main {
+    iconst 5
+    iconst 10
+    iconst 20
+    pop2
+    ireturn
+}

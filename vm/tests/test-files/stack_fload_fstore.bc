@@ -1,0 +1,7 @@
+fun main {
+    fconst 42.0
+    fstore 0
+    fload 0
+    f2i
+    ireturn
+}

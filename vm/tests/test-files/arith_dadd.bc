@@ -1,0 +1,7 @@
+fun main {
+    dconst 3.5
+    dconst 2.5
+    dadd
+    d2i
+    ireturn
+}
