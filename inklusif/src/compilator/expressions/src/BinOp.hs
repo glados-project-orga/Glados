@@ -5,40 +5,56 @@
 -- expr
 -}
 
-module BinOp (compileBinOpExpr) where
+module BinOp (compileBinOpExprT) where
 
-import Ast (Expr, BinOp(..))
+import Ast (Expr, BinOp(..), Type(..))
 import CompilerTypes (CompilerData)
 import CompilerTools (appendBody)
 
-compileBinOpExpr
-  :: (Expr -> CompilerData -> Either String CompilerData)
+bindE :: Either String a -> (a -> Either String b) -> Either String b
+bindE (Left err) _ = Left err
+bindE (Right x) f  = f x
+
+thenE :: Either String a -> Either String b -> Either String b
+thenE (Left err) _  = Left err
+thenE (Right _) nxt = nxt
+
+appendBC :: [String] -> CompilerData -> CompilerData
+appendBC bc prog = appendBody prog bc
+
+compileBinOpExprT
+  :: (Expr -> CompilerData -> Either String (Type, CompilerData))
   -> BinOp
   -> Expr
   -> Expr
   -> CompilerData
-  -> Either String CompilerData
-compileBinOpExpr rec Add a b prog = bin rec ["iadd"] a b prog
-compileBinOpExpr rec Sub a b prog = bin rec ["isub"] a b prog
-compileBinOpExpr rec Mul a b prog = bin rec ["imul"] a b prog
-compileBinOpExpr rec Div a b prog = bin rec ["idiv"] a b prog
-compileBinOpExpr rec Mod a b prog = bin rec ["irem"] a b prog
-compileBinOpExpr _ op _ _ _ = Left ("BinOp not implemented yet: " ++ show op)
+  -> Either String (Type, CompilerData)
+compileBinOpExprT rec Add a b prog = binT rec ["iadd"] a b prog
+compileBinOpExprT rec Sub a b prog = binT rec ["isub"] a b prog
+compileBinOpExprT rec Mul a b prog = binT rec ["imul"] a b prog
+compileBinOpExprT rec Div a b prog = binT rec ["idiv"] a b prog
+compileBinOpExprT rec Mod a b prog = binT rec ["irem"] a b prog
+compileBinOpExprT _ op _ _ _ = Left ("Typed BinOp not implemented yet: " ++ show op)
 
-bin
-  :: (Expr -> CompilerData -> Either String CompilerData)
+binT
+  :: (Expr -> CompilerData -> Either String (Type, CompilerData))
   -> [String]
   -> Expr
   -> Expr
   -> CompilerData
-  -> Either String CompilerData
-bin rec opBC a b prog =
-  case rec a prog of
-    Left err -> Left err
-    Right p1 ->
-      case rec b p1 of
-        Left err -> Left err
-        Right p2 -> Right (appendBC opBC p2)
+  -> Either String (Type, CompilerData)
+binT rec opBC a b prog =
+  bindE (rec a prog) (\(ta, p1) ->
+    bindE (rec b p1) (\(tb, p2) ->
+      thenE (expectInt2 ta tb)
+        (Right (IntType, appendBC opBC p2))))
 
-appendBC :: [String] -> CompilerData -> CompilerData
-appendBC bc prog = appendBody prog bc
+isIntLike :: Type -> Bool
+isIntLike IntType = True
+isIntLike _ = False
+
+expectInt2 :: Type -> Type -> Either String ()
+expectInt2 ta tb
+  | isIntLike ta && isIntLike tb = Right ()
+  | otherwise =
+      Left ("type error: expected (int, int) but got (" ++ show ta ++ ", " ++ show tb ++ ")")
