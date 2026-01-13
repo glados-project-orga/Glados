@@ -115,6 +115,7 @@ data Instr = ILdc Int
            | INew String | IGetField String | IPutField String
 
            | INewArray | IALoad | IAStore | IArrayLength
+           | IIinc Int Int
            deriving (Show, Eq)
 
 

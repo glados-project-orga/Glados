@@ -98,6 +98,7 @@ parseLoadStore = parseLoadInt
              <|> parseStoreChar
              <|> parseALoad
              <|> parseAStore
+             <|> parseIinc
 
 parseLoadInt :: Parser Instr
 parseLoadInt = parseKeyword "iload" *> parseArgSep *> ((IStck_1 . ILoadInt) <$> parseInt)
@@ -134,6 +135,11 @@ parseALoad = parseKeyword "aload" *> parseArgSep *> ((IStck_1 . ALoad) <$> parse
 
 parseAStore :: Parser Instr
 parseAStore = parseKeyword "astore" *> parseArgSep *> ((IStck_1 . AStore) <$> parseInt)
+
+parseIinc :: Parser Instr
+parseIinc = (\idx inc -> IIinc idx inc)
+        <$> (parseKeyword "iinc" *> parseArgSep *> parseInt)
+        <*> (parseArgSep *> parseInt)
 
 parseArithmetic :: Parser Instr
 parseArithmetic = parseIntArithmetic
