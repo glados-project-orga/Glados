@@ -5,19 +5,21 @@
 -- expr
 -}
 
-module Expr (compileExpr) where
+module Expr (compileExpr, compileExprT) where
 
-import Ast (Expr(..))
+import Ast (Expr(..), Type(..))
 import CompilerTypes (CompilerData)
-
-import Literal (compileLiteralExpr)
-import Var (compileVarExpr)
-import BinOp (compileBinOpExpr)
-import Call (compileCallExpr)
+import Literal (compileLiteralExprT)
+import BinOp (compileBinOpExprT)
+import Call (compileCallExprT)
+import Var (compileVarExprT)
 
 compileExpr :: Expr -> CompilerData -> Either String CompilerData
-compileExpr (LitExpr lit) prog = compileLiteralExpr lit prog
-compileExpr (VarExpr name) prog = compileVarExpr name prog
-compileExpr (BinOpExpr op a b) prog = compileBinOpExpr compileExpr op a b prog
-compileExpr (CallExpression call) prog = compileCallExpr compileExpr call prog
-compileExpr _ _ = Left "Expression not implemented yet"
+compileExpr e prog = snd <$> compileExprT e prog
+
+compileExprT :: Expr -> CompilerData -> Either String (Type, CompilerData)
+compileExprT (LitExpr lit) prog = compileLiteralExprT lit prog
+compileExprT (VarExpr name) prog = compileVarExprT name prog
+compileExprT (BinOpExpr op a b) prog = compileBinOpExprT compileExprT op a b prog
+compileExprT (CallExpression call) prog = compileCallExprT compileExprT call prog
+compileExprT _ _ = Left "expression not implemented yet"
