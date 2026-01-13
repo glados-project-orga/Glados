@@ -10,10 +10,7 @@ module Var (compileVarExpr, compileVarExprT) where
 import Ast (Type)
 import CompilerTypes (CompilerData, SymbolTable, SymInfo(..))
 import CompilerTools (appendBody)
-
-bindE :: Either String a -> (a -> Either String b) -> Either String b
-bindE (Left err) _ = Left err
-bindE (Right x) f  = f x
+import EitherUtils (bindE)
 
 compileVarExpr :: String -> CompilerData -> Either String CompilerData
 compileVarExpr name prog = snd <$> compileVarExprT name prog

@@ -9,10 +9,7 @@ module ExprArgs (compileArgs, compileArgsT) where
 
 import Ast (Expr, Type)
 import CompilerTypes (CompilerData)
-
-bindE :: Either String a -> (a -> Either String b) -> Either String b
-bindE (Left err) _ = Left err
-bindE (Right x) f  = f x
+import EitherUtils (bindE)
 
 compileArgs
   :: (Expr -> CompilerData -> Either String CompilerData)

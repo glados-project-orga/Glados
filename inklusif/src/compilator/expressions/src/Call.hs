@@ -18,20 +18,13 @@ import Arity (checkArity)
 import ExprArgs (compileArgs, compileArgsT)
 import CompilerTools (appendBody)
 import TypeCheck (expectType)
+import EitherUtils (bindE, thenE)
 
 emitCall :: String -> [String]
 emitCall fname = ["invokestatic " ++ fname]
 
 compileCallInstr :: String -> CompilerData -> CompilerData
 compileCallInstr fname prog = appendBody prog (emitCall fname)
-
-bindE :: Either String a -> (a -> Either String b) -> Either String b
-bindE (Left err) _ = Left err
-bindE (Right x) f  = f x
-
-thenE :: Either String a -> Either String b -> Either String b
-thenE (Left err) _  = Left err
-thenE (Right _) nxt = nxt
 
 compileCallExpr
   :: (Expr -> CompilerData -> Either String CompilerData)

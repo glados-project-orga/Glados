@@ -10,14 +10,7 @@ module BinOp (compileBinOpExprT) where
 import Ast (Expr, BinOp(..), Type(..))
 import CompilerTypes (CompilerData)
 import CompilerTools (appendBody)
-
-bindE :: Either String a -> (a -> Either String b) -> Either String b
-bindE (Left err) _ = Left err
-bindE (Right x) f  = f x
-
-thenE :: Either String a -> Either String b -> Either String b
-thenE (Left err) _  = Left err
-thenE (Right _) nxt = nxt
+import EitherUtils (bindE, thenE)
 
 appendBC :: [String] -> CompilerData -> CompilerData
 appendBC bc prog = appendBody prog bc
