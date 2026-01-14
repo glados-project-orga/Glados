@@ -58,7 +58,7 @@ instance ShowType CompilerVal where
     showType (CharCmpl _)      = "char"
     showType (ConstCmpl _)     = "const"
     showType (LambdaCmpl _)    = "lambda"
-    showType (ArrayCmpl _ val) = "array " ++ showType val
+    showType (ArrayCmpl _ val) = "array " ++ val
     showType (CustomCmpl name) = name
     showType VoidCmpl          = "void"
 

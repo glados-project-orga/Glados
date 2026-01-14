@@ -1,7 +1,7 @@
 module ArrayIndex (compileArrayIndex) where
 
 import CompilerTypes (CompilerData)
-import Ast (ArrayIndexExpr)
+import Ast (ArrayIndexExpr(..), Expr(..))
 
 compileArrayIndex :: ArrayIndexExpr -> CompilerData -> Either String CompilerData
-compileArrayIndex _ prog = Right prog
+compileArrayIndex (ArrayIndexExpr arr index val) prog = Right prog
