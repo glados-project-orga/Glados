@@ -72,9 +72,15 @@ parseClassVar :: Parser Expr
 parseClassVar = ClassVarExpr <$> identifier
     <*> (symbol '.' *> parseExpression)
 
+parseClassConstructor :: Parser Expr
+parseClassConstructor =
+    ClassConstructorExpr <$> (keyword "new" *> identifier)
+        <*> arguments
+
 parseAtom :: Parser Expr
 parseAtom =
         parseLiteralExpr
+    <|> parseClassConstructor
     <|> parseFunctionCall
     <|> parseStructLiteral
     <|> parseArrayLiteral
