@@ -6,7 +6,7 @@ import CompilerTools (appendDefines)
 import CompilerError (errPos)
 
 isClassDefined :: String -> Defines -> Bool
-isClassDefined searched (_, classDefs, _, _) =
+isClassDefined searched (_, _, classDefs, _, _) =
     any (\(ClassDecl _ name _ _) -> name == searched) classDefs
 
 appendMethods :: Either String CompilerData -> [FunctionDecl] -> Either String CompilerData

@@ -17,8 +17,22 @@ import Control.Applicative
 import Parser
 import ExpressionInk
 
+parseLambdaVar :: Parser LambdaVar
+parseLambdaVar =
+    LambdaVar
+        <$> (symbol '(' *> sepBy parseType comma <* symbol ')')
+        <*> (keyword "=>" *> parseType <* symbol '=')
+        <*> (parseLambdaParamNames)
+        <*> parseBlock <* symbol ';'
+
+parseLambdaParamNames :: Parser [String]
+parseLambdaParamNames =
+        symbol '[' *> sepBy identifier comma <* symbol ']'
+    <|> pure []
+
+
 parseOtherType :: Parser Type
-parseOtherType = (keyword "int"  *> pure IntType)
+parseOtherType =  (keyword "int" *> pure IntType)
     <|> (keyword "void" *> pure VoidType)
     <|> (keyword "bool" *> pure BoolType)
     <|> (keyword "string" *> pure StringType)
@@ -32,7 +46,7 @@ parseArray = ArrayVar <$> parseOtherType
     <*> (symbol '[' *> parseExpression <* symbol ']')
 
 parseType :: Parser Type
-parseType = (ArrayType <$> parseArray) 
+parseType = (ArrayType <$> parseArray)
     <|> parseOtherType
 
 parseIsConst :: Parser Bool
@@ -42,6 +56,13 @@ parseIsConst = (keyword "const" *> pure True)
 parseIsRef :: Parser Bool
 parseIsRef = (symbol '&' *> pure True)
             <|> pure False
+
+parseLambdaDecl :: Parser Statement
+parseLambdaDecl = LambdaStatement
+        <$> (LambdaDecl
+                <$> (keyword "let" *> identifier)
+                <*> (keyword "->" *> parseLambdaVar)
+            )
 
 parseVarDecl :: Parser Statement
 parseVarDecl =
@@ -65,14 +86,14 @@ parseForAssignment :: Parser Statement
 parseForAssignment = AssignmentStmt <$> assignment
     where 
     assignment = Assignment
-        <$> identifier
+        <$> parseExpression
         <*> (symbol '=' *> parseExpression)
 
 parseAssignment :: Parser Statement
 parseAssignment = AssignmentStmt <$> assignment
     where 
     assignment = Assignment
-        <$> identifier
+        <$> parseExpression
         <*> (symbol '=' *> parseExpression <* symbol ';')
 
 parseIfStmt :: Parser Statement
@@ -164,6 +185,7 @@ parseExprStmt = ExprStatement <$> exprStmt
 
 parseStatement :: Parser Statement
 parseStatement = parseVarDecl
+                <|> parseLambdaDecl
                 <|> parseAssignment
                 <|> parseIfStmt
                 <|> parseWhileStmt

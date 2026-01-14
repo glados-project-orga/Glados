@@ -14,6 +14,8 @@ module CompilerTypes (
     CompilerData,
     Defines,
     CompilerVal(..),
+    CompileResult,
+    CompileExpr,
 ) where
 
 import Ast (
@@ -22,12 +24,14 @@ import Ast (
     ClassDecl,
     EnumDecl,
     TypedefDecl,
+    Expr,
     )
 
+type HeapSize = Int
 type Ast = [Declaration]
 type ConstantPool = [String]
 type Bytecode = [String]
-type Defines = ([FunctionDecl], [ClassDecl], [EnumDecl], [TypedefDecl])
+type Defines = (HeapSize, [FunctionDecl], [ClassDecl], [EnumDecl], [TypedefDecl])
 
 data CompilerVal
   = IntCmpl Int
@@ -42,7 +46,6 @@ data CompilerVal
   | VoidCmpl
   deriving (Eq, Show)
 
-
 data SymInfo = SymInfo
   { symIndex :: Int
   , symVal  :: CompilerVal
@@ -50,3 +53,5 @@ data SymInfo = SymInfo
 
 type SymbolTable = [(String, SymInfo)]
 type CompilerData = (ConstantPool, Defines, Bytecode, SymbolTable)
+type CompileResult = Either String CompilerData
+type CompileExpr   = Expr -> CompilerData -> CompileResult

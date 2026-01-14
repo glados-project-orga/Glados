@@ -22,6 +22,7 @@ module Ast
     SourcePos(..),
     FunctionDecl(..),
     ClassDecl(..),
+    LambdaVar(..),
     EnumDecl(..),
     TypedefDecl(..),
     VarDecl(..),
@@ -31,6 +32,7 @@ module Ast
     ForStmt(..),
     ForEachStmt(..),
     MatchStmt(..),
+    LambdaDecl(..),
     TryCatchStmt(..),
     ThrowStmt(..),
     ReturnStmt(..),
@@ -117,6 +119,13 @@ data ArrayVar = ArrayVar
   , arrayVarSize :: Expr
   } deriving (Show, Eq)
 
+data LambdaVar = LambdaVar
+  { lambdaVarParamsType :: [Type]
+  , lambdaVarReturnType :: Type
+  , lambdaVarParamsName :: [String]
+  , lambdaVarBody :: [Statement]
+  } deriving (Show, Eq)
+
 -- Les types je pense c'est pas dur à expliquer
 data Type
   = IntType
@@ -125,6 +134,7 @@ data Type
   | DoubleType
   | CharType
   | BoolType
+  | LambdaType LambdaVar
   | ArrayType ArrayVar
   | CustomType String  -- (struct, enum, typedef)
   | VoidType -- iel
@@ -136,10 +146,16 @@ instance Show Type where
   show StringType = "string"
   show CharType = "char"
   show BoolType = "bool"
+  show (LambdaType _) = "lambda"
   show DoubleType = "double"
   show (ArrayType t) = show t
   show (CustomType s) = s
   show VoidType = "void"
+
+data LambdaDecl = LambdaDecl
+  { lambdaName :: String
+  , lambdaContent :: LambdaVar
+  } deriving (Show, Eq)
 
 -- Déclarations
 data VarDecl = VarDecl
@@ -151,7 +167,7 @@ data VarDecl = VarDecl
   } deriving (Show, Eq)
 
 data Assignment = Assignment
-  { assignTarget :: String 
+  { assignTarget :: Expr 
   , assignValue :: Expr
   } deriving (Show, Eq)
 
@@ -211,6 +227,7 @@ data Statement
   = VarDeclStmt VarDecl
   | AssignmentStmt Assignment
   | IfStatement IfStmt
+  | LambdaStatement LambdaDecl
   | WhileStatement WhileStmt
   | ForStatement ForStmt
   | ForEachStatement ForEachStmt
@@ -264,6 +281,7 @@ data Expr
   = LitExpr Literal
   | VarExpr String
   | ArrayVarExpr String Expr
+  | ClassVarExpr String Expr
   | BinOpExpr BinOp Expr Expr
   | UnaryOpExpr String Expr
   | CallExpression CallExpr
@@ -276,7 +294,6 @@ data Expr
   | Lambda [Parameter] [Statement]
   deriving (Show, Eq)
 
--- je crée des valeurs litéralles parce que comme ça à la compilation on sait à 100% que c'est des const et utiliser en pattern matching
 data Literal
   = IntLit Int
   | FloatLit Float
