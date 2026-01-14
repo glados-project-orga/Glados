@@ -48,6 +48,7 @@ library:
     - src/compilator/utils
     - src/compilator/expressions
     - src/compilator/expressions/src
+    - src/compilator/expressions/utils
 
 executables:
   inklusif-exe:
