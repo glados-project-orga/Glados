@@ -188,7 +188,7 @@ identifier :: Parser String
 identifier =
     betweenSpaces $
         (:) <$> parseAnyChar (['a'..'z'] ++ ['A'..'Z'] ++ ['_'])
-            <*> parseMany (parseAnyChar (['a'..'z'] ++ ['A'..'Z'] ++ ['0'..'9'] ++ ['_'] ++ ['.']))
+            <*> parseMany (parseAnyChar (['a'..'z'] ++ ['A'..'Z'] ++ ['0'..'9'] ++ ['_']))
 
 eof :: Parser ()
 eof = Parser $ \st ->
