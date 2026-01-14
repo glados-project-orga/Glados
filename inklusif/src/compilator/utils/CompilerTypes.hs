@@ -16,6 +16,7 @@ module CompilerTypes (
     CompilerVal(..),
     CompileResult,
     CompileExpr,
+    ShowType(..)
 ) where
 
 import Ast (
@@ -45,6 +46,21 @@ data CompilerVal
   | CustomCmpl String
   | VoidCmpl
   deriving (Eq, Show)
+
+class ShowType a where
+    showType :: a -> String
+
+instance ShowType CompilerVal where
+    showType (IntCmpl _)       = "int"
+    showType (DoubleCmpl _)    = "double"
+    showType (FloatCmpl _)     = "float"
+    showType (BoolCmpl _)      = "bool"
+    showType (CharCmpl _)      = "char"
+    showType (ConstCmpl _)     = "const"
+    showType (LambdaCmpl _)    = "lambda"
+    showType (ArrayCmpl _ val) = "array " ++ showType val
+    showType (CustomCmpl name) = name
+    showType VoidCmpl          = "void"
 
 data SymInfo = SymInfo
   { symIndex :: Int
