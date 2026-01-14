@@ -17,9 +17,8 @@ import Control.Applicative
 import Parser
 import ExpressionInk
 
-parseType :: Parser Type
-parseType =
-        (keyword "int"  *> pure IntType)
+parseOtherType :: Parser Type
+parseOtherType = (keyword "int"  *> pure IntType)
     <|> (keyword "void" *> pure VoidType)
     <|> (keyword "bool" *> pure BoolType)
     <|> (keyword "string" *> pure StringType)
@@ -27,6 +26,14 @@ parseType =
     <|> (keyword "double" *> pure DoubleType)
     <|> (keyword "char" *> pure CharType)
     <|> (pure CustomType) <*> identifier
+
+parseArray :: Parser ArrayVar
+parseArray = ArrayVar <$> parseOtherType 
+    <*> (symbol '[' *> parseExpression <* symbol ']')
+
+parseType :: Parser Type
+parseType = (ArrayType <$> parseArray) 
+    <|> parseOtherType
 
 parseIsConst :: Parser Bool
 parseIsConst = (keyword "const" *> pure True)
