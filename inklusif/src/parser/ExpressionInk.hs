@@ -31,8 +31,9 @@ parseAdditive =
     chainl1 parseMultiplicative additiveOp
 
 additiveOp :: Parser (Expr -> Expr -> Expr)
-additiveOp =
-        (BinOpExpr Add <$ symbol '+')
+additiveOp = (BinOpExpr AddEqual <$ keyword "+=")
+    <|> (BinOpExpr SubEqual <$ keyword "-=")
+    <|> (BinOpExpr Add <$ symbol '+')
     <|> (BinOpExpr Sub <$ symbol '-')
 
 parseMultiplicative :: Parser Expr
@@ -40,8 +41,10 @@ parseMultiplicative =
     chainl1 parseEqual multiplicativeOp
 
 multiplicativeOp :: Parser (Expr -> Expr -> Expr)
-multiplicativeOp =
-        (BinOpExpr Mul <$ symbol '*')
+multiplicativeOp = (BinOpExpr MulEqual <$ keyword "*=")
+    <|> (BinOpExpr DivEqual <$ keyword "/=")
+    <|> (BinOpExpr ModEqual <$ keyword "%=")
+    <|> (BinOpExpr Mul <$ symbol '*')
     <|> (BinOpExpr Div <$ symbol '/')
     <|> (BinOpExpr Mod <$ symbol '%')
 
@@ -83,9 +86,7 @@ parseAtom =
 --             (p st)
 
 parseAssignmentExpr :: Parser Expr
-parseAssignmentExpr =
-    AssignmentExpr
-        <$> (Assignment
+parseAssignmentExpr = AssignmentExpr <$> (Assignment
                 <$> identifier
                 <*> ((symbol '=' *> parseExpression)))
 
