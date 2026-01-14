@@ -9,7 +9,7 @@ class Point {
 }
 
 fun main() : void {
-    let p -> Point = Point();
+    let p -> Point = new Point();
 
     p.x = 10;
     p.y = 20;

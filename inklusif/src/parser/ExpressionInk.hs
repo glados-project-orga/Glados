@@ -72,11 +72,16 @@ parseClassVar :: Parser Expr
 parseClassVar = ClassVarExpr <$> identifier
     <*> (symbol '.' *> parseExpression)
 
+parseClassConstructor :: Parser Expr
+parseClassConstructor =
+    ClassConstructorExpr <$> (keyword "new" *> identifier)
+        <*> arguments
+
 parseAtom :: Parser Expr
 parseAtom =
         parseLiteralExpr
+    <|> parseClassConstructor
     <|> parseFunctionCall
-    <|> parseStructLiteral
     <|> parseArrayLiteral
     <|> parseArrayVar
     <|> parseClassVar
@@ -95,35 +100,15 @@ parseArrayVar = ArrayVarExpr <$> identifier
 --              )
 --             (p st)
 
-parseArrayAssignement :: Parser ArrayIndexExpr
-parseArrayAssignement = ArrayIndexExpr <$> identifier
-                <*> (symbol '[' *> parseExpression <* symbol ']')
-                <*> ((symbol '=' *> parseExpression))
-
 parseArrayLiteral :: Parser Expr
 parseArrayLiteral =
     ArrayLiteral <$> (symbol '[' *> sepBy parseExpression comma <* symbol ']')
-
-parseAssignmentExpr :: Parser Expr
-parseAssignmentExpr = AssignmentExpr <$> (Assignment
-                <$> parseExpression
-                <*> ((symbol '=' *> parseExpression)))
 
 parseStringLiteral :: Parser String
 parseStringLiteral = 
     parseChar '"' *> parseMany stringChar <* parseChar '"'
   where
     stringChar = parseAnyChar (filter (/= '"') (map toEnum [32..126]))
-
-parseStructLiteral :: Parser Expr
-parseStructLiteral =
-    StructLiteral <$> parseStructFields
-
-parseStructFields :: Parser [(String, Expr)]
-parseStructFields =
-    symbol '{' *> sepBy structField comma <* symbol '}'
-  where
-    structField = (,) <$> identifier <*> (symbol ':' *> parseExpression)
 
 parenthesized :: Parser Expr
 parenthesized =
