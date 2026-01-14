@@ -12,7 +12,8 @@ module CompilerTypes (
     SymInfo(..),
     Ast,
     CompilerData,
-    Defines
+    Defines,
+    CompilerVal(..),
 ) where
 
 import Ast (
@@ -21,7 +22,6 @@ import Ast (
     ClassDecl,
     EnumDecl,
     TypedefDecl,
-    Type
     )
 
 type Ast = [Declaration]
@@ -29,11 +29,23 @@ type ConstantPool = [String]
 type Bytecode = [String]
 type Defines = ([FunctionDecl], [ClassDecl], [EnumDecl], [TypedefDecl])
 
+data CompilerVal
+  = IntCmpl Int
+  | DoubleCmpl Double
+  | FloatCmpl Float
+  | BoolCmpl Bool
+  | CharCmpl Char
+  | ConstCmpl Int
+  | LambdaCmpl Int
+  | ArrayCmpl Int CompilerVal
+  | CustomCmpl String
+  | VoidCmpl
+  deriving (Eq, Show)
+
+
 data SymInfo = SymInfo
   { symIndex :: Int
-  , symType  :: Type
-  , symConst :: Bool
-  , symRef   :: Bool
+  , symVal  :: CompilerVal
   } deriving (Show, Eq)
 
 type SymbolTable = [(String, SymInfo)]

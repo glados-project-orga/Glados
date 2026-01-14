@@ -2,7 +2,8 @@ module CompilerTools (
     appendHeader,
     appendDefines,
     appendBody,
-    appendSymbolTable
+    appendSymbolTable,
+    storeInConstantPool
     ) where
 import CompilerTypes(CompilerData, ConstantPool, Defines, Bytecode, SymbolTable)
 import Ast (Declaration(..))
@@ -29,3 +30,6 @@ appendBody (header, def, body, symblTable) newBody =
 appendSymbolTable :: CompilerData -> SymbolTable -> CompilerData
 appendSymbolTable (header, def, body, symblTable) newSymblTable =
     (header, def, body, symblTable ++ newSymblTable)
+
+storeInConstantPool :: CompilerData -> String -> (CompilerData, Int)
+storeInConstantPool prog@(header, _, _, _) newElem = (appendHeader prog [newElem], length header)
