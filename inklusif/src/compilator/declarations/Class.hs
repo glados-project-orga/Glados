@@ -18,6 +18,5 @@ appendMethods (Right prog) (fun:funs) = appendMethods new_prog funs
 compileClass :: ClassDecl -> CompilerData -> Either String CompilerData
 compileClass def@(ClassDecl pos name _ meth) prog@(_, defs, _, _)
     | isClassDefined name defs = Left ((errPos pos) ++ "Class " ++ name ++ " is already defined.")
-    | otherwise = case appendMethods (Right prog) meth of
-        Left err -> Left err
-        Right meth_progs -> Right (appendDefines meth_progs [(Class def)])
+    | otherwise = appendMethods (Right prog) meth >>=
+        (\meth_progs -> Right (appendDefines meth_progs [(Class def)]))
