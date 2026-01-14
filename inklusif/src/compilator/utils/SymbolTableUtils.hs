@@ -12,6 +12,9 @@ getVarVal :: String -> CompilerData -> Either String CompilerVal
 getVarVal varName prog =
     getVar varName prog >>= (\symInfo -> Right (symVal symInfo))
 
+getVarIndex :: String -> CompilerData -> Either String Int
+getVarIndex varName prog =
+    getVar varName prog >>= (\symInfo -> Right (symIndex symInfo))
 
 getVarType :: String -> CompilerData -> Either String String
 getVarType varName prog = showType <$> getVarVal varName prog
