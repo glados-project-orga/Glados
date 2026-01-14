@@ -1,0 +1,7 @@
+fun main {
+    lconst 6
+    lconst 5
+    lxor
+    l2i
+    ireturn
+}
