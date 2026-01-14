@@ -2,7 +2,15 @@ module ArrayLiteral (compileArrayLiteral) where
 import CompilerTypes (CompilerData)
 import CompilerTools (appendBody)
 import Expr (compileExpr)
-import Ast (Expr)
+import Ast (Expr(..))
+
+arrayCellValidType :: Expr -> Maybe String
+arrayCellValidType (LitExpr _) = Just "Lit"
+arrayCellValidType (VarExpr _) = Just "Var"
+arrayCellValidType (ArrayVarExpr _ _) = Just "ArrayVar"
+arrayCellValidType (BinOpExpr _ _ _) = Just "BinOp"
+arrayCellValidType (ArrayLiteral _) = Just "ArrayLiteral"
+arrayCellValidType _ = Nothing
 
 compileOneCell :: [Expr] -> Int -> CompilerData -> Either String CompilerData
 compileOneCell [] _ prog = Right prog
