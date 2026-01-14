@@ -20,6 +20,11 @@ fun div(a -> int, b -> int) : int
 
 fun for_loop(x -> int) : void {
 	let nb -> int = Bow;
+	let arr -> int[5] = [1, 2, 3, 4, 5];
+	let list -> int[6] = [10, 20, 30, 40, 50];
+	let i -> int = 0;
+
+	arr[0] = list[2] + 5;
 
 	nb = 10 + nb;
 	nb + nb;

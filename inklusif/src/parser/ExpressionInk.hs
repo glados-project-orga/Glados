@@ -68,15 +68,18 @@ otherOp =
         (BinOpExpr And <$ keyword "&&")
     <|> (BinOpExpr Or <$ keyword "||")
 
+parseClassVar :: Parser Expr
+parseClassVar = ClassVarExpr <$> identifier
+    <*> (symbol '.' *> parseExpression)
+
 parseAtom :: Parser Expr
 parseAtom =
         parseLiteralExpr
     <|> parseFunctionCall
     <|> parseStructLiteral
     <|> parseArrayLiteral
-    <|> (ArrayAssignement <$> parseArrayAssignement)
-    <|> parseAssignmentExpr
     <|> parseArrayVar
+    <|> parseClassVar
     <|> (VarExpr <$> identifier)
     <|> parenthesized
 
@@ -103,7 +106,7 @@ parseArrayLiteral =
 
 parseAssignmentExpr :: Parser Expr
 parseAssignmentExpr = AssignmentExpr <$> (Assignment
-                <$> identifier
+                <$> parseExpression
                 <*> ((symbol '=' *> parseExpression)))
 
 parseStringLiteral :: Parser String
