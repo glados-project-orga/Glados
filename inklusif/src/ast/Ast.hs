@@ -12,6 +12,7 @@ module Ast
     StructField(..),
     EnumField(..),
     Type(..),
+    ArrayVar(..),
     Statement(..),
     MatchCase(..),
     Pattern(..),
@@ -111,6 +112,11 @@ data StructField = StructField
   , structFieldType :: Type
   } deriving (Show, Eq)
 
+data ArrayVar = ArrayVar
+  { arrayVarType :: Type
+  , arrayVarSize :: Expr
+  } deriving (Show, Eq)
+
 -- Les types je pense c'est pas dur à expliquer
 data Type
   = IntType
@@ -119,7 +125,7 @@ data Type
   | DoubleType
   | CharType
   | BoolType
-  | ArrayType Type
+  | ArrayType ArrayVar
   | CustomType String  -- (struct, enum, typedef)
   | VoidType -- iel
   deriving (Eq)
@@ -131,7 +137,7 @@ instance Show Type where
   show CharType = "char"
   show BoolType = "bool"
   show DoubleType = "double"
-  show (ArrayType t) = show t ++ "[]"
+  show (ArrayType t) = show t
   show (CustomType s) = s
   show VoidType = "void"
 
@@ -244,8 +250,9 @@ data MethodCallExpr = MethodCallExpr
   } deriving (Show, Eq)
 
 data ArrayIndexExpr = ArrayIndexExpr
-  { arrayExpr :: Expr
-  , indexExpr :: Expr
+  { arrayVar :: String
+  , indexArrayExpr :: Expr
+  , arrayValueExpr :: Expr
   } deriving (Show, Eq)
 
 data FieldAccessExpr = FieldAccessExpr
@@ -256,13 +263,14 @@ data FieldAccessExpr = FieldAccessExpr
 data Expr
   = LitExpr Literal
   | VarExpr String
+  | ArrayVarExpr String Expr
   | BinOpExpr BinOp Expr Expr
   | UnaryOpExpr String Expr
   | CallExpression CallExpr
   | MethodCallExpression MethodCallExpr
   | AssignmentExpr Assignment
   | ArrayLiteral [Expr]
-  | ArrayIndexExpression ArrayIndexExpr
+  | ArrayAssignement ArrayIndexExpr 
   | FieldAccessExpression FieldAccessExpr
   | StructLiteral [(String, Expr)]
   | Lambda [Parameter] [Statement]
