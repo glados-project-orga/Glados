@@ -31,8 +31,9 @@ parseAdditive =
     chainl1 parseMultiplicative additiveOp
 
 additiveOp :: Parser (Expr -> Expr -> Expr)
-additiveOp =
-        (BinOpExpr Add <$ symbol '+')
+additiveOp = (BinOpExpr AddEqual <$ keyword "+=")
+    <|> (BinOpExpr SubEqual <$ keyword "-=")
+    <|> (BinOpExpr Add <$ symbol '+')
     <|> (BinOpExpr Sub <$ symbol '-')
 
 parseMultiplicative :: Parser Expr
@@ -40,8 +41,10 @@ parseMultiplicative =
     chainl1 parseEqual multiplicativeOp
 
 multiplicativeOp :: Parser (Expr -> Expr -> Expr)
-multiplicativeOp =
-        (BinOpExpr Mul <$ symbol '*')
+multiplicativeOp = (BinOpExpr MulEqual <$ keyword "*=")
+    <|> (BinOpExpr DivEqual <$ keyword "/=")
+    <|> (BinOpExpr ModEqual <$ keyword "%=")
+    <|> (BinOpExpr Mul <$ symbol '*')
     <|> (BinOpExpr Div <$ symbol '/')
     <|> (BinOpExpr Mod <$ symbol '%')
 
@@ -70,9 +73,16 @@ parseAtom =
         parseLiteralExpr
     <|> parseFunctionCall
     <|> parseStructLiteral
+    <|> parseArrayLiteral
+    <|> (ArrayAssignement <$> parseArrayAssignement)
     <|> parseAssignmentExpr
+    <|> parseArrayVar
     <|> (VarExpr <$> identifier)
     <|> parenthesized
+
+parseArrayVar :: Parser Expr
+parseArrayVar = ArrayVarExpr <$> identifier
+    <*> (symbol '[' *> parseExpression <* symbol ']')
 
 -- traceInput :: String -> Parser a -> Parser a
 -- traceInput label (Parser p) =
@@ -82,10 +92,17 @@ parseAtom =
 --              )
 --             (p st)
 
+parseArrayAssignement :: Parser ArrayIndexExpr
+parseArrayAssignement = ArrayIndexExpr <$> identifier
+                <*> (symbol '[' *> parseExpression <* symbol ']')
+                <*> ((symbol '=' *> parseExpression))
+
+parseArrayLiteral :: Parser Expr
+parseArrayLiteral =
+    ArrayLiteral <$> (symbol '[' *> sepBy parseExpression comma <* symbol ']')
+
 parseAssignmentExpr :: Parser Expr
-parseAssignmentExpr =
-    AssignmentExpr
-        <$> (Assignment
+parseAssignmentExpr = AssignmentExpr <$> (Assignment
                 <$> identifier
                 <*> ((symbol '=' *> parseExpression)))
 
@@ -114,8 +131,9 @@ parseLiteralExpr =
     LitExpr <$> parseLiteral
 
 parseLiteral :: Parser Literal
-parseLiteral =
-        (IntLit <$> parseInt)
+parseLiteral = (FloatLit <$> parseFloat)
+    <|> (DoubleLit <$> parseDouble)
+    <|> (IntLit <$> parseInt)
     <|> (BoolLit True  <$ keyword "true")
     <|> (StringLit <$> parseStringLiteral)
     <|> (BoolLit False <$ keyword "false")

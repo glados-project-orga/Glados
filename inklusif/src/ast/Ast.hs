@@ -12,12 +12,11 @@ module Ast
     StructField(..),
     EnumField(..),
     Type(..),
+    ArrayVar(..),
     Statement(..),
     MatchCase(..),
     Pattern(..),
     Expr(..),
-    LoopBranch(..),
-    LoopResult(..),
     Literal(..),
     BinOp(..),
     SourcePos(..),
@@ -113,14 +112,20 @@ data StructField = StructField
   , structFieldType :: Type
   } deriving (Show, Eq)
 
+data ArrayVar = ArrayVar
+  { arrayVarType :: Type
+  , arrayVarSize :: Expr
+  } deriving (Show, Eq)
+
 -- Les types je pense c'est pas dur à expliquer
 data Type
   = IntType
   | FloatType -- j'espère on le fait pas
   | StringType
+  | DoubleType
   | CharType
   | BoolType
-  | ArrayType Type
+  | ArrayType ArrayVar
   | CustomType String  -- (struct, enum, typedef)
   | VoidType -- iel
   deriving (Eq)
@@ -131,7 +136,8 @@ instance Show Type where
   show StringType = "string"
   show CharType = "char"
   show BoolType = "bool"
-  show (ArrayType t) = show t ++ "[]"
+  show DoubleType = "double"
+  show (ArrayType t) = show t
   show (CustomType s) = s
   show VoidType = "void"
 
@@ -185,14 +191,12 @@ data MatchStmt = MatchStmt
 
 data TryCatchStmt = TryCatchStmt
   { tryBody :: [Statement]
-  , catchType :: String
-  , catchVar :: String
+  , catchVar :: Maybe String
   , catchBody :: [Statement]
   } deriving (Show, Eq)
 
 data ThrowStmt = ThrowStmt
-  { throwType :: String
-  , throwMessage :: Expr
+  { throwMessage :: Expr
   } deriving (Show, Eq)
 
 data ReturnStmt = ReturnStmt
@@ -246,8 +250,9 @@ data MethodCallExpr = MethodCallExpr
   } deriving (Show, Eq)
 
 data ArrayIndexExpr = ArrayIndexExpr
-  { arrayExpr :: Expr
-  , indexExpr :: Expr
+  { arrayVar :: String
+  , indexArrayExpr :: Expr
+  , arrayValueExpr :: Expr
   } deriving (Show, Eq)
 
 data FieldAccessExpr = FieldAccessExpr
@@ -258,36 +263,24 @@ data FieldAccessExpr = FieldAccessExpr
 data Expr
   = LitExpr Literal
   | VarExpr String
+  | ArrayVarExpr String Expr
   | BinOpExpr BinOp Expr Expr
   | UnaryOpExpr String Expr
   | CallExpression CallExpr
   | MethodCallExpression MethodCallExpr
   | AssignmentExpr Assignment
   | ArrayLiteral [Expr]
-  | ArrayIndexExpression ArrayIndexExpr
+  | ArrayAssignement ArrayIndexExpr 
   | FieldAccessExpression FieldAccessExpr
   | StructLiteral [(String, Expr)]
   | Lambda [Parameter] [Statement]
-  | LoopExpr [LoopBranch] LoopResult
-  deriving (Show, Eq)
-
--- Les loop/récursives
-data LoopBranch
-  = LoopCondition
-      { loopCond :: Expr
-      , loopResult :: LoopResult
-      }
-  deriving (Show, Eq)
-
-data LoopResult
-  = LoopReturn Expr 
-  | LoopContinue [Statement]
   deriving (Show, Eq)
 
 -- je crée des valeurs litéralles parce que comme ça à la compilation on sait à 100% que c'est des const et utiliser en pattern matching
 data Literal
   = IntLit Int
-  | FloatLit Double
+  | FloatLit Float
+  | DoubleLit Double
   | StringLit String
   | CharLit Char
   | BoolLit Bool
@@ -300,6 +293,11 @@ data BinOp
   | Mul
   | Div
   | Mod
+  | AddEqual
+  | SubEqual
+  | MulEqual
+  | DivEqual
+  | ModEqual
   | Equal
   | NotEqual
   | LessThan

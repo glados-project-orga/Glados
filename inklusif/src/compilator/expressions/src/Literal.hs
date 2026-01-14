@@ -15,6 +15,7 @@ import CompilerTools (storeInConstantPool)
 compileLiteralExpr :: Literal -> CompilerData -> Either String CompilerData
 compileLiteralExpr (IntLit n) prog = Right $ appendBody prog ["iconst " ++ show n]
 compileLiteralExpr (FloatLit x) prog = Right $ appendBody prog ["fconst " ++ show x]
+compileLiteralExpr (DoubleLit x) prog = Right $ appendBody prog ["dconst " ++ show x]
 compileLiteralExpr (BoolLit True) prog = Right $ appendBody prog ["iconst 1"]
 compileLiteralExpr (BoolLit False) prog = Right $ appendBody prog ["iconst 0"]
 compileLiteralExpr (CharLit c) prog = Right $ appendBody prog ["cconst " ++ "'" ++ [c] ++ "'"]

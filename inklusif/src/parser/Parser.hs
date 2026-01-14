@@ -26,7 +26,9 @@ module Parser (
     parseString,
     chainl1,
     eof,
-    comma
+    comma,
+    parseFloat,
+    parseDouble
 ) where
 
 import Ast
@@ -130,7 +132,6 @@ handleChar st c | c == '\n' =
                 | otherwise =
     st {input = (drop 1 (input st)), line = (line st), column = (column st) + 1}
 
-
 handleSpaces :: ParseState -> ParseState
 handleSpaces st = foldl handleChar st (takeWhile isSpace (input st))
 
@@ -154,6 +155,24 @@ parseUInt = read <$> some (parseAnyChar ['0'..'9'])
 
 parseInt :: Parser Int
 parseInt = (negate <$> (parseChar '-' *> parseUInt)) <|> parseUInt
+
+parseUDouble :: Parser Double
+parseUDouble = read <$>
+    ((\firstNb sndNb -> firstNb ++ "." ++ sndNb)
+    <$> many (parseAnyChar ['0'..'9'])
+    <*> ((parseChar '.') *> many (parseAnyChar ['0'..'9'])))
+
+parseDouble :: Parser Double
+parseDouble = (negate <$> (parseChar '-' *> parseUDouble)) <|> parseUDouble
+
+parseUFloat :: Parser Float
+parseUFloat = read <$>
+        ((\a b -> a ++ "." ++ b)
+            <$> some (parseAnyChar ['0'..'9'])
+            <*> (parseChar '.' *> many (parseAnyChar ['0'..'9'])))
+
+parseFloat :: Parser Float
+parseFloat = (negate <$> (parseChar '-' *> parseUFloat)) <|> parseUFloat
 
 parseString :: String -> Parser String
 parseString [] = pure []
