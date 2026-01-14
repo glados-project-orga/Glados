@@ -72,9 +72,15 @@ parseClassVar :: Parser Expr
 parseClassVar = ClassVarExpr <$> identifier
     <*> (symbol '.' *> parseExpression)
 
+parseClassConstructor :: Parser Expr
+parseClassConstructor =
+    ClassConstructorExpr <$> (keyword "new" *> identifier)
+        <*> arguments
+
 parseAtom :: Parser Expr
 parseAtom =
         parseLiteralExpr
+    <|> parseClassConstructor
     <|> parseFunctionCall
     <|> parseStructLiteral
     <|> parseArrayLiteral
@@ -95,19 +101,9 @@ parseArrayVar = ArrayVarExpr <$> identifier
 --              )
 --             (p st)
 
-parseArrayAssignement :: Parser ArrayIndexExpr
-parseArrayAssignement = ArrayIndexExpr <$> identifier
-                <*> (symbol '[' *> parseExpression <* symbol ']')
-                <*> ((symbol '=' *> parseExpression))
-
 parseArrayLiteral :: Parser Expr
 parseArrayLiteral =
     ArrayLiteral <$> (symbol '[' *> sepBy parseExpression comma <* symbol ']')
-
-parseAssignmentExpr :: Parser Expr
-parseAssignmentExpr = AssignmentExpr <$> (Assignment
-                <$> parseExpression
-                <*> ((symbol '=' *> parseExpression)))
 
 parseStringLiteral :: Parser String
 parseStringLiteral = 
