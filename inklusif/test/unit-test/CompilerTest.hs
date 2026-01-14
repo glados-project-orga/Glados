@@ -15,13 +15,13 @@ import Ast (Declaration(..), FunctionDecl(..), SourcePos(..), Type(..))
 testCompilerMain :: Test
 testCompilerMain = TestList[
     TestCase (assertEqual "compilerMain with empty AST" 
-        (Right ([], ([], [], [], []), [], []))
-        (compilerMain [] (Right ([], ([], [], [], []), [], [])))
+        (Right ([], (_, [], [], [], []), [], []))
+        (compilerMain [] (Right ([], (_, [], [], [], []), [], [])))
     ),
     TestCase (assertEqual "compilerMain with one function declaration" 
-        (Right ([], ([testFunc], [], [], []), ["fun foo {\n","}\n"], [])) 
+        (Right ([], (_, [testFunc], [], [], []), ["fun foo {\n","}\n"], [])) 
         (compilerMain [Function testFunc] 
-            (Right ([], ([], [], [], []), [], [])))
+            (Right ([], (_, [], [], [], []), [], []))))
     )
     ]
     where testFunc = FunctionDecl (SourcePos 0 0) "foo" [] VoidType []

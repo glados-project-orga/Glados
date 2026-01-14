@@ -24,10 +24,11 @@ import Ast (
     TypedefDecl,
     )
 
+type HeapSize = Int
 type Ast = [Declaration]
 type ConstantPool = [String]
 type Bytecode = [String]
-type Defines = ([FunctionDecl], [ClassDecl], [EnumDecl], [TypedefDecl])
+type Defines = (HeapSize, [FunctionDecl], [ClassDecl], [EnumDecl], [TypedefDecl])
 
 data CompilerVal
   = IntCmpl Int
@@ -41,7 +42,6 @@ data CompilerVal
   | CustomCmpl String
   | VoidCmpl
   deriving (Eq, Show)
-
 
 data SymInfo = SymInfo
   { symIndex :: Int
