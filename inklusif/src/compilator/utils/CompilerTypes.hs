@@ -14,6 +14,8 @@ module CompilerTypes (
     CompilerData,
     Defines,
     CompilerVal(..),
+    CompileResult,
+    CompileExpr,
 ) where
 
 import Ast (
@@ -22,6 +24,7 @@ import Ast (
     ClassDecl,
     EnumDecl,
     TypedefDecl,
+    Expr,
     )
 
 type Ast = [Declaration]
@@ -50,3 +53,5 @@ data SymInfo = SymInfo
 
 type SymbolTable = [(String, SymInfo)]
 type CompilerData = (ConstantPool, Defines, Bytecode, SymbolTable)
+type CompileResult = Either String CompilerData
+type CompileExpr   = Expr -> CompilerData -> CompileResult

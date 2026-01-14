@@ -5,28 +5,13 @@
 -- expr args
 -}
 
-module ExprArgs (compileArgs, compileArgsT) where
+module ExprArgs (compileArgs) where
 
-import Ast (Expr, Type)
-import CompilerTypes (CompilerData)
+import Ast (Expr)
+import CompilerTypes (CompilerData, CompileExpr, CompileResult)
 import EitherUtils (bindE)
 
-compileArgs
-  :: (Expr -> CompilerData -> Either String CompilerData)
-  -> [Expr]
-  -> CompilerData
-  -> Either String CompilerData
+compileArgs :: CompileExpr -> [Expr] -> CompilerData -> CompileResult
 compileArgs _ [] prog = Right prog
 compileArgs rec (e:es) prog =
   bindE (rec e prog) (\p1 -> compileArgs rec es p1)
-
-compileArgsT
-  :: (Expr -> CompilerData -> Either String (Type, CompilerData))
-  -> [Expr]
-  -> CompilerData
-  -> Either String ([Type], CompilerData)
-compileArgsT _ [] prog = Right ([], prog)
-compileArgsT rec (e:es) prog =
-  bindE (rec e prog) (\(t, p1) ->
-    bindE (compileArgsT rec es p1) (\(ts, p2) ->
-      Right (t:ts, p2)))
