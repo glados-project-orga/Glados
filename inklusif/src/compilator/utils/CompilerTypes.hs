@@ -18,7 +18,7 @@ module CompilerTypes (
 import Ast (
     Declaration(..),
     FunctionDecl,
-    StructDecl,
+    ClassDecl,
     EnumDecl,
     TypedefDecl,
     Type
@@ -27,7 +27,7 @@ import Ast (
 type Ast = [Declaration]
 type ConstantPool = [String]
 type Bytecode = [String]
-type Defines = ([FunctionDecl], [StructDecl], [EnumDecl], [TypedefDecl])
+type Defines = ([FunctionDecl], [ClassDecl], [EnumDecl], [TypedefDecl])
 
 data SymInfo = SymInfo
   { symIndex :: Int
@@ -35,6 +35,6 @@ data SymInfo = SymInfo
   , symConst :: Bool
   , symRef   :: Bool
   } deriving (Show, Eq)
-  
+
 type SymbolTable = [(String, SymInfo)]
 type CompilerData = (ConstantPool, Defines, Bytecode, SymbolTable)

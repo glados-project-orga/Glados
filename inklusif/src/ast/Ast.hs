@@ -123,7 +123,17 @@ data Type
   | ArrayType Type
   | CustomType String  -- (struct, enum, typedef)
   | VoidType -- iel
-  deriving (Show, Eq)
+  deriving (Eq)
+
+instance Show Type where
+  show IntType = "int"
+  show FloatType = "float"
+  show StringType = "string"
+  show CharType = "char"
+  show BoolType = "bool"
+  show (ArrayType t) = show t ++ "[]"
+  show (CustomType s) = s
+  show VoidType = "void"
 
 -- Déclarations
 data VarDecl = VarDecl

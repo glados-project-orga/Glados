@@ -13,7 +13,7 @@ appendHeader (header, def, body, symblTable) newHead =
 
 appendDefine :: Declaration -> Defines -> Defines
 appendDefine (Function function) (fun, st, en, td) = (fun ++ [function], st, en, td)
-appendDefine (Struct struct) (fun, st, en, td) = (fun, st ++ [struct], en, td)
+appendDefine (Class struct) (fun, st, en, td) = (fun, st ++ [struct], en, td)
 appendDefine (Enum enum) (fun, st, en, td) = (fun, st, en ++ [enum], td)
 appendDefine (Typedef typedef) (fun, st, en, td) = (fun, st, en, td ++ [typedef])
 

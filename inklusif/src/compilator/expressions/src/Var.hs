@@ -7,7 +7,7 @@
 
 module Var (compileVarExpr) where
 
-import CompilerTypes (CompilerData, SymbolTable)
+import CompilerTypes (CompilerData, SymbolTable, SymInfo(..))
 import CompilerTools (appendBody)
 
 compileVarExpr :: String -> CompilerData -> Either String CompilerData
@@ -20,7 +20,7 @@ emitLoadVar :: String -> SymbolTable -> Either String [String]
 emitLoadVar name st =
   case lookup name st of
     Nothing  -> Left ("Undefined variable: " ++ name)
-    Just idx -> Right [emitLoadIdx idx]
+    Just symInfo -> Right [emitLoadIdx (symIndex symInfo)]
 
 emitLoadIdx :: Int -> String
 emitLoadIdx 0 = "iload_0"
