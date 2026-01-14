@@ -95,19 +95,9 @@ parseArrayVar = ArrayVarExpr <$> identifier
 --              )
 --             (p st)
 
-parseArrayAssignement :: Parser ArrayIndexExpr
-parseArrayAssignement = ArrayIndexExpr <$> identifier
-                <*> (symbol '[' *> parseExpression <* symbol ']')
-                <*> ((symbol '=' *> parseExpression))
-
 parseArrayLiteral :: Parser Expr
 parseArrayLiteral =
     ArrayLiteral <$> (symbol '[' *> sepBy parseExpression comma <* symbol ']')
-
-parseAssignmentExpr :: Parser Expr
-parseAssignmentExpr = AssignmentExpr <$> (Assignment
-                <$> parseExpression
-                <*> ((symbol '=' *> parseExpression)))
 
 parseStringLiteral :: Parser String
 parseStringLiteral = 
