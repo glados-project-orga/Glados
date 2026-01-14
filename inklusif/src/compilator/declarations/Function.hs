@@ -1,20 +1,20 @@
 module Function (compileFunction) where
-import Ast (FunctionDecl(..))
+import Ast (FunctionDecl(..), Declaration(..))
 import Statements (compileStatements)
 import CompilerTypes (CompilerData)
-import CompilerTools (appendBody)
+import CompilerTools (appendBody, appendDefines)
 import FunctionUtils (searchFunctions)
 import CompilerError (errPos)
 
-closeFunction :: Either String CompilerData -> Either String CompilerData
-closeFunction (Left err) = Left err
-closeFunction (Right prog) = Right (appendBody prog ["}\n"])
+closeFunction :: Either String CompilerData -> FunctionDecl -> Either String CompilerData
+closeFunction (Left err) _ = Left err
+closeFunction (Right prog) def = Right (appendDefines (appendBody prog ["}\n"]) [Function def] )
 
 compileFunction :: FunctionDecl -> CompilerData-> Either String CompilerData
-compileFunction (FunctionDecl pos name _ _ statements) (header, defs, body, _)
+compileFunction def@(FunctionDecl pos name _ _ statements) (header, defs, body, _)
     | searchFunctions name defs /= Nothing =
         Left ((errPos pos) ++ "Function " ++ name ++ " is already defined.")
     | otherwise = new_prog
-        where new_prog = closeFunction uncomplete_prog
+        where new_prog = closeFunction uncomplete_prog def
               uncomplete_prog = compileStatements statements (Right open_fun)
               open_fun = (header, defs, body ++ ["fun" ++ " " ++ name ++ " {\n"], [])
