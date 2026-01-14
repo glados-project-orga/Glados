@@ -42,7 +42,7 @@ data CompilerVal
   | CharCmpl Char
   | ConstCmpl Int
   | LambdaCmpl Int
-  | ArrayCmpl Int CompilerVal
+  | ArrayCmpl Int String
   | CustomCmpl String
   | VoidCmpl
   deriving (Eq, Show)
