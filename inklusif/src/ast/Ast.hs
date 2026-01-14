@@ -16,8 +16,6 @@ module Ast
     MatchCase(..),
     Pattern(..),
     Expr(..),
-    LoopBranch(..),
-    LoopResult(..),
     Literal(..),
     BinOp(..),
     SourcePos(..),
@@ -268,20 +266,6 @@ data Expr
   | FieldAccessExpression FieldAccessExpr
   | StructLiteral [(String, Expr)]
   | Lambda [Parameter] [Statement]
-  | LoopExpr [LoopBranch] LoopResult
-  deriving (Show, Eq)
-
--- Les loop/récursives
-data LoopBranch
-  = LoopCondition
-      { loopCond :: Expr
-      , loopResult :: LoopResult
-      }
-  deriving (Show, Eq)
-
-data LoopResult
-  = LoopReturn Expr 
-  | LoopContinue [Statement]
   deriving (Show, Eq)
 
 -- je crée des valeurs litéralles parce que comme ça à la compilation on sait à 100% que c'est des const et utiliser en pattern matching
@@ -301,6 +285,11 @@ data BinOp
   | Mul
   | Div
   | Mod
+  | AddEqual
+  | SubEqual
+  | MulEqual
+  | DivEqual
+  | ModEqual
   | Equal
   | NotEqual
   | LessThan
