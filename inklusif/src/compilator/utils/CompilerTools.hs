@@ -8,8 +8,11 @@ module CompilerTools (
     getLitArrayType,
     isArrayMixed,
     validAssignmentType,
-    getNuancedArray
-    ) where
+    getNuancedArray,
+    convertToCompilerVal
+    )
+where
+
 import Data.Either (lefts, rights)
 import Data.Maybe (listToMaybe, fromMaybe)
 import CompilerTypes(CompilerData,
