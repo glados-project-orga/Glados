@@ -14,5 +14,5 @@ import BinOp (compileBinOpExpr)
 
 compileExpr :: Expr -> CompilerData -> Either String CompilerData
 compileExpr (LitExpr lit) prog = compileLiteralExpr lit prog
-compileExpr expr@(BinOpExpr _ _ _) prog = compileBinOpExpr expr prog
+compileExpr expr@(BinOpExpr _ _ _) prog = compileBinOpExpr compileExpr expr prog
 compileExpr _ _ = Left "Expression type not implemented yet"
