@@ -10,14 +10,34 @@ module BinOp (compileBinOpExpr) where
 import Ast (Expr(..), BinOp(..))
 import CompilerTypes (CompilerData, CompileExpr, CompilerVal(..))
 import CompilerTools (appendBody, convertToCompilerVal)
+import SymbolTableUtils (getVarIndex, getVarVal)
 
 compileBinOpExpr :: CompileExpr -> Expr -> CompilerData -> Either String CompilerData
 compileBinOpExpr compile (BinOpExpr op left right) prog =
-    compile left prog >>= \progLeft ->
-    compile right progLeft >>= \progRight ->
-    convertToCompilerVal left prog >>= \exprType ->
-    emitBinOp op exprType progRight
+    case op of
+        AddEqual -> compileCompoundAssign compile Add left right prog
+        SubEqual -> compileCompoundAssign compile Sub left right prog
+        MulEqual -> compileCompoundAssign compile Mul left right prog
+        DivEqual -> compileCompoundAssign compile Div left right prog
+        ModEqual -> compileCompoundAssign compile Mod left right prog
+        _ -> compile left prog >>= \progLeft ->
+             compile right progLeft >>= \progRight ->
+             convertToCompilerVal left prog >>= \exprType ->
+             emitBinOp op exprType progRight
 compileBinOpExpr _ _ _ = Left "compileBinOpExpr called with non-BinOp expression"
+
+compileCompoundAssign :: CompileExpr -> BinOp -> Expr -> Expr -> CompilerData -> Either String CompilerData
+compileCompoundAssign compile op (VarExpr varName) right prog =
+    getVarIndex varName prog >>= \idx ->
+    getVarVal varName prog >>= \varType ->
+    let loadInstr = typePrefix varType ++ "load " ++ show idx
+        storeInstr = typePrefix varType ++ "store " ++ show idx
+    in Right (appendBody prog [loadInstr]) >>= \progLoad ->
+       compile right progLoad >>= \progRight ->
+       emitBinOp op varType progRight >>= \progOp ->
+       Right (appendBody progOp [storeInstr])
+compileCompoundAssign _ _ _ _ _ =
+    Left "Compound assignment requires a variable on the left side"
 
 typePrefix :: CompilerVal -> String
 typePrefix (IntCmpl _) = "i"
@@ -40,8 +60,10 @@ emitBinOp LessThan t prog = Right $ emitComparison t "lt" prog
 emitBinOp GreaterThan t prog = Right $ emitComparison t "gt" prog
 emitBinOp LessEqual t prog = Right $ emitComparison t "le" prog
 emitBinOp GreaterEqual t prog = Right $ emitComparison t "ge" prog
+
 emitBinOp And _ prog = Right $ appendBody prog ["iand"]
 emitBinOp Or _ prog = Right $ appendBody prog ["ior"]
+
 emitBinOp op _ _ = Left $ "BinOp not implemented: " ++ show op
 
 emitComparison :: CompilerVal -> String -> CompilerData -> CompilerData
