@@ -1,13 +1,13 @@
 module ArrayIndex (compileArrayIndex) where
 
-import CompilerTypes (CompilerData, CompilerVal(..), convert, SymInfo(..))
+import CompilerTypes (CompilerData, CompilerVal(..))
 import SymbolTableUtils (getVarIndex, getVarVal)
 import CompilerTools (getTypePrefix, appendBody, validAssignmentType)
 
-import Ast (ArrayIndexExpr(..), Expr(..), Type(..), Literal(..), CallExpr(..))
+import Ast (ArrayIndexExpr(..), Expr(..))
 import Expr (compileExpr)
 
-validExprForTask :: CompilerVal ->Expr -> CompilerData -> Either String CompilerData
+validExprForTask :: CompilerVal -> Expr -> CompilerData -> Either String CompilerData
 validExprForTask val expr prog |
     validAssignmentType val expr prog = compileExpr expr prog
     | otherwise = Left "Invalid expression type for array index."

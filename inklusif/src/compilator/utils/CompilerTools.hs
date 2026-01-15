@@ -10,7 +10,7 @@ module CompilerTools (
     validAssignmentType,
     getNuancedArray
     ) where
-import Data.Either (lefts, rights, either)
+import Data.Either (lefts, rights)
 import Data.Maybe (listToMaybe, fromMaybe)
 import CompilerTypes(CompilerData,
     ConstantPool,
@@ -19,15 +19,11 @@ import CompilerTypes(CompilerData,
     SymbolTable,
     TypeEq(..),
     CompilerVal(..),
-    ShowType(..)
     )
-import Data.Either (fromRight)
-import SymbolTableUtils (getVarVal, getVarType)
-import FunctionUtils (getFunctionReturnType, getFunctions, findFunction)
+import SymbolTableUtils (getVarType)
+import FunctionUtils (getFunctionReturnType)
 import Ast (Declaration(..),
     Expr(..),
-    Type(..),
-    Literal(..),
     CallExpr(..),
     MethodCallExpr(..)
     )
@@ -91,13 +87,16 @@ arrayCellValidType (ArrayVarExpr _ _) _ = Right "array"
 arrayCellValidType _ _ = Left "Invalid expression type for array cell"
 
 validAssignmentType :: CompilerVal -> Expr -> CompilerData -> Bool
-validAssignmentType val (VarExpr name) prog = either (const False) (val `typeEq`) (getVarVal name prog)
-validAssignmentType val (ArrayVarExpr name _) prog = showType val == fromRight "" (getVarType name prog)
-validAssignmentType val (ClassVarExpr name (VarExpr varName)) prog = showType val == fromRight "" (getVarType varName prog)
-validAssignmentType val (LitExpr lit) prog = val `typeEq` lit
-validAssignmentType val (ArrayLiteral arr) prog = showType val == fromRight "" (getLitArrayType arr prog)
-validAssignmentType val (CallExpression (CallExpr name _)) (_, def, _, _) =
-    maybe False (\func -> val `typeEq` getFunctionReturnType func) (findFunction name (getFunctions def))
-validAssignmentType val (MethodCallExpression (MethodCallExpr _ name _)) (_, def, _, _) =
-    maybe False (\func -> val `typeEq` getFunctionReturnType func) (findFunction name (getFunctions def))
+validAssignmentType val (VarExpr name) prog = val `typeEq` (getVarType name prog)
+validAssignmentType val (ArrayVarExpr name _) prog = val `typeEq` (getVarType name prog)
+validAssignmentType val (ClassVarExpr _ (VarExpr varName)) prog = val `typeEq` (getVarType varName prog)
+validAssignmentType val (LitExpr lit) _= val `typeEq` lit
+validAssignmentType val (ArrayLiteral arr) prog = val `typeEq` (getLitArrayType arr prog)
+validAssignmentType val (CallExpression (CallExpr name _)) prog =
+    val `typeEq` getFunctionReturnType name prog
+validAssignmentType val (MethodCallExpression (MethodCallExpr _ name _)) prog =
+    val `typeEq` getFunctionReturnType name prog
 validAssignmentType _ _ _ = False
+
+
+-- validAssignmentType val (VarExpr name) prog = either (const False) (val `typeEq`) (getVarVal name prog)
