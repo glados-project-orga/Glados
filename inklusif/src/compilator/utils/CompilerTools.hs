@@ -80,6 +80,9 @@ typePrefixVal (IntCmpl _) = "i"
 typePrefixVal (LongCmpl _) = "l"
 typePrefixVal (FloatCmpl _) = "f"
 typePrefixVal (DoubleCmpl _) = "d"
+typePrefixVal (CharCmpl _) = "c"
+typePrefixVal (BoolCmpl _) = "b"
+typePrefixVal (ArrayCmpl _ _) = "a"
 typePrefixVal _ = "i"
 
 getNuancedArray :: [Expr] -> CompilerData -> ([String], [String])
