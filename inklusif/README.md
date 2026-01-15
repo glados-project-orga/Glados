@@ -301,11 +301,11 @@ while remaining simple and expressive.
 
 ### Students
 
-| Celian Raguin | Compilator / Interpreter |
-| Kerwan Calvier | VM & Compilator |
-| Aurel Pliya | VM & Compilator |
-| Hajar Ahazzam | Compilator / Interpreter |
-| Luigi Gomes | Parser, AST, Documentation |
+ * | Celian Raguin | Compilator / Interpreter |
+ * | Kerwan Calvier | VM & Compilator |
+ * | Aurel Pliya | VM & Compilator |
+ * | Hajar Ahazzam | Compilator / Interpreter |
+ * | Luigi Gomes | Parser, AST, Documentation |
 
 _Epitech_
 
