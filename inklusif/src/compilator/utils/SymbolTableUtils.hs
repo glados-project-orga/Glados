@@ -1,4 +1,4 @@
-module SymbolTableUtils  (getVarVal, getVarType, getVarIndex, getClassVarName) where
+module SymbolTableUtils  (getVarVal, getVarType, getVarIndex, getClassVarName, getVar) where
 
 import CompilerTypes (CompilerData, CompilerVal(..), ShowType(..), SymInfo(..), Handle, SymbolTable)
 
