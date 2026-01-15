@@ -64,6 +64,7 @@ data EnumField = EnumField
 -- La SourcePos (en gros l'endroit ou c'est déclaré) je suis moyen sûr de ça honnêtement
 -- le nom / les params / le body / etc ..
 
+
 data FunctionDecl = FunctionDecl
   { funcPos :: SourcePos
   , funcName :: String
@@ -187,6 +188,7 @@ data WhileStmt = WhileStmt
   , whileBody :: [Statement]
   } deriving (Show, Eq)
 
+
 data ForUpdate
     = ForUpdateExpr Expr
     | ForUpdateStmt Statement
@@ -219,6 +221,7 @@ data TryCatchStmt = TryCatchStmt
 data ThrowStmt = ThrowStmt
   { throwMessage :: Expr
   } deriving (Show, Eq)
+
 
 data ReturnStmt = ReturnStmt
   { returnExpr :: Expr

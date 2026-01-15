@@ -28,6 +28,7 @@ module CompilerTypes (
     HeapSize
 ) where
 
+
 import Ast (
     Declaration(..),
     FunctionDecl,
@@ -45,7 +46,7 @@ type HeapSize = Int
 type Ast = [Declaration]
 type ConstantPool = [String]
 type Bytecode = [String]
-type Defines = (HeapSize, [FunctionDecl], [ClassDecl], [EnumDecl], [TypedefDecl])
+type Defines = (HeapSize, [FunctionDecl], [ClassDecl], [EnumDecl], [TypedefDecl], Int)
 
 data CompilerVal
   = IntCmpl Int
@@ -199,6 +200,7 @@ data SymInfo = SymInfo
   { symIndex :: Int
   , symVal  :: CompilerVal
   } deriving (Show, Eq)
+
 
 type SymbolTable = [(String, SymInfo)]
 type CompilerData = (ConstantPool, Defines, Bytecode, SymbolTable)

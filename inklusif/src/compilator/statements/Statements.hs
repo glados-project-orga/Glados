@@ -1,6 +1,7 @@
-module Statements (compileStatements) where
+module Statements (compileStatements, compileStatement) where
+
 import Ast (Statement(..), ExprStmt(..))
-import CompilerTypes (CompilerData, CompilerData)
+import CompilerTypes (CompilerData)
 import VarDecl (compileVarDecl)
 import Assignment (compileAssignment)
 import If (compileIf)
@@ -12,12 +13,13 @@ import TryCatch (compileTryCatch)
 import Throw (compileThrow)
 import Expr (compileExpr)
 
+
 compileStatement :: Statement -> CompilerData -> Either String CompilerData
 compileStatement (VarDeclStmt vr_dcl) layer = compileVarDecl vr_dcl layer
 compileStatement (AssignmentStmt assign) layer = compileAssignment assign layer
 compileStatement (IfStatement if_st) layer = compileIf if_st layer
 compileStatement (WhileStatement while) layer = compileWhile while layer
-compileStatement (ForStatement for) layer = compileFor for layer
+compileStatement (ForStatement for) layer = compileFor compileStatement for layer
 compileStatement (ForEachStatement for_each) layer = compileForEach for_each layer
 compileStatement (MatchStatement match) layer = compileMatch match layer
 compileStatement (TryCatchStatement tryCatch) layer = compileTryCatch tryCatch layer
