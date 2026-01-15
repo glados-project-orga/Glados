@@ -61,7 +61,7 @@ equalOp =
 
 parseOther :: Parser Expr
 parseOther =
-    chainl1 parseAtom otherOp
+    chainl1 parseUnary otherOp
 
 otherOp :: Parser (Expr -> Expr -> Expr)
 otherOp = 
@@ -76,6 +76,16 @@ parseClassConstructor :: Parser Expr
 parseClassConstructor =
     ClassConstructorExpr <$> (keyword "new" *> identifier)
         <*> arguments
+
+parseUnary :: Parser Expr
+parseUnary =
+        (UnaryOpExpr Neg    <$ symbol '-' <*> parseUnary)
+    <|> (UnaryOpExpr Not    <$ symbol '!' <*> parseUnary)
+    <|> (UnaryOpExpr PreInc <$ keyword "++" <*> parseUnary)
+    <|> (UnaryOpExpr PreDec <$ keyword "--" <*> parseUnary)
+    <|> (UnaryOpExpr Ref    <$ symbol '&' <*> parseUnary)
+    <|> (UnaryOpExpr Deref  <$ symbol '*' <*> parseUnary)
+    <|> parseAtom
 
 parseAtom :: Parser Expr
 parseAtom =

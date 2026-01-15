@@ -15,6 +15,7 @@ module Ast
     ArrayVar(..),
     Statement(..),
     MatchCase(..),
+    UnaryOp(..),
     Pattern(..),
     Expr(..),
     Literal(..),
@@ -283,7 +284,7 @@ data Expr
   | ArrayVarExpr String Expr
   | ClassVarExpr String Expr
   | BinOpExpr BinOp Expr Expr
-  | UnaryOpExpr String Expr
+  | UnaryOpExpr UnaryOp Expr
   | CallExpression CallExpr
   | ClassConstructorExpr String [Expr]
   | MethodCallExpression MethodCallExpr
@@ -293,6 +294,15 @@ data Expr
   | FieldAccessExpression FieldAccessExpr
   | StructLiteral [(String, Expr)]
   | Lambda [Parameter] [Statement]
+  deriving (Show, Eq)
+
+data UnaryOp
+  = Neg        -- -x
+  | Not        -- !x
+  | PreInc     -- ++x
+  | PreDec     -- --x
+  | Ref        -- &x
+  | Deref      -- *x
   deriving (Show, Eq)
 
 data Literal
