@@ -23,6 +23,9 @@ module CompilerTypes (
     ShowType(..),
     TypeEq(..),
     Convert(..),
+    ConvertLit(..),
+    TypeNormalized(..),
+    HeapSize
 ) where
 
 import Ast (
@@ -55,6 +58,12 @@ data CompilerVal
   | VoidCmpl
   deriving (Eq, Show)
 
+data TypeNormalized
+  = TypeNorm Type
+  | LitNorm Literal
+  | CmplNorm CompilerVal
+  deriving (Show, Eq)
+
 class ShowType a where
     showType :: a -> String
 
@@ -63,6 +72,17 @@ class TypeEq a b where
 
 class Convert a where
     convert :: a -> CompilerVal
+
+class ConvertLit a where
+    convertLit :: a -> Literal
+
+instance Convert Literal where
+    convert (IntLit v)    = IntCmpl v
+    convert (FloatLit v)  = FloatCmpl v
+    convert (DoubleLit v) = DoubleCmpl v
+    convert (BoolLit v)   = BoolCmpl v
+    convert (CharLit v)   = CharCmpl v
+    convert (StringLit s) = ArrayCmpl (length s) "char"
 
 instance Convert Type where
     convert IntType        = IntCmpl 0
@@ -75,6 +95,18 @@ instance Convert Type where
     convert (ArrayType t)  = ArrayCmpl 0 (show t)
     convert (CustomType n) = CustomCmpl n
     convert VoidType       = VoidCmpl
+
+instance ConvertLit CompilerVal where
+    convertLit (IntCmpl _) = IntLit 0
+    convertLit (FloatCmpl _) = FloatLit 0.0
+    convertLit (DoubleCmpl _) = DoubleLit 0.0
+    convertLit (BoolCmpl _) = BoolLit False
+    convertLit (CharCmpl _) = CharLit '\0'
+    convertLit (ArrayCmpl _ _) = StringLit ""
+    convertLit (CustomCmpl name) = StringLit name
+    convertLit VoidCmpl = StringLit "void"
+    convertLit (ConstCmpl _) = IntLit 0
+    convertLit (LambdaCmpl _) = StringLit "lambda"
 
 instance Convert String where
     convert "int"    = IntCmpl 0
@@ -97,6 +129,16 @@ instance TypeEq CompilerVal (Either String CompilerVal) where
     typeEq _ (Left _)      = False
     typeEq val (Right cmplVal)     = typeEq val cmplVal
 
+instance TypeEq (Either String CompilerVal) (Either String CompilerVal) where
+    typeEq (Left _) _ = False
+    typeEq _ (Left _) = False
+    typeEq (Right val1) (Right val2) = typeEq val1 val2
+
+instance TypeEq TypeNormalized TypeNormalized where
+    typeEq (TypeNorm t1) (TypeNorm t2) = t1 == t2
+    typeEq (LitNorm l1) (LitNorm l2)   = l1 == l2
+    typeEq (CmplNorm c1) (CmplNorm c2) = typeEq c1 c2
+    typeEq _ _                         = False
 
 instance TypeEq CompilerVal Literal where
     typeEq (IntCmpl _) (IntLit _)          = True

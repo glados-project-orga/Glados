@@ -19,14 +19,20 @@ import CompilerTypes(CompilerData,
     SymbolTable,
     TypeEq(..),
     CompilerVal(..),
+    TypeNormalized(..),
+    Convert(..)
     )
-import SymbolTableUtils (getVarType)
+import SymbolTableUtils (getVarType, getVarVal)
 import FunctionUtils (getFunctionReturnType)
 import Ast (Declaration(..),
     Expr(..),
     CallExpr(..),
-    MethodCallExpr(..)
+    MethodCallExpr(..),
+    ClassDecl(..),
+    StructField(..),
+    Type(..),
     )
+import Data.List (find)
 
 appendHeader :: CompilerData -> ConstantPool -> CompilerData
 appendHeader (header, def, body, symblTable) newHead =
@@ -86,17 +92,63 @@ arrayCellValidType (VarExpr varName) prog = getVarType varName prog
 arrayCellValidType (ArrayVarExpr _ _) _ = Right "array"
 arrayCellValidType _ _ = Left "Invalid expression type for array cell"
 
-validAssignmentType :: CompilerVal -> Expr -> CompilerData -> Bool
-validAssignmentType val (VarExpr name) prog = val `typeEq` (getVarType name prog)
-validAssignmentType val (ArrayVarExpr name _) prog = val `typeEq` (getVarType name prog)
-validAssignmentType val (ClassVarExpr _ (VarExpr varName)) prog = val `typeEq` (getVarType varName prog)
-validAssignmentType val (LitExpr lit) _= val `typeEq` lit
-validAssignmentType val (ArrayLiteral arr) prog = val `typeEq` (getLitArrayType arr prog)
-validAssignmentType val (CallExpression (CallExpr name _)) prog =
-    val `typeEq` getFunctionReturnType name prog
-validAssignmentType val (MethodCallExpression (MethodCallExpr _ name _)) prog =
-    val `typeEq` getFunctionReturnType name prog
-validAssignmentType _ _ _ = False
+getClasses :: CompilerData -> [ClassDecl]
+getClasses (_, (_, _, classes, _, _), _, _) = classes
+
+getClass :: String -> CompilerData -> Either String ClassDecl
+getClass clname prog = 
+    maybe (Left ("Class " ++ clname ++ " does not exist."))
+          Right (find (\(ClassDecl _ name _ _) -> name == clname) classes)
+    where classes = getClasses prog
+
+getClassVarType ::  String -> String -> CompilerData -> Either String Type
+getClassVarType clname varName prog =
+    getClass clname prog >>= \(ClassDecl _ _ fields _) ->
+    maybe (Left ("Variable " ++ varName ++ " does not exist in class " ++ clname ++ "."))
+          (Right . structFieldType) (find (\(StructField name _) -> name == varName) fields)
+
+normalizeExprType :: Expr -> CompilerData -> Either String TypeNormalized
+normalizeExprType (LitExpr lit) _ = Right (LitNorm lit)
+normalizeExprType (VarExpr name) prog = getVarVal name prog >>= (Right . CmplNorm)
+normalizeExprType (ArrayVarExpr name _) prog = getVarVal name prog >>= (Right . CmplNorm)
+normalizeExprType (ClassVarExpr clName (VarExpr varName)) prog =
+    getClassVarType clName varName prog >>= \typ -> Right (TypeNorm typ)
+normalizeExprType (ArrayLiteral arr) prog =
+    getLitArrayType arr prog >>= \typ -> Right (CmplNorm (convert typ))
+normalizeExprType (CallExpression (CallExpr name _)) prog =
+    case getFunctionReturnType name prog of
+        Just retType -> Right (TypeNorm retType)
+        Nothing -> Left "Unknown function return type"
+normalizeExprType (MethodCallExpression (MethodCallExpr _ name _)) prog =
+    case getFunctionReturnType name prog of
+        Just retType -> Right (TypeNorm retType)
+        Nothing -> Left "Unknown function return type"
+normalizeExprType _ _ = Left "Unknown expression type"
+
+normalizeToCmpl :: TypeNormalized -> CompilerVal
+normalizeToCmpl (CmplNorm val) = val
+normalizeToCmpl (TypeNorm typ) = convert typ
+normalizeToCmpl (LitNorm lit) = convert lit
+
+convertToCompilerVal :: Expr -> CompilerData-> Either String CompilerVal
+convertToCompilerVal expr prog = normalizeExprType expr prog >>= (Right . normalizeToCmpl)
+
+validAssignmentType :: Expr -> Expr -> CompilerData -> Bool
+validAssignmentType expr1 expr2 prog = normed1 `typeEq` normed2
+    where normed1 = convertToCompilerVal expr1 prog
+          normed2 = convertToCompilerVal expr2 prog
+
+-- isSameType :: CompilerVal -> Expr -> CompilerData -> Bool
+-- isSameType val (VarExpr name) prog = val `typeEq` (getVarType name prog)
+-- isSameType val (ArrayVarExpr name _) prog = val `typeEq` (getVarType name prog)
+-- isSameType val (ClassVarExpr _ (VarExpr varName)) prog = val `typeEq` (getVarType varName prog)
+-- isSameType val (LitExpr lit) _= val `typeEq` lit
+-- isSameType val (ArrayLiteral arr) prog = val `typeEq` (getLitArrayType arr prog)
+-- isSameType val (CallExpression (CallExpr name _)) prog =
+--     val `typeEq` getFunctionReturnType name prog
+-- isSameType val (MethodCallExpression (MethodCallExpr _ name _)) prog =
+--     val `typeEq` getFunctionReturnType name prog
+-- isSameType _ _ _ = False
 
 
 -- validAssignmentType val (VarExpr name) prog = either (const False) (val `typeEq`) (getVarVal name prog)
