@@ -1,6 +1,6 @@
-module SymbolTableUtils  (getVarVal, getVarType, getVarIndex) where
+module SymbolTableUtils  (getVarVal, getVarType, getVarIndex, getClassVarName) where
 
-import CompilerTypes (CompilerData, CompilerVal(..), ShowType(..), SymInfo(..))
+import CompilerTypes (CompilerData, CompilerVal(..), ShowType(..), SymInfo(..), Handle, SymbolTable)
 
 
 getVar :: String -> CompilerData -> Either String SymInfo
@@ -18,3 +18,14 @@ getVarIndex varName prog =
 
 getVarType :: String -> CompilerData -> Either String String
 getVarType varName prog = showType <$> getVarVal varName prog
+
+getVarByHandle :: Handle -> SymbolTable-> String
+getVarByHandle varHandle ((name, (SymInfo _ (ClassCmpl handle _))):elems)
+    | varHandle == handle = name
+    | otherwise = getVarByHandle varHandle elems
+getVarByHandle varHandle (_:elems) = getVarByHandle varHandle elems
+getVarByHandle _ [] = ""
+
+getClassVarName :: Handle -> CompilerData -> String
+getClassVarName varHandle (_, _, _, symTable) = getVarByHandle varHandle symTable
+

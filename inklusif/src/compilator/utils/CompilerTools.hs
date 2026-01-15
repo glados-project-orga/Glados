@@ -8,11 +8,13 @@ module CompilerTools (
     getLitArrayType,
     isArrayMixed,
     validAssignmentType,
-    getNuancedArray
+    getNuancedArray,
+    cmplValToExpr
     ) where
 import Data.Either (lefts, rights)
 import Data.Maybe (listToMaybe, fromMaybe)
-import CompilerTypes(CompilerData,
+import CompilerTypes(
+    CompilerData,
     ConstantPool,
     Defines,
     Bytecode,
@@ -20,9 +22,10 @@ import CompilerTypes(CompilerData,
     TypeEq(..),
     CompilerVal(..),
     TypeNormalized(..),
-    Convert(..)
+    Convert(..),
+    ConvertExpr(..)
     )
-import SymbolTableUtils (getVarType, getVarVal)
+import SymbolTableUtils (getVarType, getVarVal, getClassVarName)
 import FunctionUtils (getFunctionReturnType)
 import Ast (Declaration(..),
     Expr(..),
@@ -137,6 +140,10 @@ validAssignmentType :: Expr -> Expr -> CompilerData -> Bool
 validAssignmentType expr1 expr2 prog = normed1 `typeEq` normed2
     where normed1 = convertToCompilerVal expr1 prog
           normed2 = convertToCompilerVal expr2 prog
+
+cmplValToExpr :: CompilerVal -> CompilerData -> Expr
+cmplValToExpr (ClassCmpl handle _) prog = (VarExpr (getClassVarName handle prog))
+cmplValToExpr val _ = convertExpr val
 
 -- isSameType :: CompilerVal -> Expr -> CompilerData -> Bool
 -- isSameType val (VarExpr name) prog = val `typeEq` (getVarType name prog)
