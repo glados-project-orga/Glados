@@ -9,7 +9,9 @@ module Labels (
         LabelTable, 
         findLabels,
         correspondLabels,
-        parseLabel)
+        removeLabel,
+        parseLabel,
+        resolveLabels)
 where
 
 import qualified Data.Map as M
@@ -52,8 +54,19 @@ correspondLine table line =
       case M.lookup lab table of
         Just n  -> "goto " ++ show n
         Nothing -> error ("Label inconnu: " ++ lab)
-
+  
     _ -> line
+
+
+removeLabel :: String -> Bool
+removeLabel line =
+  case parseLabel line of
+    Just _  -> False
+    Nothing -> True
+
+
+removeLabels :: [String] -> [String]
+removeLabels = filter removeLabel
 
 
 resolveLabels :: CompilerData -> CompilerData
