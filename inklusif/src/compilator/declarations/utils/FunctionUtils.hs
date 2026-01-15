@@ -8,7 +8,7 @@ import CompilerTypes (Defines, CompilerData)
 import Ast (FunctionDecl(..), Type(..))
 
 getFunctions :: Defines -> [FunctionDecl]
-getFunctions (_, funs, _, _, _) = funs
+getFunctions (_, funs, _, _, _, _) = funs
 
 getFunctionReturnType :: String -> CompilerData -> Maybe Type
 getFunctionReturnType name (_, def, _, _) = function >>= Just . funcReturnType

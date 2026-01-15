@@ -2,29 +2,86 @@
 -- EPITECH PROJECT, 2026
 -- glados
 -- File description:
--- expr
+-- BinOp expression compilation
 -}
 
 module BinOp (compileBinOpExpr) where
 
-import Ast (Expr, BinOp(..))
-import CompilerTypes (CompilerData, CompileExpr, CompileResult)
-import CompilerTools (appendBody)
-import EitherUtils (bindE)
+import Ast (Expr(..), BinOp(..))
+import CompilerTypes (CompilerData, CompileExpr, CompilerVal(..))
+import CompilerTools (appendBody, convertToCompilerVal, typePrefixVal)
+import SymbolTableUtils (getVarIndex, getVarVal)
 
-appendBC :: [String] -> CompilerData -> CompilerData
-appendBC bc prog = appendBody prog bc
+compileBinOpExpr :: CompileExpr -> Expr -> CompilerData -> Either String CompilerData
+compileBinOpExpr compile (BinOpExpr op left right) prog =
+    case op of
+        AddEqual -> compileCompoundAssign compile Add left right prog
+        SubEqual -> compileCompoundAssign compile Sub left right prog
+        MulEqual -> compileCompoundAssign compile Mul left right prog
+        DivEqual -> compileCompoundAssign compile Div left right prog
+        ModEqual -> compileCompoundAssign compile Mod left right prog
+        _ -> compile left prog >>= \progLeft ->
+             compile right progLeft >>= \progRight ->
+             convertToCompilerVal left prog >>= \exprType ->
+             emitBinOp op exprType progRight
+compileBinOpExpr _ _ _ = Left "compileBinOpExpr called with non-BinOp expression"
 
-compileBinOpExpr :: CompileExpr -> BinOp -> Expr -> Expr -> CompilerData -> CompileResult
-compileBinOpExpr rec Add a b prog = bin rec ["iadd"] a b prog
-compileBinOpExpr rec Sub a b prog = bin rec ["isub"] a b prog
-compileBinOpExpr rec Mul a b prog = bin rec ["imul"] a b prog
-compileBinOpExpr rec Div a b prog = bin rec ["idiv"] a b prog
-compileBinOpExpr rec Mod a b prog = bin rec ["irem"] a b prog
-compileBinOpExpr _ op _ _ _ = Left ("BinOp not implemented yet: " ++ show op)
+compileCompoundAssign :: CompileExpr -> BinOp -> Expr -> Expr -> CompilerData -> Either String CompilerData
+compileCompoundAssign compile op (VarExpr varName) right prog =
+    getVarIndex varName prog >>= \idx ->
+    getVarVal varName prog >>= \varType ->
+    let loadInstr = typePrefixVal varType ++ "load " ++ show idx
+        storeInstr = typePrefixVal varType ++ "store " ++ show idx
+    in Right (appendBody prog [loadInstr]) >>= \progLoad ->
+       compile right progLoad >>= \progRight ->
+       emitBinOp op varType progRight >>= \progOp ->
+       Right (appendBody progOp [storeInstr])
+compileCompoundAssign _ _ _ _ _ =
+    Left "Compound assignment requires a variable on the left side"
 
-bin :: CompileExpr -> [String] -> Expr -> Expr -> CompilerData -> CompileResult
-bin rec opBC a b prog =
-  bindE (rec a prog) (\p1 ->
-    bindE (rec b p1) (\p2 ->
-      Right (appendBC opBC p2)))
+emitBinOp :: BinOp -> CompilerVal -> CompilerData -> Either String CompilerData
+
+emitBinOp Add t prog = Right $ appendBody prog [typePrefixVal t ++ "add"]
+emitBinOp Sub t prog = Right $ appendBody prog [typePrefixVal t ++ "sub"]
+emitBinOp Mul t prog = Right $ appendBody prog [typePrefixVal t ++ "mul"]
+emitBinOp Div t prog = Right $ appendBody prog [typePrefixVal t ++ "div"]
+emitBinOp Mod t prog = Right $ appendBody prog [typePrefixVal t ++ "rem"]
+
+emitBinOp Equal t prog = Right $ emitComparison t "eq" prog
+emitBinOp NotEqual t prog = Right $ emitComparison t "ne" prog
+emitBinOp LessThan t prog = Right $ emitComparison t "lt" prog
+emitBinOp GreaterThan t prog = Right $ emitComparison t "gt" prog
+emitBinOp LessEqual t prog = Right $ emitComparison t "le" prog
+emitBinOp GreaterEqual t prog = Right $ emitComparison t "ge" prog
+
+emitBinOp And _ prog = Right $ appendBody prog ["iand"]
+emitBinOp Or _ prog = Right $ appendBody prog ["ior"]
+
+emitBinOp op _ _ = Left $ "BinOp not implemented: " ++ show op
+
+emitComparison :: CompilerVal -> String -> CompilerData -> CompilerData
+emitComparison (IntCmpl _) cond prog = emitIntComparison cond prog
+emitComparison t cond prog = emitCmpThenBranch t cond prog
+
+emitIntComparison :: String -> CompilerData -> CompilerData
+emitIntComparison cond prog = appendBody prog
+    [ "if_icmp" ++ cond ++ " 3"
+    , "iconst 0"
+    , "goto 2"
+    , "iconst 1"
+    ]
+
+emitCmpThenBranch :: CompilerVal -> String -> CompilerData -> CompilerData
+emitCmpThenBranch t cond prog = appendBody prog
+    [ cmpInstr t
+    , "if" ++ cond ++ " 3"
+    , "iconst 0"
+    , "goto 2"
+    , "iconst 1"
+    ]
+
+cmpInstr :: CompilerVal -> String
+cmpInstr (LongCmpl _) = "lcmp"
+cmpInstr (FloatCmpl _) = "fcmpl"
+cmpInstr (DoubleCmpl _) = "dcmpl"
+cmpInstr _ = "lcmp"

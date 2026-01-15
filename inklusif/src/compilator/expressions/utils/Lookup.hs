@@ -11,7 +11,7 @@ import Ast (FunctionDecl(..))
 import CompilerTypes (Defines)
 
 getFunctions :: Defines -> [FunctionDecl]
-getFunctions (_, funs, _, _, _) = funs
+getFunctions (_, funs, _, _, _, _) = funs
 
 findFunction :: String -> [FunctionDecl] -> Maybe FunctionDecl
 findFunction _ [] = Nothing

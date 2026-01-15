@@ -5,12 +5,16 @@ module CompilerTools (
     appendSymbolTable,
     storeInConstantPool,
     getTypePrefix,
+    typePrefixVal,
     getLitArrayType,
     isArrayMixed,
     validAssignmentType,
     getNuancedArray,
-    cmplValToExpr
-    ) where
+    convertToCompilerVal,
+    cmplValToExpr,
+    )
+where
+
 import Data.Either (lefts, rights)
 import Data.Maybe (listToMaybe, fromMaybe)
 import CompilerTypes(
@@ -42,10 +46,10 @@ appendHeader (header, def, body, symblTable) newHead =
     (header ++ newHead, def, body, symblTable)
 
 appendDefine :: Declaration -> Defines -> Defines
-appendDefine (Function function) (c, fun, st, en, td) = (c, fun ++ [function], st, en, td)
-appendDefine (Class struct) (c, fun, st, en, td) = (c, fun, st ++ [struct], en, td)
-appendDefine (Enum enum) (c, fun, st, en, td) = (c, fun, st, en ++ [enum], td)
-appendDefine (Typedef typedef) (c, fun, st, en, td) = (c, fun, st, en, td ++ [typedef])
+appendDefine (Function function) (c, fun, st, en, td, count) = (c, fun ++ [function], st, en, td, count)
+appendDefine (Class struct) (c, fun, st, en, td, count) = (c, fun, st ++ [struct], en, td, count)
+appendDefine (Enum enum) (c, fun, st, en, td, count) = (c, fun, st, en ++ [enum], td, count)
+appendDefine (Typedef typedef) (c, fun, st, en, td, count) = (c, fun, st, en, td ++ [typedef], count)
 
 appendDefines :: CompilerData -> [Declaration] -> CompilerData
 appendDefines prog [] = prog
@@ -70,6 +74,13 @@ getTypePrefix "double" = "d"
 getTypePrefix "char" = "c"
 getTypePrefix "bool" = "b"
 getTypePrefix _ = "a"
+
+typePrefixVal :: CompilerVal -> String
+typePrefixVal (IntCmpl _) = "i"
+typePrefixVal (LongCmpl _) = "l"
+typePrefixVal (FloatCmpl _) = "f"
+typePrefixVal (DoubleCmpl _) = "d"
+typePrefixVal _ = "i"
 
 getNuancedArray :: [Expr] -> CompilerData -> ([String], [String])
 getNuancedArray [] _ = ([], [])
@@ -96,7 +107,7 @@ arrayCellValidType (ArrayVarExpr _ _) _ = Right "array"
 arrayCellValidType _ _ = Left "Invalid expression type for array cell"
 
 getClasses :: CompilerData -> [ClassDecl]
-getClasses (_, (_, _, classes, _, _), _, _) = classes
+getClasses (_, (_, _, classes, _, _, _), _, _) = classes
 
 getClass :: String -> CompilerData -> Either String ClassDecl
 getClass clname prog = 
@@ -144,18 +155,3 @@ validAssignmentType expr1 expr2 prog = normed1 `typeEq` normed2
 cmplValToExpr :: CompilerVal -> CompilerData -> Expr
 cmplValToExpr (ClassCmpl handle _) prog = (VarExpr (getClassVarName handle prog))
 cmplValToExpr val _ = convertExpr val
-
--- isSameType :: CompilerVal -> Expr -> CompilerData -> Bool
--- isSameType val (VarExpr name) prog = val `typeEq` (getVarType name prog)
--- isSameType val (ArrayVarExpr name _) prog = val `typeEq` (getVarType name prog)
--- isSameType val (ClassVarExpr _ (VarExpr varName)) prog = val `typeEq` (getVarType varName prog)
--- isSameType val (LitExpr lit) _= val `typeEq` lit
--- isSameType val (ArrayLiteral arr) prog = val `typeEq` (getLitArrayType arr prog)
--- isSameType val (CallExpression (CallExpr name _)) prog =
---     val `typeEq` getFunctionReturnType name prog
--- isSameType val (MethodCallExpression (MethodCallExpr _ name _)) prog =
---     val `typeEq` getFunctionReturnType name prog
--- isSameType _ _ _ = False
-
-
--- validAssignmentType val (VarExpr name) prog = either (const False) (val `typeEq`) (getVarVal name prog)
