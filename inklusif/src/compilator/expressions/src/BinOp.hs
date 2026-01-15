@@ -27,9 +27,46 @@ typePrefix (DoubleCmpl _) = "d"
 typePrefix _ = "i"
 
 emitBinOp :: BinOp -> CompilerVal -> CompilerData -> Either String CompilerData
+
 emitBinOp Add t prog = Right $ appendBody prog [typePrefix t ++ "add"]
 emitBinOp Sub t prog = Right $ appendBody prog [typePrefix t ++ "sub"]
 emitBinOp Mul t prog = Right $ appendBody prog [typePrefix t ++ "mul"]
 emitBinOp Div t prog = Right $ appendBody prog [typePrefix t ++ "div"]
 emitBinOp Mod t prog = Right $ appendBody prog [typePrefix t ++ "rem"]
-emitBinOp op _ _ = Left $ "Op not found: " ++ show op
+
+emitBinOp Equal t prog = Right $ emitComparison t "eq" prog
+emitBinOp NotEqual t prog = Right $ emitComparison t "ne" prog
+emitBinOp LessThan t prog = Right $ emitComparison t "lt" prog
+emitBinOp GreaterThan t prog = Right $ emitComparison t "gt" prog
+emitBinOp LessEqual t prog = Right $ emitComparison t "le" prog
+emitBinOp GreaterEqual t prog = Right $ emitComparison t "ge" prog
+emitBinOp And _ prog = Right $ appendBody prog ["iand"]
+emitBinOp Or _ prog = Right $ appendBody prog ["ior"]
+emitBinOp op _ _ = Left $ "BinOp not implemented: " ++ show op
+
+emitComparison :: CompilerVal -> String -> CompilerData -> CompilerData
+emitComparison (IntCmpl _) cond prog = emitIntComparison cond prog
+emitComparison t cond prog = emitCmpThenBranch t cond prog
+
+emitIntComparison :: String -> CompilerData -> CompilerData
+emitIntComparison cond prog = appendBody prog
+    [ "if_icmp" ++ cond ++ " 3"
+    , "iconst 0"
+    , "goto 2"
+    , "iconst 1"
+    ]
+
+emitCmpThenBranch :: CompilerVal -> String -> CompilerData -> CompilerData
+emitCmpThenBranch t cond prog = appendBody prog
+    [ cmpInstr t
+    , "if" ++ cond ++ " 3"
+    , "iconst 0"
+    , "goto 2"
+    , "iconst 1"
+    ]
+
+cmpInstr :: CompilerVal -> String
+cmpInstr (LongCmpl _) = "lcmp"
+cmpInstr (FloatCmpl _) = "fcmpl"
+cmpInstr (DoubleCmpl _) = "dcmpl"
+cmpInstr _ = "lcmp"
