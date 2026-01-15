@@ -34,6 +34,7 @@ parseLambdaParamNames =
 parseOtherType :: Parser Type
 parseOtherType =  (keyword "int" *> pure IntType)
     <|> (keyword "void" *> pure VoidType)
+    <|> (keyword "long" *> pure LongType)
     <|> (keyword "bool" *> pure BoolType)
     <|> (keyword "string" *> pure StringType)
     <|> (keyword "float" *> pure FloatType)
