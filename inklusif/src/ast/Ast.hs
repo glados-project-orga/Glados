@@ -45,6 +45,8 @@ module Ast
     ForUpdate(..)
 ) where
 
+import Data.Int (Int64)
+
 -- Position dans le parsing pour les cas d'erreurs
 data SourcePos = SourcePos
   { srcLine :: Int
@@ -134,6 +136,7 @@ data Type
   | StringType
   | DoubleType
   | CharType
+  | LongType
   | BoolType
   | LambdaType LambdaVar
   | ArrayType ArrayVar
@@ -147,6 +150,7 @@ instance Show Type where
   show StringType = "string"
   show CharType = "char"
   show BoolType = "bool"
+  show LongType = "long"
   show (LambdaType _) = "lambda"
   show DoubleType = "double"
   show (ArrayType t) = show t
@@ -310,6 +314,7 @@ data Literal
   | FloatLit Float
   | DoubleLit Double
   | StringLit String
+  | LongLit Int64
   | CharLit Char
   | BoolLit Bool
   deriving (Show, Eq)
