@@ -23,7 +23,7 @@ module CompilerTypes (
     ShowType(..),
     TypeEq(..),
     Convert(..),
-    ConvertLit(..),
+    ConvertExpr(..),
     TypeNormalized(..),
     HeapSize
 ) where
@@ -34,10 +34,12 @@ import Ast (
     ClassDecl,
     EnumDecl,
     TypedefDecl,
-    Expr,
+    Expr(..),
     Type(..),
-    Literal(..)
+    Literal(..),
+    ArrayVar(..)
     )
+import Data.Int (Int64)
 
 type HeapSize = Int
 type Ast = [Declaration]
@@ -47,13 +49,14 @@ type Defines = (HeapSize, [FunctionDecl], [ClassDecl], [EnumDecl], [TypedefDecl]
 
 data CompilerVal
   = IntCmpl Int
+  | LongCmpl Int64
   | DoubleCmpl Double
   | FloatCmpl Float
   | BoolCmpl Bool
   | CharCmpl Char
   | ConstCmpl Int
   | LambdaCmpl Int
-  | ArrayCmpl Int String
+  | ArrayCmpl Int CompilerVal
   | CustomCmpl String
   | VoidCmpl
   deriving (Eq, Show)
@@ -73,8 +76,8 @@ class TypeEq a b where
 class Convert a where
     convert :: a -> CompilerVal
 
-class ConvertLit a where
-    convertLit :: a -> Literal
+class ConvertExpr a where
+    convertExpr :: a -> Expr
 
 instance Convert Literal where
     convert (IntLit v)    = IntCmpl v
@@ -82,31 +85,34 @@ instance Convert Literal where
     convert (DoubleLit v) = DoubleCmpl v
     convert (BoolLit v)   = BoolCmpl v
     convert (CharLit v)   = CharCmpl v
-    convert (StringLit s) = ArrayCmpl (length s) "char"
+    convert (LongLit v)   = LongCmpl v
+    convert (StringLit s) = ArrayCmpl (length s) (CustomCmpl "char")
 
 instance Convert Type where
     convert IntType        = IntCmpl 0
+    convert LongType       = LongCmpl 0
     convert FloatType      = FloatCmpl 0.0
     convert DoubleType     = DoubleCmpl 0.0
     convert BoolType       = BoolCmpl False
     convert CharType       = CharCmpl '\0'
     convert (LambdaType _) = LambdaCmpl 0
-    convert (StringType)   = ArrayCmpl 0 "char"
-    convert (ArrayType t)  = ArrayCmpl 0 (show t)
+    convert (StringType)   = (ArrayCmpl 0 (CharCmpl '\0'))
+    convert (ArrayType (ArrayVar t _))  = ArrayCmpl 0 (convert t)
     convert (CustomType n) = CustomCmpl n
     convert VoidType       = VoidCmpl
 
-instance ConvertLit CompilerVal where
-    convertLit (IntCmpl _) = IntLit 0
-    convertLit (FloatCmpl _) = FloatLit 0.0
-    convertLit (DoubleCmpl _) = DoubleLit 0.0
-    convertLit (BoolCmpl _) = BoolLit False
-    convertLit (CharCmpl _) = CharLit '\0'
-    convertLit (ArrayCmpl _ _) = StringLit ""
-    convertLit (CustomCmpl name) = StringLit name
-    convertLit VoidCmpl = StringLit "void"
-    convertLit (ConstCmpl _) = IntLit 0
-    convertLit (LambdaCmpl _) = StringLit "lambda"
+instance ConvertExpr CompilerVal where
+    convertExpr (IntCmpl _) = (LitExpr (IntLit 0))
+    convertExpr (LongCmpl _) = (LitExpr (LongLit 0))
+    convertExpr (FloatCmpl _) = (LitExpr (FloatLit 0.0))
+    convertExpr (DoubleCmpl _) = (LitExpr (DoubleLit 0.0))
+    convertExpr (BoolCmpl _) = (LitExpr (BoolLit False))
+    convertExpr (CharCmpl _) = (LitExpr (CharLit '\0'))
+    convertExpr VoidCmpl = (LitExpr (StringLit "void"))
+    convertExpr (ConstCmpl _) = (LitExpr (IntLit 0))
+    convertExpr (LambdaCmpl _) = (LitExpr (StringLit "lambda"))
+    convertExpr (ArrayCmpl _ valCmpl) = (ArrayLiteral [convertExpr valCmpl])
+    convertExpr (CustomCmpl name) = (LitExpr (StringLit name))
 
 instance Convert String where
     convert "int"    = IntCmpl 0
@@ -146,7 +152,7 @@ instance TypeEq CompilerVal Literal where
     typeEq (FloatCmpl _) (FloatLit _)      = True
     typeEq (BoolCmpl _) (BoolLit _)        = True
     typeEq (CharCmpl _) (CharLit _)        = True
-    typeEq (ArrayCmpl _ "char") (StringLit _) = True
+    typeEq (ArrayCmpl _ (CharCmpl _)) (StringLit _) = True
     typeEq _ _                             = False
 
 instance TypeEq CompilerVal Type where
@@ -156,7 +162,7 @@ instance TypeEq CompilerVal Type where
     typeEq (DoubleCmpl _) (DoubleType)       = True
     typeEq (CharCmpl _) (CharType)           = True
     typeEq (LambdaCmpl _) (LambdaType _)     = True
-    typeEq (ArrayCmpl _ t1) (ArrayType t2)   = t1 == show t2
+    typeEq (ArrayCmpl _ t1) (ArrayType (ArrayVar t2 _))   = typeEq t1 t2
     typeEq (CustomCmpl n1) (CustomType n2)     = n1 == n2
     typeEq VoidCmpl VoidType                    = True
     typeEq _ _                                 = False
@@ -178,13 +184,14 @@ instance TypeEq CompilerVal String where
 
 instance ShowType CompilerVal where
     showType (IntCmpl _)       = "int"
+    showType (LongCmpl _)      = "long"
     showType (DoubleCmpl _)    = "double"
     showType (FloatCmpl _)     = "float"
     showType (BoolCmpl _)      = "bool"
     showType (CharCmpl _)      = "char"
     showType (ConstCmpl _)     = "const"
     showType (LambdaCmpl _)    = "lambda"
-    showType (ArrayCmpl _ val) = "array " ++ val
+    showType (ArrayCmpl _ val) = "array " ++ showType val
     showType (CustomCmpl name) = name
     showType VoidCmpl          = "void"
 
