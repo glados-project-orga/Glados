@@ -70,6 +70,8 @@ instance Convert Type where
     convert DoubleType     = DoubleCmpl 0.0
     convert BoolType       = BoolCmpl False
     convert CharType       = CharCmpl '\0'
+    convert (LambdaType _) = LambdaCmpl 0
+    convert (StringType)   = ArrayCmpl 0 "char"
     convert (ArrayType t)  = ArrayCmpl 0 (show t)
     convert (CustomType n) = CustomCmpl n
     convert VoidType       = VoidCmpl

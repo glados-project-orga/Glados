@@ -10,7 +10,7 @@ module CompilerTools (
     validAssignmentType,
     getNuancedArray
     ) where
-import Data.Either (lefts, rights, either)
+import Data.Either (lefts, rights)
 import Data.Maybe (listToMaybe, fromMaybe)
 import CompilerTypes(CompilerData,
     ConstantPool,
@@ -26,8 +26,6 @@ import SymbolTableUtils (getVarVal, getVarType)
 import FunctionUtils (getFunctionReturnType, getFunctions, findFunction)
 import Ast (Declaration(..),
     Expr(..),
-    Type(..),
-    Literal(..),
     CallExpr(..),
     MethodCallExpr(..)
     )
@@ -93,8 +91,8 @@ arrayCellValidType _ _ = Left "Invalid expression type for array cell"
 validAssignmentType :: CompilerVal -> Expr -> CompilerData -> Bool
 validAssignmentType val (VarExpr name) prog = either (const False) (val `typeEq`) (getVarVal name prog)
 validAssignmentType val (ArrayVarExpr name _) prog = showType val == fromRight "" (getVarType name prog)
-validAssignmentType val (ClassVarExpr name (VarExpr varName)) prog = showType val == fromRight "" (getVarType varName prog)
-validAssignmentType val (LitExpr lit) prog = val `typeEq` lit
+validAssignmentType val (ClassVarExpr _ (VarExpr varName)) prog = showType val == fromRight "" (getVarType varName prog)
+validAssignmentType val (LitExpr lit) _= val `typeEq` lit
 validAssignmentType val (ArrayLiteral arr) prog = showType val == fromRight "" (getLitArrayType arr prog)
 validAssignmentType val (CallExpression (CallExpr name _)) (_, def, _, _) =
     maybe False (\func -> val `typeEq` getFunctionReturnType func) (findFunction name (getFunctions def))
