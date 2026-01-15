@@ -15,6 +15,7 @@ module Ast
     ArrayVar(..),
     Statement(..),
     MatchCase(..),
+    UnaryOp(..),
     Pattern(..),
     Expr(..),
     Literal(..),
@@ -43,6 +44,8 @@ module Ast
     FieldAccessExpr(..),
     ForUpdate(..)
 ) where
+
+import Data.Int (Int64)
 
 -- Position dans le parsing pour les cas d'erreurs
 data SourcePos = SourcePos
@@ -133,6 +136,7 @@ data Type
   | StringType
   | DoubleType
   | CharType
+  | LongType
   | BoolType
   | LambdaType LambdaVar
   | ArrayType ArrayVar
@@ -146,6 +150,7 @@ instance Show Type where
   show StringType = "string"
   show CharType = "char"
   show BoolType = "bool"
+  show LongType = "long"
   show (LambdaType _) = "lambda"
   show DoubleType = "double"
   show (ArrayType t) = show t
@@ -283,7 +288,7 @@ data Expr
   | ArrayVarExpr String Expr
   | ClassVarExpr String Expr
   | BinOpExpr BinOp Expr Expr
-  | UnaryOpExpr String Expr
+  | UnaryOpExpr UnaryOp Expr
   | CallExpression CallExpr
   | ClassConstructorExpr String [Expr]
   | MethodCallExpression MethodCallExpr
@@ -295,11 +300,21 @@ data Expr
   | Lambda [Parameter] [Statement]
   deriving (Show, Eq)
 
+data UnaryOp
+  = Neg        -- -x
+  | Not        -- !x
+  | PreInc     -- ++x
+  | PreDec     -- --x
+  | Ref        -- &x
+  | Deref      -- *x
+  deriving (Show, Eq)
+
 data Literal
   = IntLit Int
   | FloatLit Float
   | DoubleLit Double
   | StringLit String
+  | LongLit Int64
   | CharLit Char
   | BoolLit Bool
   deriving (Show, Eq)
