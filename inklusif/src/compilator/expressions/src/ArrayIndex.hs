@@ -1,6 +1,6 @@
 module ArrayIndex (compileArrayIndex) where
 
-import CompilerTypes (CompilerData, ConvertLit(..))
+import CompilerTypes (CompilerData)
 import SymbolTableUtils (getVarIndex, getVarVal)
 import CompilerTools (getTypePrefix, appendBody, validAssignmentType)
 
@@ -21,5 +21,5 @@ compileArrayIndex (ArrayIndexExpr name index val) prog =
     Right (appendBody prog ["aload " ++ show varIndex]) >>= \loadProg ->
     validExprForTask intMacro index loadProg >>= \indexProg ->
     getVarVal name indexProg >>= \arrayVal ->
-    validExprForTask (LitExpr(convertLit arrayVal)) val indexProg >>=
+    validExprForTask (LitExpr(IntLit 0)) val indexProg >>=
     \valProg -> Right $ appendBody valProg [(getTypePrefix (show arrayVal)) ++ "astore"]
