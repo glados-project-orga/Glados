@@ -10,7 +10,9 @@ module Expr (compileExpr) where
 import Ast (Expr(..))
 import CompilerTypes (CompilerData)
 import Literal (compileLiteralExpr)
+import BinOp (compileBinOpExpr)
 
 compileExpr :: Expr -> CompilerData -> Either String CompilerData
 compileExpr (LitExpr lit) prog = compileLiteralExpr lit prog
+compileExpr expr@(BinOpExpr _ _ _) prog = compileBinOpExpr expr prog
 compileExpr _ _ = Left "Expression type not implemented yet"
