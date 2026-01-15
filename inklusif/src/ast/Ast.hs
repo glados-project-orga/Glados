@@ -285,6 +285,7 @@ data Expr
   | BinOpExpr BinOp Expr Expr
   | UnaryOpExpr String Expr
   | CallExpression CallExpr
+  | ClassConstructorExpr String [Expr]
   | MethodCallExpression MethodCallExpr
   | AssignmentExpr Assignment
   | ArrayLiteral [Expr]
