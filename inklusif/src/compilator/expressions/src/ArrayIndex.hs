@@ -1,7 +1,22 @@
 module ArrayIndex (compileArrayIndex) where
 
-import CompilerTypes (CompilerData)
-import Ast (ArrayIndexExpr(..), Expr(..))
+import CompilerTypes (CompilerData, CompilerVal(..), convert, SymInfo(..))
+import SymbolTableUtils (getVarIndex, getVarVal)
+import CompilerTools (getTypePrefix, appendBody, validAssignmentType)
+
+import Ast (ArrayIndexExpr(..), Expr(..), Type(..), Literal(..), CallExpr(..))
+import Expr (compileExpr)
+
+validExprForTask :: CompilerVal ->Expr -> CompilerData -> Either String CompilerData
+validExprForTask val expr prog |
+    validAssignmentType val expr prog = compileExpr expr prog
+    | otherwise = Left "Invalid expression type for array index."
 
 compileArrayIndex :: ArrayIndexExpr -> CompilerData -> Either String CompilerData
-compileArrayIndex (ArrayIndexExpr arr index val) prog = Right prog
+compileArrayIndex (ArrayIndexExpr name index val) prog =
+    getVarIndex name prog >>= \varIndex ->
+    Right (appendBody prog ["aload " ++ show varIndex]) >>= \loadProg ->
+    validExprForTask (IntCmpl 0) index loadProg >>= \indexProg ->
+    getVarVal name indexProg >>= \arrayVal ->
+    validExprForTask arrayVal val indexProg >>=
+    \valProg -> Right $ appendBody valProg [(getTypePrefix (show arrayVal)) ++ "astore"]
