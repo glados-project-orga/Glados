@@ -7,12 +7,12 @@
 
 module BinOp (compileBinOpExpr) where
 
-import Ast (Expr, BinOp(..))
+import Ast (Expr(..), BinOp(..))
 import CompilerTypes (CompilerData, CompileExpr, CompileResult)
 import CompilerTools (appendBody)
 import EitherUtils (bindE)
 
 compileBinOpExpr :: Expr -> CompilerData -> Either String CompilerData
 compileBinOpExpr (BinOpExpr op left right) prog = Left "Placeholder"
-compileBinOpExpr _ = Left "Expected BinOpExpr in compileBinOpExpr"
+compileBinOpExpr _ _ = Left "Expected BinOpExpr in compileBinOpExpr"
 
