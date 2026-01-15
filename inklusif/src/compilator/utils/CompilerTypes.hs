@@ -85,6 +85,19 @@ instance Convert String where
     convert "void"   = VoidCmpl
     convert other    = CustomCmpl other
 
+instance TypeEq CompilerVal (Either String String) where
+    typeEq _ (Left _)      = False
+    typeEq val (Right str)     = typeEq val str
+
+instance TypeEq CompilerVal (Maybe Type) where
+    typeEq _ (Nothing)      = False
+    typeEq val (Just typ)     = typeEq val typ
+
+instance TypeEq CompilerVal (Either String CompilerVal) where
+    typeEq _ (Left _)      = False
+    typeEq val (Right cmplVal)     = typeEq val cmplVal
+
+
 instance TypeEq CompilerVal Literal where
     typeEq (IntCmpl _) (IntLit _)          = True
     typeEq (DoubleCmpl _) (DoubleLit _)    = True
@@ -117,6 +130,9 @@ instance TypeEq CompilerVal CompilerVal where
     typeEq (CustomCmpl n1) (CustomCmpl n2)   = n1 == n2
     typeEq VoidCmpl VoidCmpl                  = True
     typeEq _ _                                 = False
+
+instance TypeEq CompilerVal String where
+    typeEq val str = (showType val) == str
 
 instance ShowType CompilerVal where
     showType (IntCmpl _)       = "int"
