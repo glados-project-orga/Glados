@@ -10,6 +10,10 @@ closeFunction :: Either String CompilerData -> FunctionDecl -> Either String Com
 closeFunction (Left err) _ = Left err
 closeFunction (Right prog) def = Right (appendDefines (appendBody prog ["}\n"]) [Function def] )
 
+-- addParams :: [ParamDecl] -> CompilerData -> CompilerData
+-- addParams [] prog = prog
+-- addParams (ParamDecl name typ True:params) prog =
+
 compileFunction :: FunctionDecl -> CompilerData-> Either String CompilerData
 compileFunction def@(FunctionDecl pos name _ _ statements) (header, defs, body, _)
     | searchFunctions name defs /= Nothing =
