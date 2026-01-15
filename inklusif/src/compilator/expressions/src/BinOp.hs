@@ -9,7 +9,7 @@ module BinOp (compileBinOpExpr) where
 
 import Ast (Expr(..), BinOp(..))
 import CompilerTypes (CompilerData, CompileExpr, CompilerVal(..))
-import CompilerTools (appendBody, convertToCompilerVal)
+import CompilerTools (appendBody, convertToCompilerVal, typePrefixVal)
 import SymbolTableUtils (getVarIndex, getVarVal)
 
 compileBinOpExpr :: CompileExpr -> Expr -> CompilerData -> Either String CompilerData
@@ -30,8 +30,8 @@ compileCompoundAssign :: CompileExpr -> BinOp -> Expr -> Expr -> CompilerData ->
 compileCompoundAssign compile op (VarExpr varName) right prog =
     getVarIndex varName prog >>= \idx ->
     getVarVal varName prog >>= \varType ->
-    let loadInstr = typePrefix varType ++ "load " ++ show idx
-        storeInstr = typePrefix varType ++ "store " ++ show idx
+    let loadInstr = typePrefixVal varType ++ "load " ++ show idx
+        storeInstr = typePrefixVal varType ++ "store " ++ show idx
     in Right (appendBody prog [loadInstr]) >>= \progLoad ->
        compile right progLoad >>= \progRight ->
        emitBinOp op varType progRight >>= \progOp ->
@@ -39,20 +39,13 @@ compileCompoundAssign compile op (VarExpr varName) right prog =
 compileCompoundAssign _ _ _ _ _ =
     Left "Compound assignment requires a variable on the left side"
 
-typePrefix :: CompilerVal -> String
-typePrefix (IntCmpl _) = "i"
-typePrefix (LongCmpl _) = "l"
-typePrefix (FloatCmpl _) = "f"
-typePrefix (DoubleCmpl _) = "d"
-typePrefix _ = "i"
-
 emitBinOp :: BinOp -> CompilerVal -> CompilerData -> Either String CompilerData
 
-emitBinOp Add t prog = Right $ appendBody prog [typePrefix t ++ "add"]
-emitBinOp Sub t prog = Right $ appendBody prog [typePrefix t ++ "sub"]
-emitBinOp Mul t prog = Right $ appendBody prog [typePrefix t ++ "mul"]
-emitBinOp Div t prog = Right $ appendBody prog [typePrefix t ++ "div"]
-emitBinOp Mod t prog = Right $ appendBody prog [typePrefix t ++ "rem"]
+emitBinOp Add t prog = Right $ appendBody prog [typePrefixVal t ++ "add"]
+emitBinOp Sub t prog = Right $ appendBody prog [typePrefixVal t ++ "sub"]
+emitBinOp Mul t prog = Right $ appendBody prog [typePrefixVal t ++ "mul"]
+emitBinOp Div t prog = Right $ appendBody prog [typePrefixVal t ++ "div"]
+emitBinOp Mod t prog = Right $ appendBody prog [typePrefixVal t ++ "rem"]
 
 emitBinOp Equal t prog = Right $ emitComparison t "eq" prog
 emitBinOp NotEqual t prog = Right $ emitComparison t "ne" prog

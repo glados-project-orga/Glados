@@ -5,6 +5,7 @@ module CompilerTools (
     appendSymbolTable,
     storeInConstantPool,
     getTypePrefix,
+    typePrefixVal,
     getLitArrayType,
     isArrayMixed,
     validAssignmentType,
@@ -70,6 +71,13 @@ getTypePrefix "double" = "d"
 getTypePrefix "char" = "c"
 getTypePrefix "bool" = "b"
 getTypePrefix _ = "a"
+
+typePrefixVal :: CompilerVal -> String
+typePrefixVal (IntCmpl _) = "i"
+typePrefixVal (LongCmpl _) = "l"
+typePrefixVal (FloatCmpl _) = "f"
+typePrefixVal (DoubleCmpl _) = "d"
+typePrefixVal _ = "i"
 
 getNuancedArray :: [Expr] -> CompilerData -> ([String], [String])
 getNuancedArray [] _ = ([], [])
