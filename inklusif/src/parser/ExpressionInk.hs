@@ -13,6 +13,7 @@ module ExpressionInk (
 import Ast
 import Control.Applicative
 import Parser
+import Data.Int (Int32)
 
 parseExpression :: Parser Expr
 parseExpression = parseComparison
@@ -129,12 +130,26 @@ parseLiteralExpr =
     LitExpr <$> parseLiteral
 
 parseLiteral :: Parser Literal
-parseLiteral = (FloatLit <$> parseFloat)
+parseLiteral =
+        parseNumberLiteral
+    <|> (FloatLit  <$> parseFloat)
     <|> (DoubleLit <$> parseDouble)
-    <|> (IntLit <$> parseInt)
+    <|> (CharLit <$> (parseChar '\''
+        *> parseAnyChar (filter (/= '\'') (map toEnum [32..126])) <* parseChar '\''))
     <|> (BoolLit True  <$ keyword "true")
-    <|> (StringLit <$> parseStringLiteral)
     <|> (BoolLit False <$ keyword "false")
+    <|> (StringLit <$> parseStringLiteral)
+
+parseNumberLiteral :: Parser Literal
+parseNumberLiteral =
+    decide <$> parseNumber
+  where
+    decide n
+        | n <= fromIntegral (maxBound :: Int32)
+            = IntLit  (fromIntegral n)
+        | otherwise
+            = LongLit (fromIntegral n)
+
 
 parseFunctionCall :: Parser Expr
 parseFunctionCall =

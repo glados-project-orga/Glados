@@ -19,6 +19,7 @@ module Parser (
     parseUInt,
     parseInt,
     initialState,
+    parseNumber,
     getSourcePos,
     symbol,
     identifier,
@@ -155,6 +156,10 @@ parseUInt = read <$> some (parseAnyChar ['0'..'9'])
 
 parseInt :: Parser Int
 parseInt = (negate <$> (parseChar '-' *> parseUInt)) <|> parseUInt
+
+parseNumber :: Parser Integer
+parseNumber =
+    read <$> some (parseAnyChar ['0'..'9'])
 
 parseUDouble :: Parser Double
 parseUDouble = read <$>
