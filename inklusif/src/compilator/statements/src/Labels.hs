@@ -11,6 +11,7 @@ module Labels (
         correspondLabels,
         removeLabel,
         parseLabel,
+        generateLabel,
         resolveLabels)
 where
 
@@ -58,6 +59,13 @@ correspondLine table line =
     _ -> line
 
 
+generateLabel :: CompilerData -> (String, CompilerData)
+generateLabel (cp, (heap, funcs, classes, enums, typedefs, counter), bc, sym) = 
+    let label = "L" ++ show counter
+        newDefines = (heap, funcs, classes, enums, typedefs, counter + 1)
+    in (label, (cp, newDefines, bc, sym))
+
+
 removeLabel :: String -> Bool
 removeLabel line =
   case parseLabel line of
@@ -73,5 +81,5 @@ resolveLabels :: CompilerData -> CompilerData
 resolveLabels (cp, defs, bytecode, symtab) =
     let table   = findLabels bytecode
         bc1     = correspondLabels table bytecode
-        bcFinal = removeLabelLines bc1
+        bcFinal = removeLabels bc1
     in (cp, defs, bcFinal, symtab)

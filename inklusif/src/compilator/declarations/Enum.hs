@@ -30,7 +30,7 @@ fillEnumValues fields startVal =
 compileEnum :: EnumDecl -> CompilerData -> Either String CompilerData
 compileEnum (EnumDecl pos name []) _ =
     Left ((errPos pos) ++ "Enum " ++ name ++ " must have at least one field.")
-compileEnum enum@(EnumDecl pos name fields@(field:_)) prog@(_, (_, _, _, enums, _), _, _)
+compileEnum enum@(EnumDecl pos name fields@(field:_)) prog@(_, (_, _, _, enums, _, _), _, _)
     | enumNameExists name enums =
         Left ((errPos pos) ++ "Enum " ++ name ++ " is already defined.")
     | enumFieldExists fields enums =
