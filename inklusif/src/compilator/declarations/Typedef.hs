@@ -9,7 +9,7 @@ typeNameExists searched typedefs =
     any (\(TypedefDecl _ _ name) -> name == searched) typedefs
 
 compileTypedef :: TypedefDecl  -> CompilerData -> Either String CompilerData
-compileTypedef typedef@(TypedefDecl pos _ name) prog@(_, (_, _, _, _, typedefs), _, _)
+compileTypedef typedef@(TypedefDecl pos _ name) prog@(_, (_, _, _, _, typedefs, _), _, _)
     | typeNameExists name typedefs =
         Left ((errPos pos) ++ "Typedef " ++ name ++ " is already defined.")
     | otherwise = Right (appendDefines prog [(Typedef typedef)])

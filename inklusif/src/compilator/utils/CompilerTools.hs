@@ -13,10 +13,10 @@ appendHeader (header, def, body, symblTable) newHead =
     (header ++ newHead, def, body, symblTable)
 
 appendDefine :: Declaration -> Defines -> Defines
-appendDefine (Function function) (c, fun, st, en, td) = (c, fun ++ [function], st, en, td)
-appendDefine (Class struct) (c, fun, st, en, td) = (c, fun, st ++ [struct], en, td)
-appendDefine (Enum enum) (c, fun, st, en, td) = (c, fun, st, en ++ [enum], td)
-appendDefine (Typedef typedef) (c, fun, st, en, td) = (c, fun, st, en, td ++ [typedef])
+appendDefine (Function function) (c, fun, st, en, td, count) = (c, fun ++ [function], st, en, td, count)
+appendDefine (Class struct) (c, fun, st, en, td, count) = (c, fun, st ++ [struct], en, td, count)
+appendDefine (Enum enum) (c, fun, st, en, td, count) = (c, fun, st, en ++ [enum], td, count)
+appendDefine (Typedef typedef) (c, fun, st, en, td, count) = (c, fun, st, en, td ++ [typedef], count)
 
 appendDefines :: CompilerData -> [Declaration] -> CompilerData
 appendDefines prog [] = prog
