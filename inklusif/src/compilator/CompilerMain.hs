@@ -12,8 +12,6 @@ compileDeclarations (Class struct) prog = compileClass struct prog
 compileDeclarations (Enum enum) prog = compileEnum enum prog
 compileDeclarations (Typedef typedef) prog = compileTypedef typedef prog
 
-
-
 compilerMain :: Ast -> Either String CompilerData -> Either String CompilerData
 compilerMain _ (Left err) = Left err
 compilerMain [] (Right prog) = Right prog
