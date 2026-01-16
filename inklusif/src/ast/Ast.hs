@@ -299,6 +299,7 @@ data Expr
   | ArrayLiteral [Expr]
   | ArrayAssignement ArrayIndexExpr
   | CastExpr Type Expr
+  | FieldAccessExpression FieldAccessExpr
   | StructLiteral [(String, Expr)]
   | Lambda [Parameter] [Statement]
   deriving (Show, Eq)

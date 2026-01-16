@@ -5,7 +5,7 @@
 -- expr
 -}
 
-module Literal (compileLiteralExpr) where
+module CompileLiteral (compileLiteralExpr) where
 
 import Ast (Literal(..))
 import CompilerTypes (CompilerData)

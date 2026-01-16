@@ -9,7 +9,7 @@ module Expr (compileExpr) where
 
 import Ast (Expr(..))
 import CompilerTypes (CompilerData)
-import Literal (compileLiteralExpr)
+import CompileLiteral (compileLiteralExpr)
 import BinOp (compileBinOpExpr)
 import ArrayIndex (compileArrayIndex)
 import ArrayLiteral (compileArrayLiteral)
