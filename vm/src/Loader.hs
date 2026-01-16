@@ -24,6 +24,7 @@ import Parser (
     parseSingleChar,
     parseArgSep,
     parseString,
+    parseQuotedString,
     parseKeyword,
     parseBool,
     sepBy
@@ -348,6 +349,7 @@ parseValue = parseSpaces *> parseValue' <* parseSpaces
   where
     parseValue' = (VBool <$> parseBool)
               <|> (VChar <$> parseSingleChar)
+              <|> (VString <$> parseQuotedString)
               <|> (VDouble <$> parseDouble)
               <|> (VFloat <$> parseFloat)
               <|> (VLong <$> parseLong)

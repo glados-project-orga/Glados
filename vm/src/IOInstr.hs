@@ -33,5 +33,6 @@ valueToString (VChar c) = [c]
 valueToString (VFloat f) = show f
 valueToString (VDouble d) = show d
 valueToString (VLong l) = show l
+valueToString (VString s) = s
 valueToString VNull = "null"
 valueToString (VHandle h) = "<handle:" ++ show h ++ ">"

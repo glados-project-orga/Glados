@@ -27,6 +27,7 @@ module Parser (
     parseArgSep,
     parseCharIf,
     parseString,
+    parseQuotedString,
     parseKeyword,
     parseBool
 ) where
@@ -130,12 +131,28 @@ parseFloat = (negate <$> (parseChar '-' *> parseUFloat)) <|> parseUFloat
 parseDouble :: Parser Double
 parseDouble = (negate <$> (parseChar '-' *> parseUDouble)) <|> parseUDouble
 
-parseSingleChar :: Parser Char
-parseSingleChar = parseChar '\'' *> parseSingleChar' <* parseChar '\''
+parseNormalChar :: Parser Char
+parseNormalChar = Parser f
   where
-    parseSingleChar' = Parser f
     f [] = Left "reached end of input"
     f (x:xs) = Right (x, xs)
+
+parseBackSlash :: Parser Char
+parseBackSlash = parseChar '\\' *> Parser code
+  where
+    code [] = Left "reached end of input after escape"
+    code (x:xs) = case x of
+      'n'  -> Right ('\n', xs)
+      't'  -> Right ('\t', xs)
+      'r'  -> Right ('\r', xs)
+      'v'  -> Right ('\v', xs)
+      _    -> Left $ "Unknown backslash sequence: \\" ++ [x]
+
+
+parseSingleChar :: Parser Char
+parseSingleChar = parseChar '\'' *> parseCharContent <* parseChar '\''
+  where
+    parseCharContent = parseBackSlash <|> parseNormalChar
 
 parseArgSep :: Parser ()
 parseArgSep = (parseChar '_' *> pure ()) <|> parseSpaces
@@ -151,6 +168,11 @@ parseCharIf char = Parser f
 parseString :: Parser String
 parseString = betweenSpaces (
     many (parseCharIf (not . isSpace)))
+
+parseQuotedString :: Parser String
+parseQuotedString = parseChar '"' *> parseStringContent <* parseChar '"'
+  where
+    parseStringContent = many (parseCharIf (\a -> a /= '"'))
 
 parseKeyword :: String -> Parser ()
 parseKeyword [] = pure ()
