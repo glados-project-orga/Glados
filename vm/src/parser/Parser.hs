@@ -131,12 +131,28 @@ parseFloat = (negate <$> (parseChar '-' *> parseUFloat)) <|> parseUFloat
 parseDouble :: Parser Double
 parseDouble = (negate <$> (parseChar '-' *> parseUDouble)) <|> parseUDouble
 
-parseSingleChar :: Parser Char
-parseSingleChar = parseChar '\'' *> parseSingleChar' <* parseChar '\''
+parseNormalChar :: Parser Char
+parseNormalChar = Parser f
   where
-    parseSingleChar' = Parser f
     f [] = Left "reached end of input"
     f (x:xs) = Right (x, xs)
+
+parseBackSlash :: Parser Char
+parseBackSlash = parseChar '\\' *> Parser code
+  where
+    code [] = Left "reached end of input after escape"
+    code (x:xs) = case x of
+      'n'  -> Right ('\n', xs)
+      't'  -> Right ('\t', xs)
+      'r'  -> Right ('\r', xs)
+      'v'  -> Right ('\v', xs)
+      _    -> Left $ "Unknown backslash sequence: \\" ++ [x]
+
+
+parseSingleChar :: Parser Char
+parseSingleChar = parseChar '\'' *> parseCharContent <* parseChar '\''
+  where
+    parseCharContent = parseBackSlash <|> parseNormalChar
 
 parseArgSep :: Parser ()
 parseArgSep = (parseChar '_' *> pure ()) <|> parseSpaces
