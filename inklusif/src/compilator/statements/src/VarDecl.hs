@@ -1,4 +1,4 @@
-module VarDecl (compileVarDecl) where
+module VarDecl (compileVarDecl, storeInSymbolTable, addGoodTypeStore) where
 import CompilerTypes (CompilerData, SymInfo(..))
 import CompilerTools (appendSymbolTable, convertToType, typePrefixVal, appendBody, addValToHeader)
 import Ast (VarDecl, Type(..), VarDecl(..), Expr(..), ArrayVar(..))
@@ -27,7 +27,6 @@ storeConstVar name t value prog@(header, _, _, symTable) =
     addValToHeader progWithVar value
         where localindex = length symTable
               headerindex = length header
-
 
 isSameType :: Type -> Expr -> CompilerData -> Bool
 isSameType t expr prog = case convertToType expr prog of
