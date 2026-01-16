@@ -7,12 +7,10 @@ import Enum (compileEnum)
 import Typedef (compileTypedef)
 
 compileDeclarations :: Declaration -> CompilerData -> Either String CompilerData
-compileDeclarations (Function fun) prog = compileFunction fun prog
+compileDeclarations (Function fun) (cp, def, bc, _) = compileFunction fun (cp, def, bc, [])
 compileDeclarations (Class struct) prog = compileClass struct prog
 compileDeclarations (Enum enum) prog = compileEnum enum prog
 compileDeclarations (Typedef typedef) prog = compileTypedef typedef prog
-
-
 
 compilerMain :: Ast -> Either String CompilerData -> Either String CompilerData
 compilerMain _ (Left err) = Left err

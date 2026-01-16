@@ -10,23 +10,25 @@ module CompilerTools (
     isArrayMixed,
     validAssignmentType,
     getNuancedArray,
-    convertToCompilerVal
+    convertToType,
+    addValToHeader
     )
 where
 
 import Data.Either (lefts, rights)
 import Data.Maybe (listToMaybe, fromMaybe)
-import CompilerTypes(CompilerData,
+import CompilerTypes(
+    CompilerData,
     ConstantPool,
     Defines,
     Bytecode,
     SymbolTable,
     TypeEq(..),
-    CompilerVal(..),
     TypeNormalized(..),
-    Convert(..)
+    Convert(..),
+    SearchTypes(..),
     )
-import SymbolTableUtils (getVarType, getVarVal)
+import SymbolTableUtils (getVarType, getVarType)
 import FunctionUtils (getFunctionReturnType)
 import Ast (Declaration(..),
     Expr(..),
@@ -35,12 +37,23 @@ import Ast (Declaration(..),
     ClassDecl(..),
     StructField(..),
     Type(..),
+    Literal(..),
     )
 import Data.List (find)
 
 appendHeader :: CompilerData -> ConstantPool -> CompilerData
 appendHeader (header, def, body, symblTable) newHead =
     (header ++ newHead, def, body, symblTable)
+
+addValToHeader :: CompilerData -> Expr -> Either String CompilerData
+addValToHeader prog (LitExpr (IntLit i)) = Right (appendHeader prog [show i])
+addValToHeader prog (LitExpr (FloatLit f)) = Right (appendHeader prog [show f])
+addValToHeader prog (LitExpr (DoubleLit d)) = Right (appendHeader prog [show d])
+addValToHeader prog (LitExpr (CharLit c)) = Right (appendHeader prog [show c])
+addValToHeader prog (LitExpr (StringLit s)) = Right (appendHeader prog [show s])
+addValToHeader prog (LitExpr (BoolLit b)) = Right (appendHeader prog [show b])
+addValToHeader prog (LitExpr (LongLit l)) = Right (appendHeader prog [show l])
+addValToHeader _ _ = Left "Unsupported literal type for header addition."
 
 appendDefine :: Declaration -> Defines -> Defines
 appendDefine (Function function) (c, fun, st, en, td, count) = (c, fun ++ [function], st, en, td, count)
@@ -72,12 +85,15 @@ getTypePrefix "char" = "c"
 getTypePrefix "bool" = "b"
 getTypePrefix _ = "a"
 
-typePrefixVal :: CompilerVal -> String
-typePrefixVal (IntCmpl _) = "i"
-typePrefixVal (LongCmpl _) = "l"
-typePrefixVal (FloatCmpl _) = "f"
-typePrefixVal (DoubleCmpl _) = "d"
-typePrefixVal _ = "i"
+typePrefixVal :: Type -> String
+typePrefixVal (IntType ) = "i"
+typePrefixVal (LongType ) = "l"
+typePrefixVal (FloatType ) = "f"
+typePrefixVal (DoubleType ) = "d"
+typePrefixVal (CharType ) = "c"
+typePrefixVal (BoolType ) = "b"
+typePrefixVal (ArrayType _) = "a"
+typePrefixVal _ = "a"
 
 getNuancedArray :: [Expr] -> CompilerData -> ([String], [String])
 getNuancedArray [] _ = ([], [])
@@ -99,7 +115,7 @@ getLitArrayType exprs prog | not (null arrayError) = Left firstError
 
 arrayCellValidType :: Expr -> CompilerData -> Either String String
 arrayCellValidType (ArrayLiteral arr) prog = getLitArrayType arr prog
-arrayCellValidType (VarExpr varName) prog = getVarType varName prog
+arrayCellValidType (VarExpr varName) prog = show <$> getVarType varName prog
 arrayCellValidType (ArrayVarExpr _ _) _ = Right "array"
 arrayCellValidType _ _ = Left "Invalid expression type for array cell"
 
@@ -120,12 +136,12 @@ getClassVarType clname varName prog =
 
 normalizeExprType :: Expr -> CompilerData -> Either String TypeNormalized
 normalizeExprType (LitExpr lit) _ = Right (LitNorm lit)
-normalizeExprType (VarExpr name) prog = getVarVal name prog >>= (Right . CmplNorm)
-normalizeExprType (ArrayVarExpr name _) prog = getVarVal name prog >>= (Right . CmplNorm)
+normalizeExprType (VarExpr name) prog = getVarType name prog >>= (Right . TypeNorm)
+normalizeExprType (ArrayVarExpr name _) prog = getVarType name prog >>= (Right . TypeNorm)
 normalizeExprType (ClassVarExpr clName (VarExpr varName)) prog =
     getClassVarType clName varName prog >>= \typ -> Right (TypeNorm typ)
 normalizeExprType (ArrayLiteral arr) prog =
-    getLitArrayType arr prog >>= \typ -> Right (CmplNorm (convert typ))
+    getLitArrayType arr prog >>= \typ -> Right (TypeNorm (convert typ))
 normalizeExprType (CallExpression (CallExpr name _)) prog =
     case getFunctionReturnType name prog of
         Just retType -> Right (TypeNorm retType)
@@ -136,30 +152,17 @@ normalizeExprType (MethodCallExpression (MethodCallExpr _ name _)) prog =
         Nothing -> Left "Unknown function return type"
 normalizeExprType _ _ = Left "Unknown expression type"
 
-normalizeToCmpl :: TypeNormalized -> CompilerVal
-normalizeToCmpl (CmplNorm val) = val
-normalizeToCmpl (TypeNorm typ) = convert typ
-normalizeToCmpl (LitNorm lit) = convert lit
+normalizeToType :: TypeNormalized -> Type
+normalizeToType (TypeNorm typ) = typ
+normalizeToType (LitNorm lit) = convert lit
 
-convertToCompilerVal :: Expr -> CompilerData-> Either String CompilerVal
-convertToCompilerVal expr prog = normalizeExprType expr prog >>= (Right . normalizeToCmpl)
+convertToType :: Expr -> CompilerData-> Either String Type
+convertToType expr prog = normalizeExprType expr prog >>= (Right . normalizeToType)
 
-validAssignmentType :: Expr -> Expr -> CompilerData -> Bool
-validAssignmentType expr1 expr2 prog = normed1 `typeEq` normed2
-    where normed1 = convertToCompilerVal expr1 prog
-          normed2 = convertToCompilerVal expr2 prog
-
--- isSameType :: CompilerVal -> Expr -> CompilerData -> Bool
--- isSameType val (VarExpr name) prog = val `typeEq` (getVarType name prog)
--- isSameType val (ArrayVarExpr name _) prog = val `typeEq` (getVarType name prog)
--- isSameType val (ClassVarExpr _ (VarExpr varName)) prog = val `typeEq` (getVarType varName prog)
--- isSameType val (LitExpr lit) _= val `typeEq` lit
--- isSameType val (ArrayLiteral arr) prog = val `typeEq` (getLitArrayType arr prog)
--- isSameType val (CallExpression (CallExpr name _)) prog =
---     val `typeEq` getFunctionReturnType name prog
--- isSameType val (MethodCallExpression (MethodCallExpr _ name _)) prog =
---     val `typeEq` getFunctionReturnType name prog
--- isSameType _ _ _ = False
-
-
--- validAssignmentType val (VarExpr name) prog = either (const False) (val `typeEq`) (getVarVal name prog)
+validAssignmentType :: SearchTypes -> SearchTypes -> CompilerData -> Bool
+validAssignmentType (SearchType t1) (SearchType t2) _ = t1 == t2
+validAssignmentType (SearchExpr expr) (SearchType t) prog = t `typeEq` (convertToType expr prog)
+validAssignmentType (SearchType t) (SearchExpr expr) prog = t `typeEq` (convertToType expr prog)
+validAssignmentType (SearchExpr expr1) (SearchExpr expr2) prog = normed1 `typeEq` normed2
+    where normed1 = convertToType expr1 prog
+          normed2 = convertToType expr2 prog

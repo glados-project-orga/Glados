@@ -154,7 +154,7 @@ instance Show Type where
   show LongType = "long"
   show (LambdaType _) = "lambda"
   show DoubleType = "double"
-  show (ArrayType t) = show t
+  show (ArrayType (ArrayVar t _)) = "array " ++ show t
   show (CustomType s) = s
   show VoidType = "void"
 

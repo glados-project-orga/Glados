@@ -12,7 +12,7 @@ import Match (compileMatch)
 import TryCatch (compileTryCatch)
 import Throw (compileThrow)
 import Expr (compileExpr)
-
+import Return (compileReturn)
 
 compileStatement :: Statement -> CompilerData -> Either String CompilerData
 compileStatement (VarDeclStmt vr_dcl) layer = compileVarDecl vr_dcl layer
@@ -25,6 +25,7 @@ compileStatement (MatchStatement match) layer = compileMatch match layer
 compileStatement (TryCatchStatement tryCatch) layer = compileTryCatch tryCatch layer
 compileStatement (ThrowStatement throw) layer = compileThrow throw layer
 compileStatement (ExprStatement (ExprStmt expr)) layer = compileExpr expr layer
+compileStatement (ReturnStatement ret) layer = compileReturn ret layer
 compileStatement _ _ = Left "Unsupported statement type in compileStatement"
 
 compileStatements :: [Statement] -> Either String CompilerData -> Either String CompilerData
