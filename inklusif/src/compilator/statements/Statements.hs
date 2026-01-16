@@ -12,12 +12,12 @@ import Match (compileMatch)
 import TryCatch (compileTryCatch)
 import Throw (compileThrow)
 import Expr (compileExpr)
-
+import CompileBlock (compileBlock)
 
 compileStatement :: Statement -> CompilerData -> Either String CompilerData
 compileStatement (VarDeclStmt vr_dcl) layer = compileVarDecl vr_dcl layer
 compileStatement (AssignmentStmt assign) layer = compileAssignment assign layer
-compileStatement (IfStatement if_st) layer = compileIf if_st layer
+compileStatement (IfStatement if_st) layer = compileIf compileStatement if_st layer
 compileStatement (WhileStatement while) layer = compileWhile compileStatement while layer
 compileStatement (ForStatement for) layer = compileFor compileStatement for layer
 compileStatement (ForEachStatement for_each) layer = compileForEach for_each layer
@@ -29,7 +29,6 @@ compileStatement _ _ = Left "Unsupported statement type in compileStatement"
 
 compileStatements :: [Statement] -> Either String CompilerData -> Either String CompilerData
 compileStatements _ (Left err) = Left err
-compileStatements [] (Right prog) = Right prog
-compileStatements (stmt:stmts) (Right layer) = compileStatements stmts n_layer
-    where
-        n_layer = compileStatement stmt layer
+compileStatements stmts (Right layer) =
+  compileBlock compileStatement stmts layer
+
