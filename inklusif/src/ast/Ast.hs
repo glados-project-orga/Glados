@@ -294,8 +294,8 @@ data Expr
   | MethodCallExpression MethodCallExpr
   | AssignmentExpr Assignment
   | ArrayLiteral [Expr]
-  | ArrayAssignement ArrayIndexExpr 
-  | FieldAccessExpression FieldAccessExpr
+  | ArrayAssignement ArrayIndexExpr
+  | CastExpr Type Expr
   | StructLiteral [(String, Expr)]
   | Lambda [Parameter] [Statement]
   deriving (Show, Eq)
