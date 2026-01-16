@@ -15,6 +15,8 @@ module StatementParser (
 import Ast
 import Control.Applicative
 import Parser
+import Literal
+import Type
 import ExpressionInk
 
 parseLambdaVar :: Parser LambdaVar
@@ -29,26 +31,6 @@ parseLambdaParamNames :: Parser [String]
 parseLambdaParamNames =
         symbol '[' *> sepBy identifier comma <* symbol ']'
     <|> pure []
-
-
-parseOtherType :: Parser Type
-parseOtherType =  (keyword "int" *> pure IntType)
-    <|> (keyword "void" *> pure VoidType)
-    <|> (keyword "long" *> pure LongType)
-    <|> (keyword "bool" *> pure BoolType)
-    <|> (keyword "string" *> pure StringType)
-    <|> (keyword "float" *> pure FloatType)
-    <|> (keyword "double" *> pure DoubleType)
-    <|> (keyword "char" *> pure CharType)
-    <|> (pure CustomType) <*> identifier
-
-parseArray :: Parser ArrayVar
-parseArray = ArrayVar <$> parseOtherType 
-    <*> (symbol '[' *> parseExpression <* symbol ']')
-
-parseType :: Parser Type
-parseType = (ArrayType <$> parseArray)
-    <|> parseOtherType
 
 parseIsConst :: Parser Bool
 parseIsConst = (keyword "const" *> pure True)

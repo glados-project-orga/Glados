@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.37.0.
+-- This file has been generated from package.yaml by hpack version 0.39.1.
 --
 -- see: https://github.com/sol/hpack
 
@@ -23,14 +23,8 @@ source-repository head
 
 library
   exposed-modules:
-      ClassParser
-      EnumParsing
-      ExpressionInk
-      FunctionParsing
       InkParser
       Parser
-      StatementParser
-      TypedefParser
       Args
       CheckFile
       Help
@@ -40,6 +34,7 @@ library
       Enum
       Function
       Typedef
+      ClassUtils
       FunctionUtils
       Statements
       Assignment
@@ -48,6 +43,7 @@ library
       If
       Labels
       Match
+      Return
       Throw
       TryCatch
       VarDecl
@@ -55,15 +51,16 @@ library
       CompilerError
       CompilerTools
       CompilerTypes
+      SymbolTableUtils
       Expr
       ArrayIndex
+      ArrayLiteral
       BinOp
       Call
       FieldAccess
       Lambda
       Literal
       MethodCall
-      StructLiteral
       UnaryOp
       Var
       Arity
