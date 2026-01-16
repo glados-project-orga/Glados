@@ -9,7 +9,7 @@ import Labels (generateLabel)
 
 compileFor :: (Statement -> CompilerData -> Either String CompilerData) 
         -> ForStmt
-        -> CompilerData 
+        -> CompilerData
         -> Either String CompilerData 
 
 compileFor compileStmt (ForStmt initStmt condExpr updateStmt body) prog = 
