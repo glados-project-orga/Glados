@@ -27,6 +27,7 @@ module Parser (
     parseArgSep,
     parseCharIf,
     parseString,
+    parseQuotedString,
     parseKeyword,
     parseBool
 ) where
@@ -151,6 +152,11 @@ parseCharIf char = Parser f
 parseString :: Parser String
 parseString = betweenSpaces (
     many (parseCharIf (not . isSpace)))
+
+parseQuotedString :: Parser String
+parseQuotedString = parseChar '"' *> parseStringContent <* parseChar '"'
+  where
+    parseStringContent = many (parseCharIf (\a -> a /= '"'))
 
 parseKeyword :: String -> Parser ()
 parseKeyword [] = pure ()
