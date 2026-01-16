@@ -32,7 +32,6 @@ import Data.Int (Int64)
 data Value = VInt  Int
           | VBool Bool
           | VChar Char
-          | VString String
           | VFloat Float
           | VDouble Double
           | VLong Int64

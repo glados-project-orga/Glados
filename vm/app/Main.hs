@@ -46,9 +46,10 @@ runVM parsedFuncs =
             , heap       = V.empty
             , frames     = []
             }
-      in case compile initialState of 
-        Left err -> hPutStrLn stderr ("Error: " ++ err) >> exitWith (ExitFailure 84)
-        Right finalState -> handleResult (stack finalState)
+      in compile initialState >>= \result ->
+        case result of
+          Left err -> hPutStrLn stderr ("Error: " ++ err) >> exitWith (ExitFailure 84)
+          Right finalState -> handleResult (stack finalState)
 
 handleResult :: [Value] -> IO ()
 handleResult [] = return ()
