@@ -58,6 +58,12 @@ correspondLine table line =
   
     _ -> line
 
+resolveLabels :: CompilerData -> CompilerData
+resolveLabels (cp, defs, bytecode, symtab) =
+    let table   = findLabels bytecode
+        bc1     = correspondLabels table bytecode
+        bcFinal = removeLabels bc1
+    in (cp, defs, bcFinal, symtab)
 
 generateLabel :: CompilerData -> (String, CompilerData)
 generateLabel (cp, (heap, funcs, classes, enums, typedefs, counter), bc, sym) = 
@@ -75,11 +81,3 @@ removeLabel line =
 
 removeLabels :: [String] -> [String]
 removeLabels = filter removeLabel
-
-
-resolveLabels :: CompilerData -> CompilerData
-resolveLabels (cp, defs, bytecode, symtab) =
-    let table   = findLabels bytecode
-        bc1     = correspondLabels table bytecode
-        bcFinal = removeLabels bc1
-    in (cp, defs, bcFinal, symtab)
