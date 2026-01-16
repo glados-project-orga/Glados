@@ -29,10 +29,10 @@ runFile :: FilePath -> IO ()
 runFile path = readFile path >>= \content ->
   case loadBytecode content of
     Left err -> hPutStrLn stderr ("Error: " ++ err) >> exitWith (ExitFailure 84)
-    Right parsedFuncs -> runVM parsedFuncs
+    Right (pool, parsedFuncs) -> runVM pool parsedFuncs
 
-runVM :: Map.Map String Function -> IO()
-runVM parsedFuncs = 
+runVM :: V.Vector Value -> Map.Map String Function -> IO()
+runVM constPoolVec parsedFuncs = 
   case Map.lookup "main" parsedFuncs of
     Nothing -> hPutStrLn stderr "Error: No 'main' function found" >> exitWith (ExitFailure 84)
     Just _ -> 
@@ -42,7 +42,7 @@ runVM parsedFuncs =
             , ip         = 0
             , functions  = parsedFuncs
             , currentFunc = "main"
-            , constPool  = V.empty
+            , constPool  = constPoolVec
             , heap       = V.empty
             , frames     = []
             }
