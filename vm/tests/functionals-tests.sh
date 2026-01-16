@@ -187,6 +187,7 @@ echo ""
 echo "== IO Instructions =="
 test_output "invoke_write - write integer to stdout" "$TEST_FILES_DIR/io_invoke_write.bc" "42"
 test_output "invoke_write - write chars to stdout" "$TEST_FILES_DIR/io_invoke_write_char.bc" "Hi"
+test_output "sconst - load and store string constant" "$TEST_FILES_DIR/stack_sconst.bc" "Hello, World!"
 echo ""
 
 echo "== Constant Pool Instructions =="

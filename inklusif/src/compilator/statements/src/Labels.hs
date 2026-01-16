@@ -55,7 +55,6 @@ correspondLine table line =
       case M.lookup lab table of
         Just n  -> "goto " ++ show n
         Nothing -> error ("Label inconnu: " ++ lab)
-  
     _ -> line
 
 resolveLabels :: CompilerData -> CompilerData

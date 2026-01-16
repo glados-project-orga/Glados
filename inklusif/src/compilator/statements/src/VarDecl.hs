@@ -16,9 +16,9 @@ addGoodTypeStore t prog@(_, _, _, symTable) =
 
 storeVar :: String -> Type -> Expr -> CompilerData -> Either String CompilerData
 storeVar name t value prog =
-    Right(storeInSymbolTable name t prog)
-    >>= \progWithVar -> compileExpr value progWithVar >>= \valBodyProg ->
-    addGoodTypeStore t valBodyProg
+    compileExpr value prog >>= \expryProg ->
+    addGoodTypeStore t expryProg >>= \valBodyProg ->
+    Right(storeInSymbolTable name t valBodyProg)
 
 storeConstVar :: String -> Type -> Expr -> CompilerData -> Either String CompilerData
 storeConstVar name t value prog@(header, _, _, symTable) =

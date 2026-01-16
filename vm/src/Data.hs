@@ -88,7 +88,7 @@ data StackCharg =  ILoadInt Int
                 | ILoadFloat Int | IStoreFloat Int | IConstFloat Float
                 | ILoadLong Int | IStoreLong Int | IConstLong Int64
                 | ILoadDouble Int | IStoreDouble Int | IConstDouble Double
-                | ILoadChar Int | IStoreChar Int | IConstChar Char
+                | ILoadChar Int | IStoreChar Int | IConstChar Char | IConstString String
                 | ALoad Int  | AStore  Int
            deriving (Show, Eq)
 

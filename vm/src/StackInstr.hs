@@ -48,6 +48,10 @@ stackInstrConstChar :: Char -> VMState -> Either String VMState
 stackInstrConstChar c st@VMState{stack, ip} =
     Right st {ip = ip + 1, stack = VChar c : stack}
 
+stackInstrConstString :: String -> VMState -> Either String VMState
+stackInstrConstString s st@VMState{stack, ip} =
+    Right st {ip = ip + 1, stack = VString s : stack}
+
 stackInstrLdc :: Int -> VMState -> Either String VMState
 stackInstrLdc n st@VMState{stack, ip, constPool} =
     case constPool V.!? n of
@@ -245,6 +249,7 @@ stack_chargement ins st =
         IStoreChar n    -> stackInstrStoreChar n st
         IConstChar c    -> stackInstrConstChar c st
 
+        IConstString s  -> stackInstrConstString s st
 
 stackInstrIinc :: Int -> Int -> VMState -> Either String VMState
 stackInstrIinc idx inc st@VMState{ip, locals} =

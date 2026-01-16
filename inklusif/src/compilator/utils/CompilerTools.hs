@@ -11,7 +11,7 @@ module CompilerTools (
     validAssignmentType,
     getNuancedArray,
     convertToType,
-    addValToHeader
+    addValToHeader,
     )
 where
 
@@ -134,10 +134,24 @@ getClassVarType clname varName prog =
     maybe (Left ("Variable " ++ varName ++ " does not exist in class " ++ clname ++ "."))
           (Right . structFieldType) (find (\(StructField name _) -> name == varName) fields)
 
+normalizeBinOp :: (Expr, Expr) -> CompilerData -> Either String TypeNormalized
+normalizeBinOp (left, right) prog =
+    convertToType left prog >>= \normLeft ->
+    convertToType right prog >>= \normRight ->
+    Right (opPriorityTable (normLeft, normRight))
+
+opPriorityTable :: (Type, Type) -> TypeNormalized
+opPriorityTable op | any (== DoubleType) op = (TypeNorm DoubleType)
+                   | any (== FloatType) op = (TypeNorm FloatType)
+                   | any (== LongType) op = (TypeNorm LongType)
+                   | any (== IntType) op = (TypeNorm IntType)
+                   | otherwise = (TypeNorm VoidType)
+
 normalizeExprType :: Expr -> CompilerData -> Either String TypeNormalized
 normalizeExprType (LitExpr lit) _ = Right (LitNorm lit)
 normalizeExprType (VarExpr name) prog = getVarType name prog >>= (Right . TypeNorm)
 normalizeExprType (ArrayVarExpr name _) prog = getVarType name prog >>= (Right . TypeNorm)
+normalizeExprType (BinOpExpr _ l r) prog = normalizeBinOp (l, r) prog
 normalizeExprType (ClassVarExpr clName (VarExpr varName)) prog =
     getClassVarType clName varName prog >>= \typ -> Right (TypeNorm typ)
 normalizeExprType (ArrayLiteral arr) prog =
@@ -150,7 +164,7 @@ normalizeExprType (MethodCallExpression (MethodCallExpr _ name _)) prog =
     case getFunctionReturnType name prog of
         Just retType -> Right (TypeNorm retType)
         Nothing -> Left "Unknown function return type"
-normalizeExprType _ _ = Left "Unknown expression type"
+normalizeExprType expr _ = Left ("Unknown expression type :" ++ (show expr))
 
 normalizeToType :: TypeNormalized -> Type
 normalizeToType (TypeNorm typ) = typ
