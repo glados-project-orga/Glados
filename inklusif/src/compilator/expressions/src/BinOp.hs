@@ -7,10 +7,10 @@
 
 module BinOp (compileBinOpExpr) where
 
-import Ast (Expr(..), BinOp(..))
-import CompilerTypes (CompilerData, CompileExpr, CompilerVal(..))
-import CompilerTools (appendBody, convertToCompilerVal, typePrefixVal)
-import SymbolTableUtils (getVarIndex, getVarVal)
+import Ast (Expr(..), BinOp(..), Type(..))
+import CompilerTypes (CompilerData, CompileExpr)
+import CompilerTools (appendBody, convertToType, typePrefixVal)
+import SymbolTableUtils (getVarIndex, getVarType)
 
 compileBinOpExpr :: CompileExpr -> Expr -> CompilerData -> Either String CompilerData
 compileBinOpExpr compile (BinOpExpr op left right) prog =
@@ -22,14 +22,14 @@ compileBinOpExpr compile (BinOpExpr op left right) prog =
         ModEqual -> compileCompoundAssign compile Mod left right prog
         _ -> compile left prog >>= \progLeft ->
              compile right progLeft >>= \progRight ->
-             convertToCompilerVal left prog >>= \exprType ->
+             convertToType left prog >>= \exprType ->
              emitBinOp op exprType progRight
 compileBinOpExpr _ _ _ = Left "compileBinOpExpr called with non-BinOp expression"
 
 compileCompoundAssign :: CompileExpr -> BinOp -> Expr -> Expr -> CompilerData -> Either String CompilerData
 compileCompoundAssign compile op (VarExpr varName) right prog =
     getVarIndex varName prog >>= \idx ->
-    getVarVal varName prog >>= \varType ->
+    getVarType varName prog >>= \varType ->
     let loadInstr = typePrefixVal varType ++ "load " ++ show idx
         storeInstr = typePrefixVal varType ++ "store " ++ show idx
     in Right (appendBody prog [loadInstr]) >>= \progLoad ->
@@ -39,7 +39,7 @@ compileCompoundAssign compile op (VarExpr varName) right prog =
 compileCompoundAssign _ _ _ _ _ =
     Left "Compound assignment requires a variable on the left side"
 
-emitBinOp :: BinOp -> CompilerVal -> CompilerData -> Either String CompilerData
+emitBinOp :: BinOp -> Type -> CompilerData -> Either String CompilerData
 
 emitBinOp Add t prog = Right $ appendBody prog [typePrefixVal t ++ "add"]
 emitBinOp Sub t prog = Right $ appendBody prog [typePrefixVal t ++ "sub"]
@@ -59,8 +59,8 @@ emitBinOp Or _ prog = Right $ appendBody prog ["ior"]
 
 emitBinOp op _ _ = Left $ "BinOp not implemented: " ++ show op
 
-emitComparison :: CompilerVal -> String -> CompilerData -> CompilerData
-emitComparison (IntCmpl _) cond prog = emitIntComparison cond prog
+emitComparison :: Type -> String -> CompilerData -> CompilerData
+emitComparison (IntType) cond prog = emitIntComparison cond prog
 emitComparison t cond prog = emitCmpThenBranch t cond prog
 
 emitIntComparison :: String -> CompilerData -> CompilerData
@@ -71,7 +71,7 @@ emitIntComparison cond prog = appendBody prog
     , "iconst 1"
     ]
 
-emitCmpThenBranch :: CompilerVal -> String -> CompilerData -> CompilerData
+emitCmpThenBranch :: Type -> String -> CompilerData -> CompilerData
 emitCmpThenBranch t cond prog = appendBody prog
     [ cmpInstr t
     , "if" ++ cond ++ " 3"
@@ -80,8 +80,8 @@ emitCmpThenBranch t cond prog = appendBody prog
     , "iconst 1"
     ]
 
-cmpInstr :: CompilerVal -> String
-cmpInstr (LongCmpl _) = "lcmp"
-cmpInstr (FloatCmpl _) = "fcmpl"
-cmpInstr (DoubleCmpl _) = "dcmpl"
+cmpInstr :: Type -> String
+cmpInstr (LongType) = "lcmp"
+cmpInstr (FloatType) = "fcmpl"
+cmpInstr (DoubleType) = "dcmpl"
 cmpInstr _ = "lcmp"

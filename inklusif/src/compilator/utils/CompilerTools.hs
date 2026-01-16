@@ -10,7 +10,7 @@ module CompilerTools (
     isArrayMixed,
     validAssignmentType,
     getNuancedArray,
-    convertToCompilerVal,
+    convertToType,
     cmplValToExpr,
     )
 where
@@ -24,12 +24,11 @@ import CompilerTypes(
     Bytecode,
     SymbolTable,
     TypeEq(..),
-    CompilerVal(..),
     TypeNormalized(..),
     Convert(..),
     ConvertExpr(..)
     )
-import SymbolTableUtils (getVarType, getVarVal, getClassVarName)
+import SymbolTableUtils (getVarType, getVarType)
 import FunctionUtils (getFunctionReturnType)
 import Ast (Declaration(..),
     Expr(..),
@@ -38,6 +37,7 @@ import Ast (Declaration(..),
     ClassDecl(..),
     StructField(..),
     Type(..),
+    Literal(..),
     )
 import Data.List (find)
 
@@ -75,14 +75,14 @@ getTypePrefix "char" = "c"
 getTypePrefix "bool" = "b"
 getTypePrefix _ = "a"
 
-typePrefixVal :: CompilerVal -> String
-typePrefixVal (IntCmpl _) = "i"
-typePrefixVal (LongCmpl _) = "l"
-typePrefixVal (FloatCmpl _) = "f"
-typePrefixVal (DoubleCmpl _) = "d"
-typePrefixVal (CharCmpl _) = "c"
-typePrefixVal (BoolCmpl _) = "b"
-typePrefixVal (ArrayCmpl _ _) = "a"
+typePrefixVal :: Type -> String
+typePrefixVal (IntType ) = "i"
+typePrefixVal (LongType ) = "l"
+typePrefixVal (FloatType ) = "f"
+typePrefixVal (DoubleType ) = "d"
+typePrefixVal (CharType ) = "c"
+typePrefixVal (BoolType ) = "b"
+typePrefixVal (ArrayType _) = "a"
 typePrefixVal _ = "i"
 
 getNuancedArray :: [Expr] -> CompilerData -> ([String], [String])
@@ -105,7 +105,7 @@ getLitArrayType exprs prog | not (null arrayError) = Left firstError
 
 arrayCellValidType :: Expr -> CompilerData -> Either String String
 arrayCellValidType (ArrayLiteral arr) prog = getLitArrayType arr prog
-arrayCellValidType (VarExpr varName) prog = getVarType varName prog
+arrayCellValidType (VarExpr varName) prog = show <$> getVarType varName prog
 arrayCellValidType (ArrayVarExpr _ _) _ = Right "array"
 arrayCellValidType _ _ = Left "Invalid expression type for array cell"
 
@@ -126,12 +126,12 @@ getClassVarType clname varName prog =
 
 normalizeExprType :: Expr -> CompilerData -> Either String TypeNormalized
 normalizeExprType (LitExpr lit) _ = Right (LitNorm lit)
-normalizeExprType (VarExpr name) prog = getVarVal name prog >>= (Right . CmplNorm)
-normalizeExprType (ArrayVarExpr name _) prog = getVarVal name prog >>= (Right . CmplNorm)
+normalizeExprType (VarExpr name) prog = getVarType name prog >>= (Right . TypeNorm)
+normalizeExprType (ArrayVarExpr name _) prog = getVarType name prog >>= (Right . TypeNorm)
 normalizeExprType (ClassVarExpr clName (VarExpr varName)) prog =
     getClassVarType clName varName prog >>= \typ -> Right (TypeNorm typ)
 normalizeExprType (ArrayLiteral arr) prog =
-    getLitArrayType arr prog >>= \typ -> Right (CmplNorm (convert typ))
+    getLitArrayType arr prog >>= \typ -> Right (TypeNorm (convert typ))
 normalizeExprType (CallExpression (CallExpr name _)) prog =
     case getFunctionReturnType name prog of
         Just retType -> Right (TypeNorm retType)
@@ -142,19 +142,18 @@ normalizeExprType (MethodCallExpression (MethodCallExpr _ name _)) prog =
         Nothing -> Left "Unknown function return type"
 normalizeExprType _ _ = Left "Unknown expression type"
 
-normalizeToCmpl :: TypeNormalized -> CompilerVal
-normalizeToCmpl (CmplNorm val) = val
-normalizeToCmpl (TypeNorm typ) = convert typ
-normalizeToCmpl (LitNorm lit) = convert lit
+normalizeToType :: TypeNormalized -> Type
+normalizeToType (TypeNorm typ) = typ
+normalizeToType (LitNorm lit) = convert lit
 
-convertToCompilerVal :: Expr -> CompilerData-> Either String CompilerVal
-convertToCompilerVal expr prog = normalizeExprType expr prog >>= (Right . normalizeToCmpl)
+convertToType :: Expr -> CompilerData-> Either String Type
+convertToType expr prog = normalizeExprType expr prog >>= (Right . normalizeToType)
 
 validAssignmentType :: Expr -> Expr -> CompilerData -> Bool
 validAssignmentType expr1 expr2 prog = normed1 `typeEq` normed2
-    where normed1 = convertToCompilerVal expr1 prog
-          normed2 = convertToCompilerVal expr2 prog
+    where normed1 = convertToType expr1 prog
+          normed2 = convertToType expr2 prog
 
-cmplValToExpr :: CompilerVal -> CompilerData -> Expr
-cmplValToExpr (ClassCmpl handle _) prog = (VarExpr (getClassVarName handle prog))
+cmplValToExpr :: Type -> CompilerData -> Expr
+cmplValToExpr (CustomType name) _ = (LitExpr (StringLit name))
 cmplValToExpr val _ = convertExpr val
