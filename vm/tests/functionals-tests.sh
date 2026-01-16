@@ -189,6 +189,11 @@ test_output "invoke_write - write integer to stdout" "$TEST_FILES_DIR/io_invoke_
 test_output "invoke_write - write chars to stdout" "$TEST_FILES_DIR/io_invoke_write_char.bc" "Hi"
 echo ""
 
+echo "== Constant Pool Instructions =="
+test_output "ldc - load from constant pool" "$TEST_FILES_DIR/const_pool_basic.bc" "42100-7"
+test_output "ldc - load every types from constant pool" "$TEST_FILES_DIR/const_pool_types.bc" "1 -7 40.023 true false C"
+echo ""
+
 echo "========================================"
 echo -e "Results: $PASSED passed, $FAILED failed"
 echo "========================================"
