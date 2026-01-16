@@ -1,242 +1,311 @@
 # Inklusif
 
-**Inklusif** is a small functional-style programming language developed as an **Epitech project** by a group of 5 students !
-The language provides pattern matching, loops, references, type traits, and basic data structures !
+**Inklusif** is a small **functional-style programming language** developed as part of an **Epitech project** by a group of five students.
 
-Every Inklusif file need an **".ink"** extension.
+The language supports:
 
----
+* Pattern matching
+* Loops (`while`, `for`)
+* Lambda expressions
+* References
+* User-defined types (`enum`, `typedef`, `class`)
+* Basic data structures
 
-## Features
-
-### Match
-
-A pattern matching system similar to switch/case. Use `_` as the “other” case.
-
-```jsx
-fun showBinaryOrOther(x -> int) : void
-{
-    match x {
-        0 => see("zero");
-        1 => see("one");
-        _ => see("other");
-    }
-}
-```
+Every Inklusif source file must use the **`.ink`** extension.
 
 ---
 
-### Loops
+## Coding in Inklusif
 
-#### While Loop
-
-```jsx
-fun while_loop() : void {
-    let i -> int = 0;
-
-    while (i < 5) {
-        i++;
-    }
-}
-```
-
-#### For Loop
-
-```jsx
-fun for_loop() : void {
-    for (let i -> int = 0; i < 5; i++) {
-        i++;
-    }
-}
-
-fun for_loop_multiple_iterator() : void {
-    let i -> int = 0;
-    let j -> int = 0;
-    let k -> int = 0;
-
-    for (i < 5; i++, j++, k++) {
-        i++;
-    }
-}
-```
-
-#### Loop Expression
-
-```jsx
-fun fact(nb -> int) : int
-{
-    res -> int = 0;
-    fib -> int = loop
-    {
-        il (nb eq 1)
-            => 1;
-        il (nb sup 1) {
-            res += nb * nb - 1;
-            nb minus 1;
-        }
-        => res;
-    }
-}
-```
-
-#### Iterating Over Lists
-
-```jsx
-fun print_list_elems(list -> array[str]) : void {
-    for elem in list :
-        print elem;
-}
-
-fun main() -> void {
-    list = ["hello", "world"];
-    print_list_elems(list);
-}
-
-OUTPUT:
-"hello"
-"world"
-```
+This section describes the core syntax and features of the language, with examples.
 
 ---
 
-### Try / Catch
+## Functions
 
-Error handling with `throw` and `catch`.
+### Function Declaration
 
-```jsx
-fun div(a -> int, b -> int) : int
-{
-    il (b eq 0)
-        throw ValueError "division";
-    elle
-        => (a / b);
+```ink
+fun functionName(param1 -> Type, param2 -> Type ...) : ReturnType {
+    CODE
 }
+```
 
-fun main() : void
-{
-    try {
-        div 5 0;
-    }
-    catch value error as e {
-        print e;
-    }
+**Example:**
+
+```ink
+fun add(a -> int, b -> int) : int {
+    => a + b;
 }
 ```
 
 ---
 
-### References / Heap
+## Conditional Statements
 
-```jsx
-fun modifyValue(&x -> int) : void {
-    x = 20;
+### `il / elle` (if / else)
+
+```ink
+il (condition) {
+    CODE
+} elle {
+    CODE
 }
+```
 
-fun main() : void {
-    int &a = 10;
-    modifyValue(a);
-    print a;
+**Example:**
+
+```ink
+il (x > 0) {
+    print("positive");
+} elle {
+    print("negative");
 }
-
-OUTPUT: 20
 ```
 
 ---
 
-### Type Traits
+## Loops
 
-```jsx
-fun main() : void {
-    int index = 0;
-    string age = "age ";
+### While Loop
 
-    while (index < 10) {
-        index.inc;
-    }
-
-    age.combine(index.to_string);
-    print(age);
+```ink
+while (condition) {
+    CODE
 }
+```
 
-OUTPUT: "age 10"
+**Example:**
+
+```ink
+while (i < 10) {
+    i += 1;
+}
 ```
 
 ---
 
-### File Inclusion (Optional / Low Priority)
+### For Loop
 
-```jsx
-#include "./hello_world.ink"
-
-fun main() : void {
-    hello_world();
+```ink
+for (initialization; condition; iteration) {
+    CODE
 }
+```
 
-OUTPUT: "hello_world"
+**Example:**
+
+```ink
+for (let i -> int = 0; i < 5; i = i + 1) {
+    print(i);
+}
 ```
 
 ---
 
-### Structures, Enums, Typedefs
+## Pattern Matching
 
-```jsx
-struct item {
-    weight -> int;
-    name -> string;
-};
+### Match Statement
 
-enum item_list {
-    SWORD = 0,
-    BOW,
-    WAND
-};
+```ink
+match variable {
+    expression -> result
+    expression -> result
+    ...
+    _ -> defaultResult
+}
+```
 
+**Example:**
+
+```ink
+match x {
+    0 -> print("zero");
+    1 -> print("one");
+    _ -> print("other");
+}
+```
+
+---
+
+## Variables
+
+### Variable Declaration
+
+#### Constant Value
+
+```ink
+const name -> Type = expression;
+```
+
+#### Mutable Value
+
+```ink
+let name -> Type = expression;
+```
+
+**Example:**
+
+```ink
+const max -> int = 100;
+let counter -> int = 0;
+```
+
+---
+
+### Assignment
+
+```ink
+variable = expression;
+```
+
+**Examples:**
+
+```ink
+nb = nb + 10;
+arr[0] = 42;
+class.field = "value";
+```
+
+---
+
+## Lambda Expressions
+
+Lambdas are fully typed and can be assigned to variables or passed as parameters.
+
+```ink
+let lambdaName -> (ArgTypes) => ReturnType =
+    [argNames] {
+        CODE
+    };
+```
+
+**Example:**
+
+```ink
+let sum -> (int, int) => int =
+    [a, b] {
+        => a + b;
+    };
+```
+
+Parameter names are optional but "()" & "[]" are mandatory :
+
+```ink
+let constant -> () -> int =
+    [] {
+        => 42;
+    };
+```
+
+---
+
+## Enums
+
+### Enum Declaration
+
+```ink
+enum EnumName {
+    VALUE = 10,
+    OTHER,
+    ANOTHER
+}
+```
+
+Values without an explicit assignment are automatically incremented.
+
+**Example:**
+
+```ink
+enum ErrorCode {
+    OK = 0,
+    NOtOK,
+    IDKwhyIMhere
+}
+```
+
+---
+
+## Typedefs
+
+Typedefs allow you to create aliases for existing types.
+
+```ink
+typedef OriginalType NewType;
+```
+
+**Example:**
+
+```ink
 typedef int Integer;
 ```
 
 ---
 
-### Types
+## Classes
 
-* Int
-* Float (Bonus)
-* String
-* Array (iterable)
-* Char
-* Bool
-* Lambda
-* Tuple
+### Class Declaration
 
-**Variable Declaration Syntax**
+```ink
+class ClassName {
+    fieldName -> Type;
+    ...
 
-```jsx
-Let variableMutable -> int = 0
-Const variableConst -> str = "string"
+    method methodName(params) : ReturnType {
+        CODE
+    }
+}
+```
+
+**Example:**
+
+```ink
+class Point {
+    x -> int;
+    y -> int;
+
+    method move(dx -> int, dy -> int) : void {
+        this.x = this.x + dx;
+        this.y = this.y + dy;
+    }
+}
 ```
 
 ---
 
-### Built-in Operators
+### Instantiating a Class
 
-* Arithmetic: `+ - * / mod`
-* Comparison: `== != < > <= >=`
-* Logical: `&& || !`
-* Power: `^^`
+```ink
+let variable -> ClassName = new ClassName();
+```
+
+**Example:**
+
+```ink
+let p -> Point = new Point();
+```
 
 ---
 
-### Summary
+## Summary
 
-Inklusif provides:
+Inklusif combines:
 
-* Pattern matching (`match`)
-* Loops (`while`, `for`, `loop`)
-* List iteration without indices
-* Error handling (`throw` / `catch`)
-* References and heap manipulation
-* Type traits and built-in methods
-* Basic file inclusion
-* Structs, enums, typedefs
-* Standard types and operators
+* Strong typing
+* Functional concepts (lambdas, pattern matching)
+* Familiar imperative constructs (loops, classes)
 
-This project was created collaboratively by a group of 5 Epitech students.
+while remaining simple and expressive.
+
+---
+
+### Students
+
+ * | Celian Raguin | Compilator / Interpreter |
+ * | Kerwan Calvier | VM & Compilator |
+ * | Aurel Pliya | VM & Compilator |
+ * | Hajar Ahazzam | Compilator / Interpreter |
+ * | Luigi Gomes | Parser, AST, Documentation |
+
+_Epitech_
+

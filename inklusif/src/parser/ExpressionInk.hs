@@ -13,6 +13,7 @@ module ExpressionInk (
 import Ast
 import Control.Applicative
 import Parser
+import Data.Int (Int32)
 
 parseExpression :: Parser Expr
 parseExpression = parseComparison
@@ -61,7 +62,7 @@ equalOp =
 
 parseOther :: Parser Expr
 parseOther =
-    chainl1 parseAtom otherOp
+    chainl1 parseUnary otherOp
 
 otherOp :: Parser (Expr -> Expr -> Expr)
 otherOp = 
@@ -77,12 +78,21 @@ parseClassConstructor =
     ClassConstructorExpr <$> (keyword "new" *> identifier)
         <*> arguments
 
+parseUnary :: Parser Expr
+parseUnary =
+        (UnaryOpExpr Neg    <$ symbol '-' <*> parseUnary)
+    <|> (UnaryOpExpr Not    <$ symbol '!' <*> parseUnary)
+    <|> (UnaryOpExpr PreInc <$ keyword "++" <*> parseUnary)
+    <|> (UnaryOpExpr PreDec <$ keyword "--" <*> parseUnary)
+    <|> (UnaryOpExpr Ref    <$ symbol '&' <*> parseUnary)
+    <|> (UnaryOpExpr Deref  <$ symbol '*' <*> parseUnary)
+    <|> parseAtom
+
 parseAtom :: Parser Expr
 parseAtom =
         parseLiteralExpr
     <|> parseClassConstructor
     <|> parseFunctionCall
-    <|> parseStructLiteral
     <|> parseArrayLiteral
     <|> parseArrayVar
     <|> parseClassVar
@@ -111,16 +121,6 @@ parseStringLiteral =
   where
     stringChar = parseAnyChar (filter (/= '"') (map toEnum [32..126]))
 
-parseStructLiteral :: Parser Expr
-parseStructLiteral =
-    StructLiteral <$> parseStructFields
-
-parseStructFields :: Parser [(String, Expr)]
-parseStructFields =
-    symbol '{' *> sepBy structField comma <* symbol '}'
-  where
-    structField = (,) <$> identifier <*> (symbol ':' *> parseExpression)
-
 parenthesized :: Parser Expr
 parenthesized =
     symbol '(' *> parseExpression <* symbol ')'
@@ -130,12 +130,26 @@ parseLiteralExpr =
     LitExpr <$> parseLiteral
 
 parseLiteral :: Parser Literal
-parseLiteral = (FloatLit <$> parseFloat)
+parseLiteral =
+        parseNumberLiteral
+    <|> (FloatLit  <$> parseFloat)
     <|> (DoubleLit <$> parseDouble)
-    <|> (IntLit <$> parseInt)
+    <|> (CharLit <$> (parseChar '\''
+        *> parseAnyChar (filter (/= '\'') (map toEnum [32..126])) <* parseChar '\''))
     <|> (BoolLit True  <$ keyword "true")
-    <|> (StringLit <$> parseStringLiteral)
     <|> (BoolLit False <$ keyword "false")
+    <|> (StringLit <$> parseStringLiteral)
+
+parseNumberLiteral :: Parser Literal
+parseNumberLiteral =
+    decide <$> parseNumber
+  where
+    decide n
+        | n <= fromIntegral (maxBound :: Int32)
+            = IntLit  (fromIntegral n)
+        | otherwise
+            = LongLit (fromIntegral n)
+
 
 parseFunctionCall :: Parser Expr
 parseFunctionCall =

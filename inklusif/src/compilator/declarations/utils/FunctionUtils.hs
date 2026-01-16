@@ -1,13 +1,19 @@
 module FunctionUtils (
     getFunctions,
     findFunction,
-    searchFunctions
+    searchFunctions,
+    getFunctionReturnType
   ) where
-import CompilerTypes (Defines)
-import Ast (FunctionDecl(..))
+import CompilerTypes (Defines, CompilerData)
+import Ast (FunctionDecl(..), Type(..))
 
 getFunctions :: Defines -> [FunctionDecl]
 getFunctions (_, funs, _, _, _, _) = funs
+
+getFunctionReturnType :: String -> CompilerData -> Maybe Type
+getFunctionReturnType name (_, def, _, _) = function >>= Just . funcReturnType
+  where function = (findFunction name (getFunctions def))
+
 
 findFunction :: String -> [FunctionDecl] -> Maybe FunctionDecl
 findFunction _ [] = Nothing
