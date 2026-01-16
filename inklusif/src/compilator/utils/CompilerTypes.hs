@@ -17,7 +17,6 @@ module CompilerTypes (
     Ast,
     CompilerData,
     Defines,
-    CompilerVal(..),
     CompileResult,
     CompileExpr,
     ShowType(..),
@@ -27,6 +26,8 @@ module CompilerTypes (
     TypeNormalized(..),
     HeapSize,
     Handle,
+    SearchTypes(..),
+    Search(..)
 ) where
 
 
@@ -41,8 +42,6 @@ import Ast (
     Literal(..),
     ArrayVar(..)
     )
-import Data.Int (Int64)
-
 type Handle = Int
 type HeapSize = Int
 type Ast = [Declaration]
@@ -50,24 +49,24 @@ type ConstantPool = [String]
 type Bytecode = [String]
 type Defines = (HeapSize, [FunctionDecl], [ClassDecl], [EnumDecl], [TypedefDecl], Int)
 
-data CompilerVal
-  = IntCmpl Int
-  | LongCmpl Int64
-  | DoubleCmpl Double
-  | FloatCmpl Float
-  | BoolCmpl Bool
-  | CharCmpl Char
-  | ConstCmpl Int
-  | LambdaCmpl Int
-  | ArrayCmpl Handle CompilerVal
-  | ClassCmpl Handle String
-  | VoidCmpl
-  deriving (Eq, Show)
-
 data TypeNormalized
-  = TypeNorm Type
-  | LitNorm Literal
-  deriving (Show, Eq)
+    = TypeNorm Type
+    | LitNorm Literal
+    deriving (Show, Eq)
+
+data SearchTypes
+    = SearchType Type
+    | SearchExpr Expr
+    deriving (Show, Eq)
+
+class Search a where
+    srch :: a -> SearchTypes
+
+instance Search Type where
+    srch t = SearchType t
+
+instance Search Expr where
+    srch e = SearchExpr e
 
 class ShowType a where
     showType :: a -> String

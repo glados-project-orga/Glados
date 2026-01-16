@@ -26,7 +26,8 @@ import CompilerTypes(
     TypeEq(..),
     TypeNormalized(..),
     Convert(..),
-    ConvertExpr(..)
+    ConvertExpr(..),
+    SearchTypes(..),
     )
 import SymbolTableUtils (getVarType, getVarType)
 import FunctionUtils (getFunctionReturnType)
@@ -149,8 +150,11 @@ normalizeToType (LitNorm lit) = convert lit
 convertToType :: Expr -> CompilerData-> Either String Type
 convertToType expr prog = normalizeExprType expr prog >>= (Right . normalizeToType)
 
-validAssignmentType :: Expr -> Expr -> CompilerData -> Bool
-validAssignmentType expr1 expr2 prog = normed1 `typeEq` normed2
+validAssignmentType :: SearchTypes -> SearchTypes -> CompilerData -> Bool
+validAssignmentType (SearchType t1) (SearchType t2) _ = t1 == t2
+validAssignmentType (SearchExpr expr) (SearchType t) prog = t `typeEq` (convertToType expr prog)
+validAssignmentType (SearchType t) (SearchExpr expr) prog = t `typeEq` (convertToType expr prog)
+validAssignmentType (SearchExpr expr1) (SearchExpr expr2) prog = normed1 `typeEq` normed2
     where normed1 = convertToType expr1 prog
           normed2 = convertToType expr2 prog
 
