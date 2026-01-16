@@ -12,6 +12,7 @@ module CompilerTools (
     getNuancedArray,
     convertToType,
     addValToHeader,
+    getArraySubType
     )
 where
 
@@ -142,10 +143,15 @@ opPriorityTable op | any (== DoubleType) op = (TypeNorm DoubleType)
                    | any (== IntType) op = (TypeNorm IntType)
                    | otherwise = (TypeNorm VoidType)
 
+getArraySubType :: Type -> Either String Type
+getArraySubType (ArrayType (ArrayVar t _)) = Right t
+getArraySubType _ = Left "Type is not an array type when searching array type."
+
 normalizeExprType :: Expr -> CompilerData -> Either String TypeNormalized
 normalizeExprType (LitExpr lit) _ = Right (LitNorm lit)
 normalizeExprType (VarExpr name) prog = getVarType name prog >>= (Right . TypeNorm)
-normalizeExprType (ArrayVarExpr name _) prog = getVarType name prog >>= (Right . TypeNorm)
+normalizeExprType (ArrayVarExpr name _) prog = getVarType name prog
+    >>= getArraySubType >>= (Right . TypeNorm)
 normalizeExprType (BinOpExpr _ l r) prog = normalizeBinOp (l, r) prog
 normalizeExprType (ClassVarExpr clName (VarExpr varName)) prog =
     getClassVarType clName varName prog >>= \typ -> Right (TypeNorm typ)

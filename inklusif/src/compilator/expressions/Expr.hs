@@ -18,7 +18,7 @@ import Call (compileCallExpr)
 import MethodCall (compileMethodCall)
 import FieldAccess (compileFieldAccess)
 import Var (compileVarExpr)
-
+import ArrayVarExpr (compileArrayVarExpr)
 
 prepareArrayLiteral :: CompileExpr -> [Expr] -> CompilerData -> Either String CompilerData
 prepareArrayLiteral _ [] prog = Right prog
@@ -35,5 +35,6 @@ compileExpr (CallExpression call) prog = compileCallExpr compileExpr call prog
 compileExpr (MethodCallExpression objCall) prog = compileMethodCall compileExpr objCall prog
 compileExpr (FieldAccessExpression fieldAccess) prog = compileFieldAccess fieldAccess prog
 compileExpr (VarExpr expr) prog = compileVarExpr expr prog
+compileExpr (ArrayVarExpr nam idxe) prog = compileArrayVarExpr compileExpr (nam, idxe) prog
 compileExpr expr@(BinOpExpr _ _ _) prog = compileBinOpExpr compileExpr expr prog
-compileExpr _ _ = Left "Expression type not implemented yet"
+compileExpr expr _ = Left ("Expression type not implemented yet : " ++ show expr)

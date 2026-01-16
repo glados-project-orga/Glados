@@ -1,8 +1,8 @@
 module Function (compileFunction) where
-import Ast (FunctionDecl(..), Declaration(..), Parameter(..), Statement(..), ReturnStmt(..), Type(..))
+import Ast (FunctionDecl(..), Declaration(..), Parameter(..), Statement(..), Type(..))
 import Statements (manageBody)
-import CompilerTypes (CompilerData, Search(..))
-import CompilerTools (appendBody, appendDefines, validAssignmentType, convertToType)
+import CompilerTypes (CompilerData)
+import CompilerTools (appendBody, appendDefines)
 import FunctionUtils (searchFunctions)
 import VarDecl (storeInSymbolTable, addGoodTypeStore)
 import CompilerError (errPos)
