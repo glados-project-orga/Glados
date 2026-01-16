@@ -38,6 +38,26 @@ test_exit_code() {
     fi
 }
 
+test_output() {
+    local desc="$1"
+    local inputFile="$2"
+    local expectedOutput="$3"
+    
+    local actualOutput
+    actualOutput=$("$VM_BIN" "$inputFile" 2>/dev/null)
+    
+    if [ "$actualOutput" = "$expectedOutput" ]; then
+        echo -e "PASS: $desc"
+        PASSED=$((PASSED + 1))
+    else
+        echo -e "FAIL: $desc"
+        echo "  Input file: $inputFile"
+        echo "  Expected output: '$expectedOutput'"
+        echo "  Actual output:   '$actualOutput'"
+        FAILED=$((FAILED + 1))
+    fi
+}
+
 echo "=== Testing VM Instructions ==="
 echo ""
 
@@ -162,6 +182,11 @@ echo ""
 
 echo "== Object Instructions =="
 test_exit_code "new/putfield/getfield - object operations" "$TEST_FILES_DIR/object_basic.bc" 100
+echo ""
+
+echo "== IO Instructions =="
+test_output "invoke_write - write integer to stdout" "$TEST_FILES_DIR/io_invoke_write.bc" "42"
+test_output "invoke_write - write chars to stdout" "$TEST_FILES_DIR/io_invoke_write_char.bc" "Hi"
 echo ""
 
 echo "========================================"
