@@ -11,12 +11,12 @@ compileOneCell re (ex:exs) index prefix prog = (re ex addedIndexProg)
     >>= (\new_prog -> compileOneCell re exs (index + 1) prefix new_prog)
         where addedIndexProg = appendBody prog ["dup", ("iconst " ++ show index)]
 
-compileArrayLiteral :: CompileExpr -> [Expr] -> CompilerData -> Either String CompilerData
-compileArrayLiteral _ [] prog = Right prog
-compileArrayLiteral re exprs prog
+compileArrayLiteral :: CompileExpr -> [Expr] -> Type -> CompilerData -> Either String CompilerData
+compileArrayLiteral _ [] _ prog = Right prog
+compileArrayLiteral re exprs t prog
     | not (null arrayError) = Left firstError
     | isArrayMixed validTypes = Left "Array contains mixed expression types."
     | otherwise = compileOneCell re exprs 0 prefix prog
         where firstError = fromMaybe "Unknown error" (listToMaybe arrayError)
-              prefix = typePrefixVal (fromMaybe VoidType (listToMaybe validTypes))
+              prefix = typePrefixVal t
               (arrayError, validTypes) = getNuancedArray exprs prog

@@ -33,7 +33,7 @@ storeArrayVar :: String -> Type -> ArrayVar -> Expr -> CompilerData -> Either St
 storeArrayVar name t (ArrayVar at len) (ArrayLiteral exprs) prog =
              compileExpr len prog
             >>= \lenProg -> Right (appendBody lenProg ["newarray " ++ show at])
-            >>= \newArrayProg -> compileArrayLiteral compileExpr exprs newArrayProg
+            >>= \newArrayProg -> compileArrayLiteral compileExpr exprs at newArrayProg
             >>= \newArrayWithElementsProg -> addGoodTypeStore t newArrayWithElementsProg
             >>= \storedProg -> Right (storeInSymbolTable name t storedProg)
 storeArrayVar _ _ _ expr _ = Left ("Invalid array variable declaration with. " ++ show expr)
