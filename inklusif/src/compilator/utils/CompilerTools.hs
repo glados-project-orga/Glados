@@ -38,6 +38,7 @@ import Ast (Declaration(..),
     StructField(..),
     Type(..),
     Literal(..),
+    ArrayVar(..),
     )
 import Data.List (find)
 
@@ -95,29 +96,23 @@ typePrefixVal (BoolType ) = "b"
 typePrefixVal (ArrayType _) = "a"
 typePrefixVal _ = "a"
 
-getNuancedArray :: [Expr] -> CompilerData -> ([String], [String])
+getNuancedArray :: [Expr] -> CompilerData -> ([String], [Type])
 getNuancedArray [] _ = ([], [])
 getNuancedArray exprs prog = (lefts arrayTypes, rights arrayTypes)
-    where arrayTypes = map (\expr -> arrayCellValidType expr prog) exprs
+    where arrayTypes = map (\expr -> convertToType expr prog) exprs
 
-isArrayMixed :: [String] -> Bool
+isArrayMixed :: [Type] -> Bool
 isArrayMixed [] = False
 isArrayMixed (headType:xs) = any (/= headType) xs
 
-getLitArrayType :: [Expr] -> CompilerData -> Either String String
-getLitArrayType [] _ = Right "array void"
+getLitArrayType :: [Expr] -> CompilerData -> Either String Type
+getLitArrayType [] _ = Right (ArrayType (ArrayVar VoidType (LitExpr (IntLit 0))))
 getLitArrayType exprs prog | not (null arrayError) = Left firstError
                            | isArrayMixed validTypes = Left "Array contains mixed expression types."
-                           | otherwise = Right ("array " ++ firstType)
+                           | otherwise = Right (ArrayType (ArrayVar (fval) (LitExpr (IntLit 0))))
     where firstError = fromMaybe "Unknown error" (listToMaybe arrayError)
-          firstType = fromMaybe "unknown" (listToMaybe validTypes)
+          fval = fromMaybe VoidType (listToMaybe validTypes)
           (arrayError, validTypes) = getNuancedArray exprs prog
-
-arrayCellValidType :: Expr -> CompilerData -> Either String String
-arrayCellValidType (ArrayLiteral arr) prog = getLitArrayType arr prog
-arrayCellValidType (VarExpr varName) prog = show <$> getVarType varName prog
-arrayCellValidType (ArrayVarExpr _ _) _ = Right "array"
-arrayCellValidType _ _ = Left "Invalid expression type for array cell"
 
 getClasses :: CompilerData -> [ClassDecl]
 getClasses (_, (_, _, classes, _, _, _), _, _) = classes
@@ -155,7 +150,7 @@ normalizeExprType (BinOpExpr _ l r) prog = normalizeBinOp (l, r) prog
 normalizeExprType (ClassVarExpr clName (VarExpr varName)) prog =
     getClassVarType clName varName prog >>= \typ -> Right (TypeNorm typ)
 normalizeExprType (ArrayLiteral arr) prog =
-    getLitArrayType arr prog >>= \typ -> Right (TypeNorm (convert typ))
+    getLitArrayType arr prog >>= \typ -> Right (TypeNorm typ)
 normalizeExprType (CallExpression (CallExpr name _)) prog =
     case getFunctionReturnType name prog of
         Just retType -> Right (TypeNorm retType)
