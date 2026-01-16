@@ -191,7 +191,8 @@ echo ""
 
 echo "== Constant Pool Instructions =="
 test_output "ldc - load from constant pool" "$TEST_FILES_DIR/const_pool_basic.bc" "42100-7"
-test_output "ldc - load every types from constant pool" "$TEST_FILES_DIR/const_pool_types.bc" "1 -7 40.023 true false C"
+test_output "ldc - load every types from constant pool" "$TEST_FILES_DIR/const_pool_types.bc" "1 -7 40.023 true false 
+ string TEST"
 echo ""
 
 echo "========================================"
