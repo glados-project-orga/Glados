@@ -64,6 +64,7 @@ data EnumField = EnumField
 -- La SourcePos (en gros l'endroit ou c'est déclaré) je suis moyen sûr de ça honnêtement
 -- le nom / les params / le body / etc ..
 
+
 data FunctionDecl = FunctionDecl
   { funcPos :: SourcePos
   , funcName :: String
@@ -153,7 +154,7 @@ instance Show Type where
   show LongType = "long"
   show (LambdaType _) = "lambda"
   show DoubleType = "double"
-  show (ArrayType t) = show t
+  show (ArrayType (ArrayVar t _)) = "array " ++ show t
   show (CustomType s) = s
   show VoidType = "void"
 
@@ -187,6 +188,7 @@ data WhileStmt = WhileStmt
   , whileBody :: [Statement]
   } deriving (Show, Eq)
 
+
 data ForUpdate
     = ForUpdateExpr Expr
     | ForUpdateStmt Statement
@@ -219,6 +221,7 @@ data TryCatchStmt = TryCatchStmt
 data ThrowStmt = ThrowStmt
   { throwMessage :: Expr
   } deriving (Show, Eq)
+
 
 data ReturnStmt = ReturnStmt
   { returnExpr :: Expr

@@ -26,7 +26,7 @@ re: fclean all
 
 unit_tests:
 	stack test --coverage
-	stack hpc report glados
+	stack hpc report inklusif
 	mkdir -p ./test/coverage
 	cp -r $(BINARY_PATH) ./test/coverage/
 

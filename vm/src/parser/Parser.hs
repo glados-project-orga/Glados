@@ -26,7 +26,9 @@ module Parser (
     parseDouble,
     parseArgSep,
     parseCharIf,
-    parseString
+    parseString,
+    parseKeyword,
+    parseBool
 ) where
 
 import Data.Char (isSpace)
@@ -149,3 +151,11 @@ parseCharIf char = Parser f
 parseString :: Parser String
 parseString = betweenSpaces (
     many (parseCharIf (not . isSpace)))
+
+parseKeyword :: String -> Parser ()
+parseKeyword [] = pure ()
+parseKeyword (c:cs) = parseChar c *> parseKeyword cs
+
+parseBool :: Parser Bool
+parseBool = (parseKeyword "True" *> pure True)
+        <|> (parseKeyword "False" *> pure False)
