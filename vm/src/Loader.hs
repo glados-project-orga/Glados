@@ -50,6 +50,7 @@ parseInstr = parseConsts
          <|> parseStack
          <|> parseControlFlow
          <|> parseInvokeStatic
+         <|> parseInvokeWrite
          <|> parseReturn
          <|> parseArray
          <|> parseObject
@@ -269,6 +270,9 @@ parseIfACmpNe = parseKeyword "if_acmpne" *> parseSpaces *> (IIfACmpNe <$> parseI
 
 parseInvokeStatic :: Parser Instr
 parseInvokeStatic = parseKeyword "invokestatic" *> (IInvokeStatic <$> parseString)
+
+parseInvokeWrite :: Parser Instr
+parseInvokeWrite = parseKeyword "invoke_write" *> parseArgSep *> (IInvokeWrite <$> parseInt)
 
 parseReturn :: Parser Instr
 parseReturn = (parseKeyword "ireturn" *> pure IReturnInt)
