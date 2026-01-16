@@ -11,7 +11,7 @@ module CompilerTools (
     validAssignmentType,
     getNuancedArray,
     convertToType,
-    cmplValToExpr,
+    addValToHeader
     )
 where
 
@@ -26,7 +26,6 @@ import CompilerTypes(
     TypeEq(..),
     TypeNormalized(..),
     Convert(..),
-    ConvertExpr(..),
     SearchTypes(..),
     )
 import SymbolTableUtils (getVarType, getVarType)
@@ -45,6 +44,16 @@ import Data.List (find)
 appendHeader :: CompilerData -> ConstantPool -> CompilerData
 appendHeader (header, def, body, symblTable) newHead =
     (header ++ newHead, def, body, symblTable)
+
+addValToHeader :: CompilerData -> Expr -> Either String CompilerData
+addValToHeader prog (LitExpr (IntLit i)) = Right (appendHeader prog [show i])
+addValToHeader prog (LitExpr (FloatLit f)) = Right (appendHeader prog [show f])
+addValToHeader prog (LitExpr (DoubleLit d)) = Right (appendHeader prog [show d])
+addValToHeader prog (LitExpr (CharLit c)) = Right (appendHeader prog [show c])
+addValToHeader prog (LitExpr (StringLit s)) = Right (appendHeader prog [show s])
+addValToHeader prog (LitExpr (BoolLit b)) = Right (appendHeader prog [show b])
+addValToHeader prog (LitExpr (LongLit l)) = Right (appendHeader prog [show l])
+addValToHeader _ _ = Left "Unsupported literal type for header addition."
 
 appendDefine :: Declaration -> Defines -> Defines
 appendDefine (Function function) (c, fun, st, en, td, count) = (c, fun ++ [function], st, en, td, count)
@@ -84,7 +93,7 @@ typePrefixVal (DoubleType ) = "d"
 typePrefixVal (CharType ) = "c"
 typePrefixVal (BoolType ) = "b"
 typePrefixVal (ArrayType _) = "a"
-typePrefixVal _ = "i"
+typePrefixVal _ = "a"
 
 getNuancedArray :: [Expr] -> CompilerData -> ([String], [String])
 getNuancedArray [] _ = ([], [])
@@ -157,7 +166,3 @@ validAssignmentType (SearchType t) (SearchExpr expr) prog = t `typeEq` (convertT
 validAssignmentType (SearchExpr expr1) (SearchExpr expr2) prog = normed1 `typeEq` normed2
     where normed1 = convertToType expr1 prog
           normed2 = convertToType expr2 prog
-
-cmplValToExpr :: Type -> CompilerData -> Expr
-cmplValToExpr (CustomType name) _ = (LitExpr (StringLit name))
-cmplValToExpr val _ = convertExpr val

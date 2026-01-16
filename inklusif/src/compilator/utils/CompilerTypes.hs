@@ -22,7 +22,6 @@ module CompilerTypes (
     ShowType(..),
     TypeEq(..),
     Convert(..),
-    ConvertExpr(..),
     TypeNormalized(..),
     HeapSize,
     Handle,
@@ -77,9 +76,6 @@ class TypeEq a b where
 class Convert a where
     convert :: a -> Type
 
-class ConvertExpr a where
-    convertExpr :: a -> Expr
-
 instance Convert Literal where
     convert (IntLit _)    = IntType
     convert (FloatLit _)  = FloatType
@@ -88,19 +84,6 @@ instance Convert Literal where
     convert (CharLit _)   = CharType
     convert (LongLit _)   = LongType
     convert (StringLit s) = ArrayType (ArrayVar CharType (LitExpr (IntLit (length s))))
-
-instance ConvertExpr Type where
-    convertExpr IntType = (LitExpr (IntLit 0))
-    convertExpr LongType = (LitExpr (LongLit 0))
-    convertExpr FloatType = (LitExpr (FloatLit 0.0))
-    convertExpr DoubleType = (LitExpr (DoubleLit 0.0))
-    convertExpr BoolType = (LitExpr (BoolLit False))
-    convertExpr CharType = (LitExpr (CharLit '\0'))
-    convertExpr StringType = (LitExpr (StringLit ""))
-    convertExpr VoidType = (LitExpr (StringLit "void"))
-    convertExpr (LambdaType _) = (LitExpr (StringLit "lambda"))
-    convertExpr (ArrayType (ArrayVar t _)) = (ArrayLiteral [convertExpr t])
-    convertExpr (CustomType name) = (LitExpr (StringLit name))
 
 instance Convert String where
     convert "int"    = IntType
@@ -144,6 +127,7 @@ instance TypeEq Type String where
     typeEq VoidType "void"        = True
     typeEq (CustomType name) str  = name == str
     typeEq _ _                    = False
+
 instance TypeEq Type Literal where
     typeEq (IntType) (IntLit _)          = True
     typeEq (DoubleType) (DoubleLit _)    = True
@@ -156,6 +140,8 @@ instance TypeEq Type Literal where
 data SymInfo = SymInfo
   { symIndex :: Int
   , symVal  :: Type
+  , symIsConst :: Maybe Handle
+  , symIsRef :: Bool
   } deriving (Show, Eq)
 
 
