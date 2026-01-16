@@ -6,11 +6,7 @@
 -}
 
 module Loader (
-    loadBytecode,
-    parseInstr,
-    parseInstrs,
-    parseFunction,
-    parseFunctions
+    loadBytecode
 ) where
 
 import Data
@@ -27,20 +23,21 @@ import Parser (
     parseDouble,
     parseSingleChar,
     parseArgSep,
-    parseString
+    parseString,
+    parseKeyword,
+    parseBool,
+    sepBy
   )
 import qualified Data.Map as Map
 import qualified Data.Vector as V
 import Control.Applicative ((<|>))
 
-loadBytecode :: String -> Either String (Map.Map String Function)
+loadBytecode :: String -> Either String (V.Vector Value, Map.Map String Function)
 loadBytecode content =
-    case runParser parseFunctions content of
+    case runParser parseBytecodeFile content of
         Left err -> Left err
-        Right (funcs, _) -> Right (Map.fromList (map (\f -> (funcName f, f)) funcs))
-
-parseInstrs :: Parser [Instr]
-parseInstrs = parseMany (betweenSpaces parseInstr)
+        Right ((pool, funcs), _) -> 
+            Right (pool, Map.fromList (map (\f -> (funcName f, f)) funcs))
 
 parseInstr :: Parser Instr
 parseInstr = parseConsts
@@ -50,15 +47,12 @@ parseInstr = parseConsts
          <|> parseStack
          <|> parseControlFlow
          <|> parseInvokeStatic
+         <|> parseInvokeWrite
          <|> parseReturn
          <|> parseArray
          <|> parseObject
          <|> parseConversion
          <|> parseComparison
-
-parseKeyword :: String -> Parser ()
-parseKeyword [] = pure ()
-parseKeyword (c:cs) = parseChar c *> parseKeyword cs
 
 parseConsts :: Parser Instr
 parseConsts = parseConstInt
@@ -270,6 +264,9 @@ parseIfACmpNe = parseKeyword "if_acmpne" *> parseSpaces *> (IIfACmpNe <$> parseI
 parseInvokeStatic :: Parser Instr
 parseInvokeStatic = parseKeyword "invokestatic" *> (IInvokeStatic <$> parseString)
 
+parseInvokeWrite :: Parser Instr
+parseInvokeWrite = parseKeyword "invoke_write" *> parseArgSep *> (IInvokeWrite <$> parseInt)
+
 parseReturn :: Parser Instr
 parseReturn = (parseKeyword "ireturn" *> pure IReturnInt)
           <|> (parseKeyword "dreturn" *> pure IReturnDouble)
@@ -330,3 +327,28 @@ parseFunction =
               <*> (parseChar '{' *> parseSpaces *> 
                    (V.fromList <$> parseMany (betweenSpaces parseInstr)) 
                    <* parseSpaces <* parseChar '}'))
+
+parseBytecodeFile :: Parser (V.Vector Value, [Function])
+parseBytecodeFile = 
+    (,) <$> (parseSpaces *> parseHeader)
+        <*> parseFunctions
+
+parseHeader :: Parser (V.Vector Value)
+parseHeader = (parseKeyword "header" *> parseSpaces *> 
+               parseChar '{' *> parseSpaces *>
+               (V.fromList <$> (parseValue `sepBy` parseSemicolon))
+               <* parseSpaces <* parseChar '}' <* parseSpaces)
+          <|> pure V.empty
+
+parseSemicolon :: Parser ()
+parseSemicolon = parseSpaces *> parseChar ';' *> parseSpaces
+
+parseValue :: Parser Value
+parseValue = parseSpaces *> parseValue' <* parseSpaces
+  where
+    parseValue' = (VBool <$> parseBool)
+              <|> (VChar <$> parseSingleChar)
+              <|> (VDouble <$> parseDouble)
+              <|> (VFloat <$> parseFloat)
+              <|> (VLong <$> parseLong)
+              <|> (VInt <$> parseInt)
