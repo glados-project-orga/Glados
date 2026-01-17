@@ -1,0 +1,6 @@
+fun main {
+    dconst 42.7
+    d2l
+    l2i
+    ireturn
+}

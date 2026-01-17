@@ -1,0 +1,34 @@
+header {
+    1; -7; 40.023; True; False; '\n'; "string TEST"
+}
+
+fun main {
+    ldc 0
+    invoke_write 1
+    cconst ' '
+    invoke_write 1
+    ldc 1
+    invoke_write 1
+    cconst ' '
+    invoke_write 1
+    ldc 2
+    invoke_write 1
+    cconst ' '
+    invoke_write 1
+    ldc 3
+    invoke_write 1
+    cconst ' '
+    invoke_write 1
+    ldc 4
+    invoke_write 1
+    cconst ' '
+    invoke_write 1
+    ldc 5
+    invoke_write 1
+    cconst ' '
+    invoke_write 1
+    ldc 6
+    invoke_write 1
+    iconst 0
+    ireturn
+}

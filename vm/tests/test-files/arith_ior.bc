@@ -1,0 +1,6 @@
+fun main {
+    iconst 5
+    iconst 3
+    ior
+    ireturn
+}

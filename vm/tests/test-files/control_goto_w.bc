@@ -1,0 +1,7 @@
+fun main {
+    goto_w 3
+    iconst 0
+    ireturn
+    iconst 1
+    ireturn
+}
