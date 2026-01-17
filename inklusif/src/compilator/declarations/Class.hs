@@ -1,13 +1,9 @@
 module Class (compileClass) where
 import Ast (ClassDecl(..), Declaration(..), FunctionDecl)
-import CompilerTypes (CompilerData, Defines)
+import CompilerTypes (CompilerData)
 import Function (compileFunction)
-import CompilerTools (appendDefines)
+import CompilerTools (appendDefines, isClassDefined)
 import CompilerError (errPos)
-
-isClassDefined :: String -> Defines -> Bool
-isClassDefined searched (_, _, classDefs, _, _, _) =
-    any (\(ClassDecl _ name _ _) -> name == searched) classDefs
 
 appendMethods :: Either String CompilerData -> [FunctionDecl] -> Either String CompilerData
 appendMethods (Left err) _ = Left err

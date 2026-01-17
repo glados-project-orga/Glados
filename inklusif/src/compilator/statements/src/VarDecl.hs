@@ -1,6 +1,14 @@
 module VarDecl (compileVarDecl, storeInSymbolTable, addGoodTypeStore) where
-import CompilerTypes (CompilerData, SymInfo(..))
-import CompilerTools (appendSymbolTable, convertToType, typePrefixVal, appendBody, addValToHeader)
+import CompilerTypes (CompilerData, SymInfo(..), TypeEq(..), Defines)
+import CompilerTools (appendSymbolTable,
+    convertToType,
+    typePrefixVal,
+    appendBody,
+    addValToHeader,
+    isClassDefined,
+    )
+import Typedef (getTypedefType, typeNameExists)
+import ArrayLiteral (compileArrayLiteral)
 import Ast (VarDecl, Type(..), VarDecl(..), Expr(..), ArrayVar(..))
 import Expr (compileExpr)
 
@@ -28,9 +36,31 @@ storeConstVar name t value prog@(header, _, _, symTable) =
         where localindex = length symTable
               headerindex = length header
 
+storeArrayVar :: String -> Type -> ArrayVar -> Expr -> CompilerData -> Either String CompilerData
+storeArrayVar name t (ArrayVar at len) (ArrayLiteral exprs) prog =
+             compileExpr len prog
+            >>= \lenProg -> Right (appendBody lenProg ["newarray "])
+            >>= \newArrayProg -> compileArrayLiteral compileExpr exprs at newArrayProg
+            >>= \newArrayWithElementsProg -> addGoodTypeStore t newArrayWithElementsProg
+            >>= \storedProg -> Right (storeInSymbolTable name t storedProg)
+storeArrayVar _ _ _ expr _ = Left ("Invalid array variable declaration with. " ++ show expr)
+
+storeCustomVar :: String -> Type -> Expr -> CompilerData -> Either String CompilerData
+storeCustomVar name ct@(CustomType cname) _ prog =
+    Right (appendBody prog ["new " ++ cname]) >>= \newArrayProg ->
+    Right (storeInSymbolTable name ct newArrayProg)
+storeCustomVar name t value prog = storeVar name t value prog
+
+getCustomType :: Type -> Defines -> Either String Type
+getCustomType ct@(CustomType cname) defs@(_, _, _, _, typedefs, _)
+    | typeNameExists cname typedefs = Right $ (maybe VoidType id (getTypedefType cname typedefs))
+    | isClassDefined cname defs = Right $ ct
+    | otherwise = Left ("Type " ++ cname ++ " does not exist.")
+getCustomType t _ = Right t
+
 isSameType :: Type -> Expr -> CompilerData -> Bool
 isSameType t expr prog = case convertToType expr prog of
-    Right convertedType -> t == convertedType
+    Right convertedType -> t `typeEq` convertedType
     Left _ -> False
 
 compileVarDecl :: VarDecl -> CompilerData -> Either String CompilerData
@@ -38,12 +68,13 @@ compileVarDecl (VarDecl _ _ _ True True) _ =
     Left "Cannot have a variable that is both constant and reference."
 compileVarDecl (VarDecl name t value True _) prog = storeConstVar name t value prog
 compileVarDecl (VarDecl _ _ _ _ True) prog = Right prog
-compileVarDecl (VarDecl name t value _ _) prog
+compileVarDecl (VarDecl name t value _ _) prog@(_,  defines, _, _)
     | isSameType t value prog = case t of
-        ArrayType (ArrayVar at len) -> Right (appendBody prog ["iconst " ++ show len, "newarray " ++ show at])
-            >>= \newArrayProg -> Right (storeInSymbolTable name t newArrayProg)
-            >>= \storedProg -> addGoodTypeStore t storedProg
-        CustomType cname -> Right (appendBody prog ["new " ++ cname]) >>= \newArrayProg ->
-            Right (storeInSymbolTable name t newArrayProg)
+        ArrayType arr -> storeArrayVar name t arr value prog
+        CustomType _ -> getCustomType t defines >>=
+            \ct -> storeCustomVar name ct value prog
         _ -> storeVar name t value prog
-    | otherwise = Left "Variable declaration type does not match assigned value type."
+    | otherwise = Left ("Variable declaration type does not match assigned value type." ++ 
+        case convertToType value prog of
+            Right ct -> " Expected " ++ show t ++ ", got " ++ show ct ++ "."
+            Left err -> " (Could not determine type: " ++ err ++ ")")

@@ -116,6 +116,13 @@ instance TypeEq TypeNormalized TypeNormalized where
     typeEq (LitNorm l1) (LitNorm l2)   = l1 == l2
     typeEq _ _                         = False
 
+instance TypeEq Type Type where
+    typeEq (ArrayType (ArrayVar CharType _)) StringType = True
+    typeEq (ArrayType (ArrayVar t1 _)) (ArrayType (ArrayVar t2 _)) = typeEq t1 t2
+    typeEq (CustomType name1) (CustomType name2)  = name1 == name2
+    typeEq (LongType) (IntType) = True
+    typeEq t1 t2                      = t1 == t2
+
 instance TypeEq Type String where
     typeEq IntType "int"          = True
     typeEq FloatType "float"      = True
