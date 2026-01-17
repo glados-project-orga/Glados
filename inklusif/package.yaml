@@ -54,7 +54,6 @@ library:
     - src/compilator/expressions/src
     - src/compilator/expressions/utils
 
-
 executables:
   inklusif-exe:
     main: Main.hs
