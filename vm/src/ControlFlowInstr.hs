@@ -11,7 +11,6 @@ module ControlFlowInstr (
     controlFlowReturn,
     controlFlowReturnInt,
     controlFlowGoto,
-    controlFlowGoto_w,
     controlFlowReturnDouble,
     controlFlowReturnFloat,
     controlFlowReturnLong,
@@ -159,12 +158,6 @@ controlFlowReturnLong st@VMState{stack, functions, currentFunc, frames} =
 controlFlowGoto :: Int -> VMState -> Either String VMState
 controlFlowGoto offset st =
     Right st {ip = offset}
-
-
-controlFlowGoto_w :: Int -> VMState -> Either String VMState
-controlFlowGoto_w offset st =
-    Right st {ip = offset}
-
 
 controlFlowInvokeStatic :: String -> VMState -> Either String VMState
 controlFlowInvokeStatic funcName st@VMState{functions, frames, currentFunc, ip} =

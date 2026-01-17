@@ -215,14 +215,10 @@ parseControlFlow = parseIfICmpGt
                <|> parseIfGe
                <|> parseIfLt
                <|> parseIfLe
-               <|> parseGotoW
                <|> parseGoto
 
 parseGoto :: Parser Instr
 parseGoto = parseKeyword "goto" *> parseSpaces *> (IGoto <$> parseInt)
-
-parseGotoW :: Parser Instr
-parseGotoW = parseKeyword "goto_w" *> parseSpaces *> (IGoto_w <$> parseInt)
 
 parseIfEq :: Parser Instr
 parseIfEq = parseKeyword "ifeq" *> parseSpaces *> (IIfEq <$> parseInt)

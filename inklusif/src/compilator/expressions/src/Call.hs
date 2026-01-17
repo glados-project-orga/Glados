@@ -31,6 +31,8 @@ compileCallExpr compileExpr (CallExpr "write" args) prog
     | otherwise =
         case args of
             (x:(LitExpr (IntLit n)): _) ->
+                if n <= 0 then Left "exepected 0 or 1 for output"
+                else
                     compileExpr x prog >>= \p1 ->
                     Right (appendBody p1 ["invoke_write " ++ show n])
             _ -> Left "Error: write expects (expr, int)"

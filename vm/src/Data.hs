@@ -109,7 +109,7 @@ data Instr = ILdc Int
            | IIfICmpGt Int | IIfICmpLe Int | ILcmp | IFcmpl
            | IFcmpg | IDcmpl | IDcmpg
 
-           | IGoto Int | IGoto_w Int
+           | IGoto Int
            | IInvokeStatic String
            | IReturn | IReturnInt | IReturnDouble | IReturnFloat | IReturnLong | IReturnA
            | INew String | IGetField String | IPutField String
