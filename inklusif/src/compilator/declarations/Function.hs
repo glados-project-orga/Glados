@@ -13,8 +13,9 @@ closeFunction prog def = Right (appendDefines (appendBody prog ["}"]) [Function 
 
 addParams :: [Parameter] -> CompilerData -> Either String CompilerData
 addParams [] prog = Right prog
-addParams (Parameter name typ _:params) prog = Right (storeInSymbolTable name typ prog)
-    >>= \progWithParam -> addGoodTypeStore typ progWithParam
+addParams (Parameter name typ _:params) prog =
+    addGoodTypeStore typ prog
+    >>= \progWithParam -> Right (storeInSymbolTable name typ progWithParam)
     >>= \progWithStore -> addParams params progWithStore
 
 

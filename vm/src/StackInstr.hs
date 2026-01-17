@@ -87,6 +87,7 @@ stackInstrALoad :: Int -> VMState -> Either String VMState
 stackInstrALoad n st@VMState{stack, ip, locals} =
     case locals V.!? n of
         Just (VInt v) -> Right st { ip = ip + 1 , stack = (VInt v : stack)}
+        Just (VHandle h) -> Right st { ip = ip + 1 , stack = (VHandle h : stack)}
         Just _ -> Left ("aload: expected reference at local index " ++ show n)
         Nothing -> Left ("Invalid local index: " ++ show n)
 
@@ -96,6 +97,8 @@ stackInstrAStore n st@VMState{stack, ip, locals} =
     case stack of
         (VInt v : rest) ->
             Right st { ip = ip + 1, stack = rest, locals = (locals V.// [(n, VInt v)])}
+        (VHandle h : rest) ->
+            Right st { ip = ip + 1, stack = rest, locals = (locals V.// [(n, VHandle h)])}
         (_ : _) ->
             Left ("astore: expected reference on stack for local index " ++ show n)
         [] -> Left "astore: empty stack"

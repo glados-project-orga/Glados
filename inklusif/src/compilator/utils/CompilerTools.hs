@@ -159,6 +159,7 @@ opPriorityTable op | any (== DoubleType) op = (TypeNorm DoubleType)
                    | any (== FloatType) op = (TypeNorm FloatType)
                    | any (== LongType) op = (TypeNorm LongType)
                    | any (== IntType) op = (TypeNorm IntType)
+                   | any (== BoolType) op = (TypeNorm BoolType)
                    | otherwise = (TypeNorm VoidType)
 
 getFromEnum :: [EnumField] -> String -> Maybe Int
