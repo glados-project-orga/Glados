@@ -43,7 +43,6 @@ parseSpecialChar =
     <|> ('\r'  <$ parseChar 'r')
     )
 
-
 parseStringLiteral :: Parser String
 parseStringLiteral = 
     parseChar '"' *> parseMany stringChar <* parseChar '"'
@@ -55,7 +54,8 @@ parseNumberLiteral =
     decide <$> parseNumber
   where
     decide n
-        | n <= fromIntegral (maxBound :: Int32)
+        | n >= fromIntegral (minBound :: Int32)
+       && n <= fromIntegral (maxBound :: Int32)
             = IntLit  (fromIntegral n)
         | otherwise
             = LongLit (fromIntegral n)
