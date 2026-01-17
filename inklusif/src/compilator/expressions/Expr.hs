@@ -15,10 +15,9 @@ import BinOp (compileBinOpExpr)
 import ArrayIndex (compileArrayIndex)
 import ArrayLiteral (compileArrayLiteral)
 import Call (compileCallExpr)
-import MethodCall (compileMethodCall)
-import FieldAccess (compileFieldAccess)
 import Var (compileVarExpr)
 import ArrayVarExpr (compileArrayVarExpr)
+import ClassVarExpr (compileClassVarExpr)
 
 prepareArrayLiteral :: CompileExpr -> [Expr] -> CompilerData -> Either String CompilerData
 prepareArrayLiteral _ [] prog = Right prog
@@ -32,8 +31,7 @@ compileExpr (LitExpr lit) prog = compileLiteralExpr lit prog
 compileExpr (ArrayAssignement indx) prog = compileArrayIndex compileExpr indx prog
 compileExpr (ArrayLiteral exprs) prog = prepareArrayLiteral compileExpr exprs prog
 compileExpr (CallExpression call) prog = compileCallExpr compileExpr call prog
-compileExpr (MethodCallExpression objCall) prog = compileMethodCall compileExpr objCall prog
-compileExpr (FieldAccessExpression fieldAccess) prog = compileFieldAccess fieldAccess prog
+compileExpr (ClassVarExpr cname expr) prog = compileClassVarExpr compileExpr (cname, expr) prog
 compileExpr (VarExpr expr) prog = compileVarExpr expr prog
 compileExpr (ArrayVarExpr nam idxe) prog = compileArrayVarExpr compileExpr (nam, idxe) prog
 compileExpr expr@(BinOpExpr _ _ _) prog = compileBinOpExpr compileExpr expr prog
