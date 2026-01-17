@@ -6,11 +6,21 @@ on:
       - main
       - CI/CD
       - dev
+      - compilator
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build-and-test:
+  compiler:
+    name: Compiler / build-and-test
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: inklusif
 
     steps:
       - name: Checkout sources
@@ -26,10 +36,57 @@ jobs:
         with:
           path: |
             ~/.stack
-            .stack-work
-          key: ${{ runner.os }}-stack-${{ hashFiles('stack.yaml') }}
+            inklusif/.stack-work
+          key: ${{ runner.os }}-stack-compiler-${{ hashFiles('inklusif/stack.yaml', 'inklusif/stack.yaml.lock', 'inklusif/package.yaml', 'inklusif/**/*.cabal') }}
           restore-keys: |
-            ${{ runner.os }}-stack-
+            ${{ runner.os }}-stack-compiler-
+
+      - name: Debug working directory
+        run: pwd && ls -la
+
+      - name: Build (make all)
+        run: make all
+
+      - name: Run unit tests (make tests_run)
+        run: make tests_run
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiler-coverage
+          path: inklusif/test/coverage/
+          if-no-files-found: ignore
+
+  vm:
+    name: VM / build-and-test
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: vm
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Install Stack + GHC
+        uses: haskell/actions/setup@v2
+        with:
+          enable-stack: true
+
+      - name: Cache Stack
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.stack
+            vm/.stack-work
+          key: ${{ runner.os }}-stack-vm-${{ hashFiles('vm/stack.yaml', 'vm/stack.yaml.lock', 'vm/package.yaml', 'vm/**/*.cabal') }}
+          restore-keys: |
+            ${{ runner.os }}-stack-vm-
+
+      - name: Debug working directory
+        run: pwd && ls -la
 
       - name: Build (make all)
         run: make all
@@ -38,11 +95,14 @@ jobs:
         run: make tests_run
 
       - name: Run runtime tests
-        run: ./tests/functionals-tests.sh
+        run: |
+          chmod +x tests/functionals-tests.sh
+          ./tests/functionals-tests.sh
 
       - name: Upload coverage report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage
-          path: test/coverage/
+          name: vm-coverage
+          path: vm/test/coverage/
+          if-no-files-found: ignore
