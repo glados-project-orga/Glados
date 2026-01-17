@@ -1,0 +1,10 @@
+fun getLong {
+    lconst 42
+    lreturn
+}
+
+fun main {
+    invokestatic getLong
+    l2i
+    ireturn
+}

@@ -1,0 +1,6 @@
+fun main {
+    goto 2
+    iconst 0
+    iconst 1
+    ireturn
+}

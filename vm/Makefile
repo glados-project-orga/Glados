@@ -1,6 +1,6 @@
 ##
 ## EPITECH PROJECT, 2025
-## glados
+## glados-vm
 ## File description:
 ## Makefile
 ##
@@ -8,7 +8,7 @@
 
 BINARY_PATH :=	$(shell stack path --local-install-root)
 
-NAME = inklusif
+NAME = glados-vm
 
 all:
 	stack build
@@ -26,7 +26,7 @@ re: fclean all
 
 unit_tests:
 	stack test --coverage
-	stack hpc report inklusif
+	stack hpc report glados-vm
 	mkdir -p ./test/coverage
 	cp -r $(BINARY_PATH) ./test/coverage/
 
