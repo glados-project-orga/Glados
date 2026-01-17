@@ -19,6 +19,7 @@ compileUnaryOp compile (UnaryOpExpr op expr) prog =
         Not   -> compileNot compile expr prog
         PreInc -> compilePreIncDec compile expr 1 prog
         PreDec -> compilePreIncDec compile expr (-1) prog
+        _ -> Left "Unary op: Not implemented, ref or deref"
 compileUnaryOp _ _ _ = Left "compileUnaryOp called with non-UnaryOp expression"
 
 compileNeg :: CompileExpr -> Expr -> CompilerData -> Either String CompilerData
