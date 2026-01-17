@@ -23,9 +23,9 @@ compileCondAsBranch (BinOpExpr op left right) lEnd prog =
         GreaterThan   -> emitBranch "le" left right lEnd prog
         Equal         -> emitBranch "ne" left right lEnd prog
         NotEqual      -> emitBranch "eq" left right lEnd prog
-        _             -> Left "Condition non supportée dans un while"
+        _             -> Left "Case not support in while"
 
-compileCondAsBranch _ _ _ = Left "Condition invalide dans un while"
+compileCondAsBranch _ _ _ = Left "Invalid conditions in while"
 
 
 compileWhile :: (Statement -> CompilerData -> Either String CompilerData)
