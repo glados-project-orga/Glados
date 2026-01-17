@@ -157,9 +157,11 @@ parseUInt = read <$> some (parseAnyChar ['0'..'9'])
 parseInt :: Parser Int
 parseInt = (negate <$> (parseChar '-' *> parseUInt)) <|> parseUInt
 
+parseInteger :: Parser Integer
+parseInteger = read <$> some (parseAnyChar ['0'..'9'])
+
 parseNumber :: Parser Integer
-parseNumber =
-    read <$> some (parseAnyChar ['0'..'9'])
+parseNumber = (negate <$> (parseChar '-' *> parseInteger)) <|> parseInteger
 
 parseUDouble :: Parser Double
 parseUDouble = read <$>
