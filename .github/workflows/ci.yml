@@ -41,6 +41,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-stack-compiler-
 
+      - name: Debug working directory
+        run: pwd && ls -la
+
       - name: Build (make all)
         run: make all
 
@@ -82,6 +85,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-stack-vm-
 
+      - name: Debug working directory
+        run: pwd && ls -la
+
       - name: Build (make all)
         run: make all
 
@@ -90,7 +96,7 @@ jobs:
 
       - name: Run runtime tests
         run: |
-          chmod +x ./tests/functionals-tests.sh
+          chmod +x tests/functionals-tests.sh
           ./tests/functionals-tests.sh
 
       - name: Upload coverage report
