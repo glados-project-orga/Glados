@@ -215,14 +215,10 @@ parseControlFlow = parseIfICmpGt
                <|> parseIfGe
                <|> parseIfLt
                <|> parseIfLe
-               <|> parseGotoW
                <|> parseGoto
 
 parseGoto :: Parser Instr
 parseGoto = parseKeyword "goto" *> parseSpaces *> (IGoto <$> parseInt)
-
-parseGotoW :: Parser Instr
-parseGotoW = parseKeyword "goto_w" *> parseSpaces *> (IGoto_w <$> parseInt)
 
 parseIfEq :: Parser Instr
 parseIfEq = parseKeyword "ifeq" *> parseSpaces *> (IIfEq <$> parseInt)
@@ -277,6 +273,7 @@ parseReturn = (parseKeyword "ireturn" *> pure IReturnInt)
           <|> (parseKeyword "dreturn" *> pure IReturnDouble)
           <|> (parseKeyword "freturn" *> pure IReturnFloat)
           <|> (parseKeyword "lreturn" *> pure IReturnLong)
+          <|> (parseKeyword "areturn" *> pure IReturnA)
           <|> (parseKeyword "return" *> pure IReturn)
 
 parseObject :: Parser Instr
