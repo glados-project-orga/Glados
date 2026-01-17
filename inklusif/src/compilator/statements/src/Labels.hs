@@ -46,6 +46,7 @@ correspondLabels table (l:ls) =
 correspondLine :: LabelTable -> String -> String
 correspondLine table line =
   case words line of
+
     ["ifeq", lab] ->
       case M.lookup lab table of
         Just n  -> "ifeq " ++ show n
@@ -53,9 +54,12 @@ correspondLine table line =
 
     ["goto", lab] ->
       case M.lookup lab table of
-        Just n  -> "goto " ++ show n
+        Just n  ->
+          "goto " ++ show n
         Nothing -> error ("Label inconnu: " ++ lab)
+
     _ -> line
+
 
 resolveLabels :: CompilerData -> CompilerData
 resolveLabels (cp, defs, bytecode, symtab) =
