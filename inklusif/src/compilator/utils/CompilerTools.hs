@@ -163,7 +163,7 @@ normalizeExprType (VarExpr name) prog = getVarType name prog >>= (Right . TypeNo
 normalizeExprType (ArrayVarExpr name _) prog = getVarType name prog
     >>= getArraySubType >>= (Right . TypeNorm)
 normalizeExprType (BinOpExpr _ l r) prog = normalizeBinOp (l, r) prog
-normalizeExprType (CastExpr type _) _ = Right (TypeNorm type)
+normalizeExprType (CastExpr t _) _ = Right (TypeNorm t)
 normalizeExprType (ClassVarExpr clName (VarExpr varName)) prog =
     getClassVarType clName varName prog >>= \typ -> Right (TypeNorm typ)
 normalizeExprType (ArrayLiteral arr) prog =

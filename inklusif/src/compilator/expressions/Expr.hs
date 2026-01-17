@@ -36,5 +36,5 @@ compileExpr (ClassVarExpr cname expr) prog = compileClassVarExpr compileExpr (cn
 compileExpr (VarExpr expr) prog = compileVarExpr expr prog
 compileExpr (ArrayVarExpr nam idxe) prog = compileArrayVarExpr compileExpr (nam, idxe) prog
 compileExpr expr@(BinOpExpr _ _ _) prog = compileBinOpExpr compileExpr expr prog
-compileExpr (CastExpr Type Expr) prog = compileCast compileExpr Type Expr prog
+compileExpr (CastExpr t expr) prog = compileCast compileExpr t expr prog
 compileExpr _ _ = Left "Expression type not implemented yet"
