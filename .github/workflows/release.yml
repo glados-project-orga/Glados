@@ -12,6 +12,9 @@ on:
 permissions:
   contents: write   # pour pouvoir create release
 
+permissions:
+  contents: write   # pour pouvoir create release
+
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
@@ -30,24 +33,40 @@ jobs:
         with:
           path: |
             ~/.stack
-            .stack-work
-          key: ${{ runner.os }}-stack-${{ hashFiles('stack.yaml') }}
+            inklusif/.stack-work
+            vm/.stack-work
+          key: ${{ runner.os }}-stack-${{ hashFiles('inklusif/stack.yaml', 'inklusif/stack.yaml.lock', 'inklusif/package.yaml', 'inklusif/**/*.cabal', 'vm/stack.yaml', 'vm/stack.yaml.lock', 'vm/package.yaml', 'vm/**/*.cabal') }}
           restore-keys: |
             ${{ runner.os }}-stack-
 
-      - name: Build fresh release (make re)
+      - name: Build compiler (make re)
         run: make re
+        working-directory: inklusif
 
-      - name: Check binary exists
-        run: ls -l ./glados
+      - name: Build vm (make re)
+        run: make re
+        working-directory: vm
+
+      - name: Check binaries exist
+        run: |
+          ls -l inklusif/inklusif
+          ls -l vm/glados-vm
 
       - name: Create zip archive
-        run: zip glados.zip glados
+        run: zip glados-${{ github.ref_name }}.zip inklusif/inklusif vm/glados-vm
+        # zip avec le nom du tag:v0.1.0.zip
 
       - name: Create GitHub Release
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && github.event.inputs.dry-run != 'true' }}
         uses: softprops/action-gh-release@v2
         with:
-          files: ./glados.zip
+          files: ./glados-${{ github.ref_name }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload zip as artifact (dry-run / manual)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run == true }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: glados-zip-test
+          path: ./glados-${{ github.ref_name }}.zip
