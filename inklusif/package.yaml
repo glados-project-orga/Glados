@@ -1,0 +1,81 @@
+name: inklusif
+version: 0.1.0.0
+github: "githubuser/inklusif"
+license: BSD-3-Clause
+author: "Author name here"
+maintainer: "example@example.com"
+copyright: "2025 Author name here"
+
+extra-source-files:
+  - README.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description: Please see the README on GitHub at <https://github.com/githubuser/inklusif#readme>
+
+dependencies:
+  - base >= 4.14 && < 5
+  - filepath
+  - directory
+  - containers
+
+ghc-options:
+  - -Wall
+  - -Wcompat
+  - -Widentities
+  - -Wincomplete-record-updates
+  - -Wincomplete-uni-patterns
+  - -Wmissing-export-lists
+  - -Wmissing-home-modules
+  - -Wpartial-fields
+  - -Wredundant-constraints
+
+library:
+  source-dirs:
+    - src
+    - src/parser
+    - src/help
+    - src/ast
+    - src/parser/declaration
+    - src/parser/expr
+    - src/parser/statement
+    - src/compilator
+    - src/compilator/declarations
+    - src/compilator/declarations/utils
+    - src/compilator/statements
+    - src/compilator/statements/src
+    - src/compilator/utils
+    - src/compilator/expressions
+    - src/compilator/expressions/src
+    - src/compilator/expressions/utils
+    - src/parser/declaration
+    - src/parser/statement
+    - src/parser/expr
+
+executables:
+  inklusif-exe:
+    main: Main.hs
+    source-dirs: app
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - inklusif
+
+tests:
+  inklusif-test:
+    main: Spec.hs
+    source-dirs: test/unit-test
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - HUnit
+      - inklusif

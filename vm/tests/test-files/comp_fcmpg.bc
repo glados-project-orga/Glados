@@ -1,0 +1,6 @@
+fun main {
+    fconst 10.0
+    fconst 5.0
+    fcmpg
+    ireturn
+}

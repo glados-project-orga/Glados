@@ -1,0 +1,10 @@
+fun getDouble {
+    dconst 42.0
+    dreturn
+}
+
+fun main {
+    invokestatic getDouble
+    d2i
+    ireturn
+}

@@ -1,0 +1,8 @@
+fun main {
+    iconst 0
+    ifge 4
+    iconst 0
+    ireturn
+    iconst 1
+    ireturn
+}

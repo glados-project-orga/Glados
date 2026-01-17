@@ -1,0 +1,6 @@
+fun main {
+    iconst 65
+    i2c
+    c2i
+    ireturn
+}

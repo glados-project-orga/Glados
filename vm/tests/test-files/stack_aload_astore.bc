@@ -1,0 +1,6 @@
+fun main {
+    iconst 42
+    astore 0
+    aload 0
+    ireturn
+}

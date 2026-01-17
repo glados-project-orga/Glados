@@ -1,0 +1,6 @@
+fun main {
+    iconst 42
+    i2f
+    f2i
+    ireturn
+}

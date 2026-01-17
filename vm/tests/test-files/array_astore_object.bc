@@ -1,0 +1,33 @@
+fun main {
+    iconst 3
+    newarray
+    astore 0
+
+    aload 0
+    iconst 0
+    iconst 10
+    iastore
+
+    aload 0
+    iconst 1
+    iconst 20
+    iastore
+
+    aload 0
+    iconst 2
+    iconst 15
+    iastore
+
+    aload 0
+    iconst 0
+    iaload
+    aload 0
+    iconst 1
+    iaload
+    iadd
+    aload 0
+    iconst 2
+    iaload
+    iadd
+    ireturn
+}

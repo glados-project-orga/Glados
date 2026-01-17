@@ -1,0 +1,7 @@
+fun main {
+    dconst 5.0
+    dconst 10.0
+    dcmpl
+    ineg
+    ireturn
+}

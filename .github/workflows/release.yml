@@ -2,14 +2,15 @@ name: Release
 
 on:
   push:
+    branches:
+      - main
+      - dev
     tags:
       - "v*"
   workflow_dispatch:
-    inputs:
-      dry-run:
-        type: boolean
-        default: false
-        description: "test release sans publier"
+
+permissions:
+  contents: write   # pour pouvoir create release
 
 permissions:
   contents: write   # pour pouvoir create release

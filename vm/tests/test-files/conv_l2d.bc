@@ -1,0 +1,6 @@
+fun main {
+    lconst 42
+    l2d
+    d2i
+    ireturn
+}
