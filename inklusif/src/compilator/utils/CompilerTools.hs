@@ -12,7 +12,9 @@ module CompilerTools (
     getNuancedArray,
     convertToType,
     addValToHeader,
-    getArraySubType
+    getArraySubType,
+    isArrayGivenType,
+    isClassDefined
     )
 where
 
@@ -102,6 +104,10 @@ getNuancedArray [] _ = ([], [])
 getNuancedArray exprs prog = (lefts arrayTypes, rights arrayTypes)
     where arrayTypes = map (\expr -> convertToType expr prog) exprs
 
+isArrayGivenType :: Type -> [Type] -> Bool
+isArrayGivenType VoidType [] = True
+isArrayGivenType t xs = all (== t) xs
+
 isArrayMixed :: [Type] -> Bool
 isArrayMixed [] = False
 isArrayMixed (headType:xs) = any (/= headType) xs
@@ -129,6 +135,10 @@ getClassVarType clname varName prog =
     getClass clname prog >>= \(ClassDecl _ _ fields _) ->
     maybe (Left ("Variable " ++ varName ++ " does not exist in class " ++ clname ++ "."))
           (Right . structFieldType) (find (\(StructField name _) -> name == varName) fields)
+
+isClassDefined :: String -> Defines -> Bool
+isClassDefined searched (_, _, classDefs, _, _, _) =
+    any (\(ClassDecl _ name _ _) -> name == searched) classDefs
 
 normalizeBinOp :: (Expr, Expr) -> CompilerData -> Either String TypeNormalized
 normalizeBinOp (left, right) prog =

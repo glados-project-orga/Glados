@@ -1,4 +1,4 @@
-module Enum (compileEnum, getEnumValue) where
+module Enum (compileEnum, getEnumValue, enumNameExists, enumFieldExists) where
 import Data.Maybe (fromMaybe)
 import Data.Foldable (asum)
 import CompilerError (errPos)
