@@ -15,6 +15,7 @@ module ControlFlowInstr (
     controlFlowReturnDouble,
     controlFlowReturnFloat,
     controlFlowReturnLong,
+    controlFlowReturnA,
     controlFlowInvokeStatic
 ) where
 
@@ -36,6 +37,29 @@ controlFlowReturn st@VMState{functions, currentFunc, frames} =
                 currentFunc = fFunction,
                 frames = restFrames
             }
+
+
+controlFlowReturnA :: VMState -> Either String VMState
+controlFlowReturnA st@VMState{stack, functions, currentFunc, frames} =
+    case stack of
+        [] -> Left "Stack underflow in AReturn"
+        ((VHandle v) : restStack) ->
+            case frames of
+                [] ->
+                    case Map.lookup currentFunc functions of
+                        Nothing -> Left ("Function not found: " ++ currentFunc)
+                        Just func -> Right st { 
+                            ip = V.length (funcCode func),
+                            stack = [VHandle v]
+                        }
+                (Frame{fIP, fFunction}:restFrames) ->
+                    Right st {
+                        ip = fIP,
+                        currentFunc = fFunction,
+                        frames = restFrames,
+                        stack = VHandle v: restStack
+                    }
+        _ -> Left "AReturn: expected a reference (VHandle) on the stack"
 
 
 controlFlowReturnInt :: VMState -> Either String VMState
