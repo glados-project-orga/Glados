@@ -178,10 +178,12 @@ echo ""
 echo "== Array Instructions =="
 test_exit_code "newarray/iastore/iaload - array operations" "$TEST_FILES_DIR/array_basic.bc" 42
 test_exit_code "arraylength - get array length" "$TEST_FILES_DIR/array_length.bc" 5
+test_exit_code "astore/aload - store and load array reference" "$TEST_FILES_DIR/array_astore_object.bc" 45
 echo ""
 
 echo "== Object Instructions =="
 test_exit_code "new/putfield/getfield - object operations" "$TEST_FILES_DIR/object_basic.bc" 100
+test_exit_code "astore/aload - store and load object reference" "$TEST_FILES_DIR/object_astore.bc" 30
 echo ""
 
 echo "== IO Instructions =="

@@ -1,0 +1,19 @@
+fun main {
+    new Point
+    astore 0
+
+    aload 0
+    iconst 10
+    putfield x
+
+    aload 0
+    iconst 20
+    putfield y
+
+    aload 0
+    getfield x
+    aload 0
+    getfield y
+    iadd
+    ireturn
+}
