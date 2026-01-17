@@ -36,17 +36,16 @@ parseEqual =
 
 parseOther :: Parser Expr
 parseOther =
-    chainl1 parseUnary otherOp
+    chainl1 parseAtom otherOp
 
 parseUnary :: Parser Expr
 parseUnary =
-        (UnaryOpExpr Neg    <$ symbol '-' <*> parseUnary)
-    <|> (UnaryOpExpr Not    <$ symbol '!' <*> parseUnary)
-    <|> (UnaryOpExpr PreInc <$ keyword "++" <*> parseUnary)
-    <|> (UnaryOpExpr PreDec <$ keyword "--" <*> parseUnary)
-    <|> (UnaryOpExpr Ref    <$ symbol '&' <*> parseUnary)
-    <|> (UnaryOpExpr Deref  <$ symbol '*' <*> parseUnary)
-    <|> parseAtom
+        (UnaryOpExpr Neg    <$ symbol '-' <*> parseAtom)
+    <|> (UnaryOpExpr Not    <$ symbol '!' <*> parseAtom)
+    <|> (UnaryOpExpr PreInc <$ keyword "++" <*> parseAtom)
+    <|> (UnaryOpExpr PreDec <$ keyword "--" <*> parseAtom)
+    <|> (UnaryOpExpr Ref    <$ symbol '&' <*> parseAtom)
+    <|> (UnaryOpExpr Deref  <$ symbol '*' <*> parseAtom)
 
 parseAtom :: Parser Expr
 parseAtom =
@@ -57,6 +56,7 @@ parseAtom =
     <|> parseArrayLiteral
     <|> parseArrayVar
     <|> parseClassVar
+    <|> parseUnary
     <|> (VarExpr <$> identifier)
     <|> parenthesized
 

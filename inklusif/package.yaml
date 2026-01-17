@@ -41,6 +41,9 @@ library:
     - src/parser
     - src/help
     - src/ast
+    - src/parser/declaration
+    - src/parser/expr
+    - src/parser/statement
     - src/compilator
     - src/compilator/declarations
     - src/compilator/declarations/utils
