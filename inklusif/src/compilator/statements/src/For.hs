@@ -5,7 +5,7 @@ import CompilerTools (appendBody)
 import Ast (ForStmt(..), ForUpdate(..), Statement(..))
 import Expr (compileExpr)
 import Labels (generateLabel)
-
+import While (compileCondAsBranch)
 
 compileFor :: (Statement -> CompilerData -> Either String CompilerData) 
         -> ForStmt
@@ -21,17 +21,16 @@ compileFor compileStmt (ForStmt initStmt condExpr updateStmt body) prog =
         prog4 = addLd (lStart ++ ":") prog3
     in
 
-    compileExpr condExpr prog4 >>= \prog5 ->
-    
-    let prog6 = addLd ("ifeq " ++ lEnd) prog5
-    in
-    compileBody body prog6 >>= \prog7 ->
-    compileUpdate updateStmt prog7 >>= \prog8 ->
+    compileCondAsBranch condExpr lEnd prog4 >>= \prog5 ->
 
-    let prog9 = addLd ("goto " ++ lStart) prog8
-        prog10 = addLd (lEnd ++ ":") prog9
+    compileBody body prog5 >>= \prog6 ->
+
+    compileUpdate updateStmt prog6 >>= \prog7 ->
+
+    let prog8  = addLd ("goto " ++ lStart) prog7
+        prog9  = addLd (lEnd ++ ":") prog8
     in
-    Right prog10
+    Right prog9
 
     where
         compileInit Nothing p = Right p
@@ -46,4 +45,3 @@ compileFor compileStmt (ForStmt initStmt condExpr updateStmt body) prog =
         compileUpdate (ForUpdateStmt s) p = compileStmt s p 
         
         addLd instr p = appendBody p [instr]
-
