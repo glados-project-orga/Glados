@@ -26,7 +26,7 @@ pushArgs re (e:es) (p:ps) prog = pushArgs re es ps prog >>= pushArg re e p
 compileCallExpr:: CompileExpr -> CallExpr -> CompilerData -> Either String CompilerData
 compileCallExpr re (CallExpr name exprs) prog@(_, defs, _, _) = eitherParams >>=
     \params -> pushArgs re exprs params prog >>=
-    \n_prog -> Right (appendBody n_prog ["invokstatic " ++ name])
+    \n_prog -> Right (appendBody n_prog ["invokestatic " ++ name])
     where eitherParams = case searchFunctions name defs of
             Just (FunctionDecl _ _ foundParams _ _) -> Right (foundParams)
             Nothing -> Left ("Function " ++ name ++ " not found.")

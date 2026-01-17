@@ -21,7 +21,7 @@ addParams (Parameter name typ _:params) prog = Right (storeInSymbolTable name ty
 compileFunBody :: [Statement] -> Type -> CompilerData -> Either String CompilerData
 compileFunBody statement retype prog =  manageBody statement retype prog
 
-compileFunction :: FunctionDecl -> CompilerData-> Either String CompilerData
+compileFunction :: FunctionDecl -> CompilerData->  Either String CompilerData
 compileFunction def@(FunctionDecl pos name params retype statement) prog@(_, defs,_ , _)
     | searchFunctions name defs /= Nothing =
         Left ((errPos pos) ++ "Function " ++ name ++ " is already defined.")
