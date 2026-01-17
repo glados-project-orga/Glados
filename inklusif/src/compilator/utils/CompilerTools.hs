@@ -45,7 +45,8 @@ import Ast (Declaration(..),
     Literal(..),
     ArrayVar(..),
     EnumField(..),
-    EnumDecl(..)
+    EnumDecl(..),
+    UnaryOp(..)
     )
 import Data.List (find)
 import Data.Foldable (asum)
@@ -100,7 +101,7 @@ typePrefixVal (LongType ) = "l"
 typePrefixVal (FloatType ) = "f"
 typePrefixVal (DoubleType ) = "d"
 typePrefixVal (CharType ) = "c"
-typePrefixVal (BoolType ) = "b"
+typePrefixVal (BoolType ) = "i"
 typePrefixVal (ArrayType _) = "a"
 typePrefixVal _ = "a"
 
@@ -199,7 +200,12 @@ normalizeExprType (MethodCallExpression (MethodCallExpr _ name _)) prog =
     case getFunctionReturnType name prog of
         Just retType -> Right (TypeNorm retType)
         Nothing -> Left "Unknown function return type"
+normalizeExprType (UnaryOpExpr op expr) prog = normalizeUnaryOp op expr prog
 normalizeExprType expr _ = Left ("Unknown expression type :" ++ (show expr))
+
+normalizeUnaryOp :: UnaryOp -> Expr -> CompilerData -> Either String TypeNormalized
+normalizeUnaryOp Not _ _ = Right (TypeNorm BoolType)
+normalizeUnaryOp _ expr prog = normalizeExprType expr prog
 
 normalizeToType :: TypeNormalized -> Type
 normalizeToType (TypeNorm typ) = typ
