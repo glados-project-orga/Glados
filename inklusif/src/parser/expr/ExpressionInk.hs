@@ -40,10 +40,10 @@ parseOther =
 
 parseUnary :: Parser Expr
 parseUnary =
-        (UnaryOpExpr Neg    <$ symbol '-' <*> parseAtom)
-    <|> (UnaryOpExpr Not    <$ symbol '!' <*> parseAtom)
-    <|> (UnaryOpExpr PreInc <$ keyword "++" <*> parseAtom)
+        (UnaryOpExpr PreInc <$ keyword "++" <*> parseAtom)
     <|> (UnaryOpExpr PreDec <$ keyword "--" <*> parseAtom)
+    <|> (UnaryOpExpr Neg    <$ symbol '-' <*> parseAtom)
+    <|> (UnaryOpExpr Not    <$ symbol '!' <*> parseAtom)
     <|> (UnaryOpExpr Ref    <$ symbol '&' <*> parseAtom)
     <|> (UnaryOpExpr Deref  <$ symbol '*' <*> parseAtom)
 
