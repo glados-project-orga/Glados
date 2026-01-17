@@ -17,7 +17,7 @@ Every Inklusif source file must use the **`.ink`** extension.
 
 **identifier:**
 
-![identifier](/assets/diagram/identifier.png)
+![identifier](assets/diagram/identifier.png)
 
 ```
 identifier
