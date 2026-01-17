@@ -1,6 +1,6 @@
 fun main {
     iconst -5
-    iflt 3
+    iflt 4
     iconst 0
     ireturn
     iconst 1
