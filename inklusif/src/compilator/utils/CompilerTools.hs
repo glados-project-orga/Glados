@@ -131,10 +131,13 @@ getClass clname prog =
     where classes = getClasses prog
 
 getClassVarType ::  String -> String -> CompilerData -> Either String Type
-getClassVarType clname varName prog =
-    getClass clname prog >>= \(ClassDecl _ _ fields _) ->
-    maybe (Left ("Variable " ++ varName ++ " does not exist in class " ++ clname ++ "."))
-          (Right . structFieldType) (find (\(StructField name _) -> name == varName) fields)
+getClassVarType clname varName prog = getVarType clname prog >>= \typ -> 
+    case typ of
+        CustomType cTypeName -> getClass cTypeName prog >>= \(ClassDecl _ _ fields _) ->
+            maybe (Left ("Variable " ++ varName ++ " does not exist in class " ++ clname ++ "."))
+            (Right . structFieldType) (find (\(StructField name _) -> name == varName) fields)
+        _ -> Left ("Variable " ++ varName ++ " in class " ++ clname ++ " is not a Class.")
+
 
 isClassDefined :: String -> Defines -> Bool
 isClassDefined searched (_, _, classDefs, _, _, _) =
@@ -165,6 +168,9 @@ normalizeExprType (ArrayVarExpr name _) prog = getVarType name prog
 normalizeExprType (BinOpExpr _ l r) prog = normalizeBinOp (l, r) prog
 normalizeExprType (ClassVarExpr clName (VarExpr varName)) prog =
     getClassVarType clName varName prog >>= \typ -> Right (TypeNorm typ)
+normalizeExprType (ClassConstructorExpr clName _) (_, defs, _, _)
+    | isClassDefined clName defs = Right (TypeNorm (CustomType clName))
+    | otherwise = Left ("Class " ++ clName ++ " does not exist.")
 normalizeExprType (ArrayLiteral arr) prog =
     getLitArrayType arr prog >>= \typ -> Right (TypeNorm typ)
 normalizeExprType (CallExpression (CallExpr name _)) prog =

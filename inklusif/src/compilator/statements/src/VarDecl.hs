@@ -46,9 +46,10 @@ storeArrayVar name t (ArrayVar at len) (ArrayLiteral exprs) prog =
 storeArrayVar _ _ _ expr _ = Left ("Invalid array variable declaration with. " ++ show expr)
 
 storeCustomVar :: String -> Type -> Expr -> CompilerData -> Either String CompilerData
-storeCustomVar name ct@(CustomType cname) _ prog =
-    Right (appendBody prog ["new " ++ cname]) >>= \newArrayProg ->
+storeCustomVar name ct@(CustomType cname) _ prog@(_, _, _, symTable) =
+    Right (appendBody prog ["new " ++ cname, "astore " ++ show localindex]) >>= \newArrayProg ->
     Right (storeInSymbolTable name ct newArrayProg)
+            where localindex = length symTable
 storeCustomVar name t value prog = storeVar name t value prog
 
 getCustomType :: Type -> Defines -> Either String Type
