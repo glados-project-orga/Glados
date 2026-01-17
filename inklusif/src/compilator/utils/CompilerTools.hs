@@ -14,7 +14,9 @@ module CompilerTools (
     addValToHeader,
     getArraySubType,
     isArrayGivenType,
-    isClassDefined
+    isClassDefined,
+    getEnumValue,
+    getFromEnum,
     )
 where
 
@@ -42,8 +44,11 @@ import Ast (Declaration(..),
     Type(..),
     Literal(..),
     ArrayVar(..),
+    EnumField(..),
+    EnumDecl(..)
     )
 import Data.List (find)
+import Data.Foldable (asum)
 
 appendHeader :: CompilerData -> ConstantPool -> CompilerData
 appendHeader (header, def, body, symblTable) newHead =
@@ -156,13 +161,24 @@ opPriorityTable op | any (== DoubleType) op = (TypeNorm DoubleType)
                    | any (== IntType) op = (TypeNorm IntType)
                    | otherwise = (TypeNorm VoidType)
 
+getFromEnum :: [EnumField] -> String -> Maybe Int
+getFromEnum enumfields searched =
+    find (\enumfield -> declName enumfield == searched) enumfields >>= declValue
+
+getEnumValue :: [EnumDecl] -> String -> Maybe Int
+getEnumValue enums searched =
+    asum $ map (\enum -> getFromEnum (enumDecl enum) searched) enums
+
 getArraySubType :: Type -> Either String Type
 getArraySubType (ArrayType (ArrayVar t _)) = Right t
 getArraySubType _ = Left "Type is not an array type when searching array type."
 
 normalizeExprType :: Expr -> CompilerData -> Either String TypeNormalized
 normalizeExprType (LitExpr lit) _ = Right (LitNorm lit)
-normalizeExprType (VarExpr name) prog = getVarType name prog >>= (Right . TypeNorm)
+normalizeExprType (VarExpr name) prog@(_, (_, _, _, enums, _, _), _, _) =
+    case getEnumValue enums name of
+    Just _ -> Right (TypeNorm IntType)
+    _ -> getVarType name prog >>= (Right . TypeNorm)
 normalizeExprType (ArrayVarExpr name _) prog = getVarType name prog
     >>= getArraySubType >>= (Right . TypeNorm)
 normalizeExprType (BinOpExpr _ l r) prog = normalizeBinOp (l, r) prog

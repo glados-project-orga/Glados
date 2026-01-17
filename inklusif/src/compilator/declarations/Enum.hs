@@ -1,19 +1,9 @@
-module Enum (compileEnum, getEnumValue, enumNameExists, enumFieldExists) where
+module Enum (compileEnum, enumNameExists, enumFieldExists) where
 import Data.Maybe (fromMaybe)
-import Data.Foldable (asum)
 import CompilerError (errPos)
-import CompilerTools (appendDefines)
+import CompilerTools (appendDefines, getEnumValue)
 import Ast (EnumDecl(..), EnumField(..), Declaration(..))
 import CompilerTypes (CompilerData)
-import Data.List (find)
-
-getFromEnum :: [EnumField] -> String -> Maybe Int
-getFromEnum enumfields searched =
-    find (\enumfield -> declName enumfield == searched) enumfields >>= declValue
-
-getEnumValue :: [EnumDecl] -> String -> Maybe Int
-getEnumValue enums searched =
-    asum $ map (\enum -> getFromEnum (enumDecl enum) searched) enums
 
 enumNameExists :: String -> [EnumDecl] -> Bool
 enumNameExists searched enums =
