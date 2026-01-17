@@ -65,7 +65,7 @@ emitComparison (IntType) cond prog = emitIntComparison (IntType) cond prog
 emitComparison t cond prog = emitCmpThenBranch t cond prog
 
 emitIntComparison :: Type -> String -> CompilerData -> CompilerData
-emitIntComparison t cond prog =
+emitIntComparison _ cond prog =
     let (lTrue,  prog1) = generateLabel prog
         (lEnd,   prog2) = generateLabel prog1
         prog3 = appendBody prog2 ["if_icmp" ++ cond ++ " " ++ lTrue]
