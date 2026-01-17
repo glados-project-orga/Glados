@@ -20,15 +20,28 @@ parseLiteralExpr =
     LitExpr <$> parseLiteral
 
 parseLiteral :: Parser Literal
-parseLiteral =
-        parseNumberLiteral
+parseLiteral = (DoubleLit <$> parseDouble)
     <|> (FloatLit  <$> parseFloat)
-    <|> (DoubleLit <$> parseDouble)
-    <|> (CharLit <$> (parseChar '\''
-        *> parseAnyChar (filter (/= '\'') (map toEnum [32..126])) <* parseChar '\''))
+    <|> parseNumberLiteral
+    <|> parseCharLiteral
     <|> (BoolLit True  <$ keyword "true")
     <|> (BoolLit False <$ keyword "false")
     <|> (StringLit <$> parseStringLiteral)
+
+parseCharLiteral :: Parser Literal
+parseCharLiteral =
+    CharLit <$> (
+        (parseChar '\''
+        *> parseAnyChar (filter (`notElem` ['\'', '\\']) (map toEnum [32..126])) <* parseChar '\'')
+        <|> parseChar '\'' *> parseSpecialChar <* parseChar '\'')
+
+parseSpecialChar :: Parser Char
+parseSpecialChar =
+    parseChar '\\' *>
+    (   ('\n'  <$ parseChar 'n')
+    <|> ('\t'  <$ parseChar 't')
+    <|> ('\r'  <$ parseChar 'r')
+    )
 
 parseStringLiteral :: Parser String
 parseStringLiteral = 
@@ -41,7 +54,8 @@ parseNumberLiteral =
     decide <$> parseNumber
   where
     decide n
-        | n <= fromIntegral (maxBound :: Int32)
+        | n >= fromIntegral (minBound :: Int32)
+       && n <= fromIntegral (maxBound :: Int32)
             = IntLit  (fromIntegral n)
         | otherwise
             = LongLit (fromIntegral n)

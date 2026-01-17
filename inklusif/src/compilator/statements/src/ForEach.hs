@@ -29,7 +29,7 @@ compileForEach compileStmt (ForEachStmt var collection body) prog =
     let prog8  = addLd "load i" prog7
         prog9  = addLd "load col" prog8
         prog10 = addLd "size" prog9
-        prog11 = addLd ("ificmpge " ++ lEnd) prog10
+        prog11 = addLd ("if_icmpge " ++ lEnd) prog10
     in
 
     let prog12 = addLd "load col" prog11

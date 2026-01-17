@@ -18,6 +18,7 @@ import Call (compileCallExpr)
 import Var (compileVarExpr)
 import ArrayVarExpr (compileArrayVarExpr)
 import ClassVarExpr (compileClassVarExpr)
+import Cast (compileCast)
 
 prepareArrayLiteral :: CompileExpr -> [Expr] -> CompilerData -> Either String CompilerData
 prepareArrayLiteral _ [] prog = Right prog
@@ -35,4 +36,5 @@ compileExpr (ClassVarExpr cname expr) prog = compileClassVarExpr compileExpr (cn
 compileExpr (VarExpr expr) prog = compileVarExpr expr prog
 compileExpr (ArrayVarExpr nam idxe) prog = compileArrayVarExpr compileExpr (nam, idxe) prog
 compileExpr expr@(BinOpExpr _ _ _) prog = compileBinOpExpr compileExpr expr prog
-compileExpr expr _ = Left ("Expression type not implemented yet : " ++ show expr)
+compileExpr (CastExpr Type Expr) prog = compileCast compileExpr Type Expr prog
+compileExpr _ _ = Left "Expression type not implemented yet"
