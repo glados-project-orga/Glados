@@ -17,6 +17,7 @@ import Call (compileCallExpr)
 import MethodCall (compileMethodCall)
 import FieldAccess (compileFieldAccess)
 import Var (compileVarExpr)
+import Cast (compileCast)
 
 
 compileExpr :: Expr -> CompilerData -> Either String CompilerData
@@ -28,4 +29,5 @@ compileExpr (MethodCallExpression objCall) prog = compileMethodCall compileExpr 
 compileExpr (FieldAccessExpression fieldAccess) prog = compileFieldAccess fieldAccess prog
 compileExpr (VarExpr expr) prog = compileVarExpr expr prog
 compileExpr expr@(BinOpExpr _ _ _) prog = compileBinOpExpr compileExpr expr prog
+compileExpr (CastExpr Type Expr) prog = compileCast compileExpr Type Expr prog
 compileExpr _ _ = Left "Expression type not implemented yet"
