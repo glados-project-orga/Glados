@@ -19,6 +19,7 @@ import Var (compileVarExpr)
 import ArrayVarExpr (compileArrayVarExpr)
 import ClassVarExpr (compileClassVarExpr)
 import Cast (compileCast)
+import ClassConstructorExpr (compileClassConstructorExpr)
 
 prepareArrayLiteral :: CompileExpr -> [Expr] -> CompilerData -> Either String CompilerData
 prepareArrayLiteral _ [] prog = Right prog
@@ -33,6 +34,7 @@ compileExpr (ArrayAssignement indx) prog = compileArrayIndex compileExpr indx pr
 compileExpr (ArrayLiteral exprs) prog = prepareArrayLiteral compileExpr exprs prog
 compileExpr (CallExpression call) prog = compileCallExpr compileExpr call prog
 compileExpr (ClassVarExpr cname expr) prog = compileClassVarExpr compileExpr (cname, expr) prog
+compileExpr (ClassConstructorExpr cname exprs) prog = compileClassConstructorExpr (cname, exprs) prog
 compileExpr (VarExpr expr) prog = compileVarExpr expr prog
 compileExpr (ArrayVarExpr nam idxe) prog = compileArrayVarExpr compileExpr (nam, idxe) prog
 compileExpr expr@(BinOpExpr _ _ _) prog = compileBinOpExpr compileExpr expr prog
