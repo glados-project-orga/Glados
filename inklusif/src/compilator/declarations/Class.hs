@@ -8,7 +8,7 @@ import CompilerError (errPos)
 appendMethods :: Either String CompilerData -> [FunctionDecl] -> Either String CompilerData
 appendMethods (Left err) _ = Left err
 appendMethods prog [] = prog
-appendMethods (Right prog) (fun:funs) = appendMethods new_prog funs
+appendMethods (Right prog) (fun:funs) = appendMethods new_prog True funs
     where new_prog = compileFunction fun prog
 
 compileClass :: ClassDecl -> CompilerData -> Either String CompilerData
