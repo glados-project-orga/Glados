@@ -2,15 +2,12 @@ name: Release
 
 on:
   push:
-    branches:
-      - main
-      - dev
     tags:
       - "v*"
   workflow_dispatch:
 
 permissions:
-  contents: write   # pour pouvoir create release
+  contents: write
 
 jobs:
   build-and-release:
@@ -45,7 +42,6 @@ jobs:
         run: zip glados.zip glados
 
       - name: Create GitHub Release
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: softprops/action-gh-release@v2
         with:
           files: ./glados.zip
