@@ -1,0 +1,7 @@
+fun main {
+    fconst 5.0
+    fconst 10.0
+    fcmpl
+    ineg
+    ireturn
+}

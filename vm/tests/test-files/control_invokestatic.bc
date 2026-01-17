@@ -1,0 +1,11 @@
+fun main {
+    iconst 10
+    iconst 20
+    invokestatic add
+    ireturn
+}
+
+fun add {
+    iadd
+    ireturn
+}
