@@ -64,6 +64,21 @@ The instruction set represents functions as flat sequences of instructions,
 as required by the project specifications.
 
 
+### `tests/`
+This directory contains the **end-to-end and integration tests** of the project.
+
+These tests validate the full compilation and execution pipeline, from source
+code input to runtime execution on the virtual machine.
+
+They are used to:
+- verify correct behavior of the language features
+- ensure the compiler and the virtual machine interact properly
+- detect regressions across the different parts of the project
+
+The test suite is executed locally and automatically as part of the CI/CD
+pipeline.
+
+
 ## Compilation pipeline
 
 The global compilation pipeline is the following:
