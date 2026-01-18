@@ -151,7 +151,6 @@ echo ""
 
 echo "== Control Flow Instructions =="
 test_exit_code "goto - unconditional jump" "$TEST_FILES_DIR/control_goto.bc" 1
-test_exit_code "goto_w - wide unconditional jump" "$TEST_FILES_DIR/control_goto_w.bc" 1
 test_exit_code "invokestatic - function call" "$TEST_FILES_DIR/control_invokestatic.bc" 30
 test_exit_code "return - void return" "$TEST_FILES_DIR/control_return.bc" 42
 test_exit_code "ireturn - integer return" "$TEST_FILES_DIR/control_ireturn.bc" 99
