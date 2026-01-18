@@ -17,6 +17,9 @@ module CompilerTools (
     isClassDefined,
     getEnumValue,
     getFromEnum,
+    getClass,
+    getClassVarType,
+    getClasses,
     )
 where
 
@@ -58,12 +61,12 @@ appendHeader (header, def, body, symblTable) newHead =
 
 addValToHeader :: CompilerData -> Expr -> Either String CompilerData
 addValToHeader prog (LitExpr (IntLit i)) = Right (appendHeader prog [show i])
-addValToHeader prog (LitExpr (FloatLit f)) = Right (appendHeader prog [show f])
+addValToHeader prog (LitExpr (FloatLit f)) = Right (appendHeader prog [(show f) ++ "F"])
 addValToHeader prog (LitExpr (DoubleLit d)) = Right (appendHeader prog [show d])
 addValToHeader prog (LitExpr (CharLit c)) = Right (appendHeader prog [show c])
 addValToHeader prog (LitExpr (StringLit s)) = Right (appendHeader prog [show s])
 addValToHeader prog (LitExpr (BoolLit b)) = Right (appendHeader prog [show b])
-addValToHeader prog (LitExpr (LongLit l)) = Right (appendHeader prog [show l])
+addValToHeader prog (LitExpr (LongLit l)) = Right (appendHeader prog [(show l) ++ "L"])
 addValToHeader _ _ = Left "Unsupported literal type for header addition."
 
 appendDefine :: Declaration -> Defines -> Defines

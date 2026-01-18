@@ -10,11 +10,15 @@ module Main (
 ) where
 
 import Test.HUnit
-import CompilerTest (testCompiler)
+import SymTableTest (testSymTable)
+import CompilerToolsTest (testCompilerTools)
+import NormalizeTests (testNormalize)
 
 tests :: Test
 tests = TestList[
-    testCompiler
+    testSymTable,
+    testCompilerTools,
+    testNormalize
     ]
 
 main :: IO Counts
