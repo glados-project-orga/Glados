@@ -155,7 +155,7 @@ instance Show Type where
   show LongType = "long"
   show (LambdaType _) = "lambda"
   show DoubleType = "double"
-  show (ArrayType (ArrayVar t _)) = "array " ++ show t
+  show (ArrayType (ArrayVar t s)) = "array " ++ show t ++ " " ++ show s
   show (CustomType s) = s
   show VoidType = "void"
 
@@ -222,7 +222,6 @@ data TryCatchStmt = TryCatchStmt
 data ThrowStmt = ThrowStmt
   { throwMessage :: Expr
   } deriving (Show, Eq)
-
 
 data ReturnStmt = ReturnStmt
   { returnExpr :: Expr

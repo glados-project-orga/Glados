@@ -109,7 +109,7 @@ instance TypeEq Type (Either String Type) where
 instance TypeEq (Either String Type) (Either String Type) where
     typeEq (Left _) _ = False
     typeEq _ (Left _) = False
-    typeEq (Right val1) (Right val2) = val1 == val2
+    typeEq (Right val1) (Right val2) = typeEq val1 val2
 
 instance TypeEq TypeNormalized TypeNormalized where
     typeEq (TypeNorm t1) (TypeNorm t2) = t1 == t2

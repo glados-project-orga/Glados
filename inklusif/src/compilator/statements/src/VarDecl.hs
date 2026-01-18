@@ -41,7 +41,7 @@ storeConstVar name t value prog@(header, _, _, symTable) =
 storeArrayVar :: String -> Type -> ArrayVar -> Expr -> CompilerData -> Either String CompilerData
 storeArrayVar name t (ArrayVar at len) (ArrayLiteral exprs) prog =
              compileExpr len prog
-            >>= \lenProg -> Right (appendBody lenProg ["newarray "])
+            >>= \lenProg -> Right (appendBody lenProg ["newarray"])
             >>= \newArrayProg -> compileArrayLiteral compileExpr exprs at newArrayProg
             >>= \newArrayWithElementsProg -> addGoodTypeStore t newArrayWithElementsProg
             >>= \storedProg -> Right (storeInSymbolTable name t storedProg)

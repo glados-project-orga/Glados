@@ -46,7 +46,8 @@ import Ast (Declaration(..),
     ArrayVar(..),
     EnumField(..),
     EnumDecl(..),
-    UnaryOp(..)
+    UnaryOp(..),
+    ClassAccess(..),
     )
 import Data.List (find)
 import Data.Foldable (asum)
@@ -137,13 +138,10 @@ getClass clname prog =
     where classes = getClasses prog
 
 getClassVarType ::  String -> String -> CompilerData -> Either String Type
-getClassVarType clname varName prog = getVarType clname prog >>= \typ -> 
-    case typ of
-        CustomType cTypeName -> getClass cTypeName prog >>= \(ClassDecl _ _ fields _) ->
-            maybe (Left ("Variable " ++ varName ++ " does not exist in class " ++ clname ++ "."))
+getClassVarType cTypeName varName prog =
+    getClass cTypeName prog >>= \(ClassDecl _ _ fields _) ->
+            maybe (Left ("Variable " ++ varName ++ " does not exist in class " ++ cTypeName ++ "."))
             (Right . structFieldType) (find (\(StructField name _) -> name == varName) fields)
-        _ -> Left ("Variable " ++ varName ++ " in class " ++ clname ++ " is not a Class.")
-
 
 isClassDefined :: String -> Defines -> Bool
 isClassDefined searched (_, _, classDefs, _, _, _) =
@@ -175,6 +173,20 @@ getArraySubType :: Type -> Either String Type
 getArraySubType (ArrayType (ArrayVar t _)) = Right t
 getArraySubType _ = Left "Type is not an array type when searching array type."
 
+normalizeClassVarType :: String -> ClassAccess -> CompilerData -> Either String TypeNormalized
+normalizeClassVarType clDecName (ClassVarAccess varName) prog =
+    getClassVarType clDecName varName prog >>= \typ -> Right (TypeNorm typ)
+normalizeClassVarType clDecName (ClassArrayAccess varName _) prog =
+    getClassVarType clDecName varName prog >>= getArraySubType >>= \typ -> Right (TypeNorm typ)
+normalizeClassVarType clDecName (ClassMethodCall (CallExpr methName _)) prog =
+    case getFunctionReturnType methName prog of
+        Just retType -> Right (TypeNorm retType)
+        Nothing -> Left ("Unknown method return type for method " ++ methName ++ " in class " ++ clDecName)
+normalizeClassVarType clDecName (ClassClassAccess nclName cacc) prog = normalizeClassVarType nDname cacc prog
+    where nDname = case getClassVarType clDecName nclName prog of
+            Right (CustomType name) -> name
+            _ -> ""
+
 normalizeExprType :: Expr -> CompilerData -> Either String TypeNormalized
 normalizeExprType (LitExpr lit) _ = Right (LitNorm lit)
 normalizeExprType (VarExpr name) prog@(_, (_, _, _, enums, _, _), _, _) =
@@ -185,8 +197,11 @@ normalizeExprType (ArrayVarExpr name _) prog = getVarType name prog
     >>= getArraySubType >>= (Right . TypeNorm)
 normalizeExprType (BinOpExpr _ l r) prog = normalizeBinOp (l, r) prog
 normalizeExprType (CastExpr t _) _ = Right (TypeNorm t)
-normalizeExprType (ClassVarExpr clName (VarExpr varName)) prog =
-    getClassVarType clName varName prog >>= \typ -> Right (TypeNorm typ)
+normalizeExprType (ClassVarExpr clName classAccess) prog =
+    dName >>= \dname -> normalizeClassVarType dname classAccess prog
+    where dName = case getVarType clName prog of
+            Right (CustomType name) -> Right name
+            _ -> Left ("Class type of " ++ clName ++ " does not exist.")
 normalizeExprType (ClassConstructorExpr clName _) (_, defs, _, _)
     | isClassDefined clName defs = Right (TypeNorm (CustomType clName))
     | otherwise = Left ("Class " ++ clName ++ " does not exist.")
@@ -215,7 +230,7 @@ convertToType :: Expr -> CompilerData-> Either String Type
 convertToType expr prog = normalizeExprType expr prog >>= (Right . normalizeToType)
 
 validAssignmentType :: SearchTypes -> SearchTypes -> CompilerData -> Bool
-validAssignmentType (SearchType t1) (SearchType t2) _ = t1 == t2
+validAssignmentType (SearchType t1) (SearchType t2) _ = t1 `typeEq` t2
 validAssignmentType (SearchExpr expr) (SearchType t) prog = t `typeEq` (convertToType expr prog)
 validAssignmentType (SearchType t) (SearchExpr expr) prog = t `typeEq` (convertToType expr prog)
 validAssignmentType (SearchExpr expr1) (SearchExpr expr2) prog = normed1 `typeEq` normed2
