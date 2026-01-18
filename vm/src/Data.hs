@@ -124,7 +124,7 @@ data Frame = Frame
     { fLocals :: [Value]
     , fIP     :: Int
     , fFunction :: String
-    } deriving (Show)
+    } deriving (Show, Eq)
 
 
 data Function = Function
@@ -142,4 +142,4 @@ data VMState = VMState
            constPool    :: V.Vector Value,
            heap         :: Heap,
            frames       :: [Frame]
-        } deriving(Show)
+        } deriving(Show, Eq)
