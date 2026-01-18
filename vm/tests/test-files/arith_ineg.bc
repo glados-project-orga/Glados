@@ -1,0 +1,5 @@
+fun main {
+    iconst 5
+    ineg
+    ireturn
+}

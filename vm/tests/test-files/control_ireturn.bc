@@ -1,0 +1,9 @@
+fun main {
+    invokestatic getValue
+    ireturn
+}
+
+fun getValue {
+    iconst 99
+    ireturn
+}

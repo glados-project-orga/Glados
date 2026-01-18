@@ -1,0 +1,10 @@
+fun main {
+    iconst 5
+    iconst 10
+    iconst 15
+    dup_x2
+    pop
+    pop
+    pop
+    ireturn
+}

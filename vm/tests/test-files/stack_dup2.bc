@@ -1,0 +1,9 @@
+fun main {
+    iconst 3
+    iconst 4
+    dup2
+    iadd
+    iadd
+    iadd
+    ireturn
+}

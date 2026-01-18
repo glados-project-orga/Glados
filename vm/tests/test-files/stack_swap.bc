@@ -1,0 +1,7 @@
+fun main {
+    iconst 3
+    iconst 10
+    swap
+    isub
+    ireturn
+}

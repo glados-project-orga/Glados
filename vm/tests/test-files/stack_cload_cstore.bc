@@ -1,0 +1,7 @@
+fun main {
+    cconst 'A'
+    cstore 0
+    cload 0
+    c2i
+    ireturn
+}

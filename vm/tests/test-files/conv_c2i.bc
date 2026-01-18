@@ -1,0 +1,5 @@
+fun main {
+    cconst 'A'
+    c2i
+    ireturn
+}
