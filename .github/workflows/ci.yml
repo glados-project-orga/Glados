@@ -41,9 +41,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-stack-compiler-
 
-      - name: Debug working directory
-        run: pwd && ls -la
-
       - name: Build (make all)
         run: make all
 
@@ -85,9 +82,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-stack-vm-
 
-      - name: Debug working directory
-        run: pwd && ls -la
-
       - name: Build (make all)
         run: make all
 
@@ -96,8 +90,8 @@ jobs:
 
       - name: Run runtime tests
         run: |
-          chmod +x tests/functionals-tests.sh
-          ./tests/functionals-tests.sh
+          chmod +x ../tests/functionals-tests.sh
+          ../tests/functionals-tests.sh
 
       - name: Upload coverage report
         if: always()
@@ -106,3 +100,41 @@ jobs:
           name: vm-coverage
           path: vm/test/coverage/
           if-no-files-found: ignore
+
+  e2e:
+    name: E2E / compiler + vm
+    runs-on: ubuntu-latest
+    needs: [compiler, vm]
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Install Stack + GHC
+        uses: haskell/actions/setup@v2
+        with:
+          enable-stack: true
+
+      - name: Cache Stack
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.stack
+            inklusif/.stack-work
+            vm/.stack-work
+          key: ${{ runner.os }}-stack-e2e-${{ hashFiles('inklusif/stack.yaml', 'inklusif/stack.yaml.lock', 'inklusif/package.yaml', 'inklusif/**/*.cabal', 'vm/stack.yaml', 'vm/stack.yaml.lock', 'vm/package.yaml', 'vm/**/*.cabal', 'tests/teste2e.sh', 'tests/e2e-files/**') }}
+          restore-keys: |
+            ${{ runner.os }}-stack-e2e-
+
+      - name: Build compiler (make all)
+        run: make all
+        working-directory: inklusif
+
+      - name: Build vm (make all)
+        run: make all
+        working-directory: vm
+
+      - name: Run e2e tests
+        run: |
+          chmod +x tests/teste2e.sh
+          ./tests/teste2e.sh
