@@ -52,9 +52,17 @@ getCustomType ct@(CustomType cname) defs@(_, _, _, _, typedefs, _)
     | otherwise = Left ("Type " ++ cname ++ " does not exist.")
 getCustomType t _ = Right t
 
+getTrueType :: Type -> Defines -> Type
+getTrueType t@(CustomType cname) (_, _, _, _, typedefs, _) =
+    case getTypedefType cname typedefs of
+        Just typedefType -> typedefType
+        Nothing -> t
+getTrueType t _ = t
+
 isSameType :: Type -> Expr -> CompilerData -> Bool
-isSameType t expr prog = case convertToType expr prog of
-    Right convertedType -> t `typeEq` convertedType
+isSameType t expr prog@(_, defines, _, _) = case convertToType expr prog of
+    Right convertedType -> trueType `typeEq` convertedType
+        where trueType = getTrueType t defines
     Left _ -> False
 
 compileVarDecl :: VarDecl -> CompilerData -> Either String CompilerData
@@ -66,7 +74,7 @@ compileVarDecl (VarDecl name t value _ _) prog@(_,  defines, _, _)
     | isSameType t value prog = case t of
         ArrayType arr -> storeArrayVar name t arr value prog
         CustomType _ -> getCustomType t defines >>=
-            \ct -> storeCustomVar name ct value prog
+            \ct -> storeVar name ct value prog
         _ -> storeVar name t value prog
     | otherwise = Left ("Variable declaration type does not match assigned value type." ++ 
         case convertToType value prog of

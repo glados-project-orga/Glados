@@ -14,6 +14,7 @@ module ControlFlowInstr (
     controlFlowReturnDouble,
     controlFlowReturnFloat,
     controlFlowReturnLong,
+    controlFlowReturnChar,
     controlFlowReturnA,
     controlFlowInvokeStatic
 ) where
@@ -153,6 +154,28 @@ controlFlowReturnLong st@VMState{stack, functions, currentFunc, frames} =
                     }
         _ -> Left "IReturnLong expects an long on top of the stack"
 
+
+controlFlowReturnChar :: VMState -> Either String VMState
+controlFlowReturnChar st@VMState{stack, functions, currentFunc, frames} =
+    case stack of
+        [] -> Left "Stack underflow in IReturnChar"
+        (VChar returnValue:restStack) ->
+            case frames of
+                [] ->
+                    case Map.lookup currentFunc functions of
+                        Nothing -> Left ("Function not found: " ++ currentFunc)
+                        Just func -> Right st { 
+                            ip = V.length (funcCode func),
+                            stack = [VChar returnValue]
+                        }
+                (Frame{fIP, fFunction}:restFrames) ->
+                    Right st {
+                        ip = fIP,
+                        currentFunc = fFunction,
+                        frames = restFrames,
+                        stack = VChar returnValue : restStack
+                    }
+        _ -> Left "IReturnChar expects a char on top of the stack"
 
 
 controlFlowGoto :: Int -> VMState -> Either String VMState
