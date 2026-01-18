@@ -46,9 +46,10 @@ execInstr (IReturnInt) st = pure $ controlFlowReturnInt st
 execInstr (IReturnLong) st = pure $ controlFlowReturnLong st
 execInstr (IReturnFloat) st = pure $ controlFlowReturnFloat st
 execInstr (IReturnDouble) st = pure $ controlFlowReturnDouble st
+execInstr (IReturnChar) st = pure $ controlFlowReturnChar st
+execInstr (IReturnA) st = pure $ controlFlowReturnA st
 
 execInstr (IGoto offset) st = pure $ controlFlowGoto offset st
-execInstr (IGoto_w offset) st = pure $ controlFlowGoto_w offset st
 
 execInstr (IGetField fieldName) st = pure $ heapInstrGetField fieldName st
 execInstr (IPutField fieldName) st = pure $ heapInstrPutField fieldName st

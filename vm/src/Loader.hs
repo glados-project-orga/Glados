@@ -10,6 +10,7 @@ module Loader (
 ) where
 
 import Data
+import Data.Int (Int64)
 import Parser (
     Parser(..),
     runParser,
@@ -215,14 +216,10 @@ parseControlFlow = parseIfICmpGt
                <|> parseIfGe
                <|> parseIfLt
                <|> parseIfLe
-               <|> parseGotoW
                <|> parseGoto
 
 parseGoto :: Parser Instr
 parseGoto = parseKeyword "goto" *> parseSpaces *> (IGoto <$> parseInt)
-
-parseGotoW :: Parser Instr
-parseGotoW = parseKeyword "goto_w" *> parseSpaces *> (IGoto_w <$> parseInt)
 
 parseIfEq :: Parser Instr
 parseIfEq = parseKeyword "ifeq" *> parseSpaces *> (IIfEq <$> parseInt)
@@ -277,6 +274,8 @@ parseReturn = (parseKeyword "ireturn" *> pure IReturnInt)
           <|> (parseKeyword "dreturn" *> pure IReturnDouble)
           <|> (parseKeyword "freturn" *> pure IReturnFloat)
           <|> (parseKeyword "lreturn" *> pure IReturnLong)
+          <|> (parseKeyword "creturn" *> pure IReturnChar)
+          <|> (parseKeyword "areturn" *> pure IReturnA)
           <|> (parseKeyword "return" *> pure IReturn)
 
 parseObject :: Parser Instr
@@ -354,7 +353,13 @@ parseValue = parseSpaces *> parseValue' <* parseSpaces
     parseValue' = (VBool <$> parseBool)
               <|> (VChar <$> parseSingleChar)
               <|> (VString <$> parseQuotedString)
+              <|> (VFloat <$> parseFloatWithSuffix)
               <|> (VDouble <$> parseDouble)
-              <|> (VFloat <$> parseFloat)
-              <|> (VLong <$> parseLong)
+              <|> (VLong <$> parseLongWithSuffix)
               <|> (VInt <$> parseInt)
+
+parseFloatWithSuffix :: Parser Float
+parseFloatWithSuffix = parseFloat <* (parseChar 'f' <|> parseChar 'F')
+
+parseLongWithSuffix :: Parser Int64
+parseLongWithSuffix = parseLong <* (parseChar 'L' <|> parseChar 'l')

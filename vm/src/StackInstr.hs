@@ -28,6 +28,14 @@ import Data.Int (Int64)
 import qualified Data.Vector as V
 
 
+setLocal :: Int -> Value -> V.Vector Value -> V.Vector Value
+setLocal n val vec
+    | n < V.length vec = vec V.// [(n, val)]
+    | otherwise = 
+        let padding = V.replicate (n - V.length vec) VNull
+        in vec V.++ padding V.++ V.singleton val
+
+
 stackInstrConstInt :: Int -> VMState -> Either String VMState
 stackInstrConstInt n st@VMState{stack, ip} =
     Right st {ip = ip + 1, stack = VInt n : stack}
@@ -87,6 +95,7 @@ stackInstrALoad :: Int -> VMState -> Either String VMState
 stackInstrALoad n st@VMState{stack, ip, locals} =
     case locals V.!? n of
         Just (VInt v) -> Right st { ip = ip + 1 , stack = (VInt v : stack)}
+        Just (VHandle h) -> Right st { ip = ip + 1 , stack = (VHandle h : stack)}
         Just _ -> Left ("aload: expected reference at local index " ++ show n)
         Nothing -> Left ("Invalid local index: " ++ show n)
 
@@ -95,7 +104,9 @@ stackInstrAStore :: Int -> VMState -> Either String VMState
 stackInstrAStore n st@VMState{stack, ip, locals} =
     case stack of
         (VInt v : rest) ->
-            Right st { ip = ip + 1, stack = rest, locals = (locals V.// [(n, VInt v)])}
+            Right st { ip = ip + 1, stack = rest, locals = setLocal n (VInt v) locals}
+        (VHandle h : rest) ->
+            Right st { ip = ip + 1, stack = rest, locals = setLocal n (VHandle h) locals}
         (_ : _) ->
             Left ("astore: expected reference on stack for local index " ++ show n)
         [] -> Left "astore: empty stack"
@@ -105,7 +116,7 @@ stackInstrStoreInt :: Int -> VMState -> Either String VMState
 stackInstrStoreInt n st@VMState{stack, ip, locals} =
     case stack of
         (VInt val : rest) ->
-            let newLocals = locals V.// [(n, VInt val)]
+            let newLocals = setLocal n (VInt val) locals
             in Right st {ip = (ip + 1), stack = rest, locals = newLocals}
         _ -> Left ("istore: expected int on stack for local index " ++ show n)
 
@@ -114,7 +125,7 @@ stackInstrStoreFloat :: Int -> VMState -> Either String VMState
 stackInstrStoreFloat n st@VMState{stack, ip, locals} =
     case stack of
         (VFloat f: rest) ->
-            let newlocals = locals V.//[(n, VFloat f)] 
+            let newlocals = setLocal n (VFloat f) locals
             in Right st {ip = (ip + 1), stack = rest, locals = newlocals}
         _ -> Left ("fstore: expected float on stack for local index " ++ show n)
 
@@ -123,7 +134,7 @@ stackInstrStoreLong :: Int -> VMState -> Either String VMState
 stackInstrStoreLong n st@VMState{stack, ip, locals} =
     case stack of
         (VLong l: rest) ->
-            let newlocals = locals V.//[(n, VLong l)] 
+            let newlocals = setLocal n (VLong l) locals
             in Right st {ip = (ip + 1), stack = rest, locals = newlocals}
         _ -> Left ("lstore: expected long on stack for local index " ++ show n)
 
@@ -140,7 +151,7 @@ stackInstrStoreDouble :: Int -> VMState -> Either String VMState
 stackInstrStoreDouble n st@VMState{stack, ip, locals} =
     case stack of
         (VDouble d : rest) ->
-            let newlocals = locals V.// [(n, VDouble d)] 
+            let newlocals = setLocal n (VDouble d) locals
             in Right st {ip = ip + 1, stack = rest, locals = newlocals}
         _ -> Left ("dstore: expected double on stack for local index " ++ show n)
 
@@ -157,7 +168,7 @@ stackInstrStoreChar :: Int -> VMState -> Either String VMState
 stackInstrStoreChar n st@VMState{stack, ip, locals} =
     case stack of
         (VChar c : rest) ->
-            let newlocals = locals V.// [(n, VChar c)] 
+            let newlocals = setLocal n (VChar c) locals
             in Right st {ip = ip + 1, stack = rest, locals = newlocals}
         _ -> Left ("cstore: expected char on stack for local index " ++ show n)
 

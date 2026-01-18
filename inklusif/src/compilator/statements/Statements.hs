@@ -1,7 +1,7 @@
 module Statements (compileStatements, compileStatement, manageBody) where
 
 import Ast (Statement(..), ExprStmt(..), Type(..), ReturnStmt(..))
-import CompilerTools (validAssignmentType, convertToType)
+import CompilerTools (validAssignmentType, convertToType, appendBody)
 import CompilerTypes (CompilerData, Search(..))
 import VarDecl (compileVarDecl)
 import Assignment (compileAssignment)
@@ -31,11 +31,11 @@ compileStatement (ReturnStatement ret) layer = compileReturn ret layer
 compileStatement _ _ = Left "Unsupported statement type in compileStatement"
 
 checkReturnType :: [Statement] -> Type -> CompilerData -> Either String CompilerData
-checkReturnType [] VoidType prog = Right (prog)
+checkReturnType [] VoidType prog = Right (appendBody prog ["return"])
 checkReturnType [] _ _ = Left "Function missing return statement in non-void function."
-checkReturnType ((ReturnStatement (ReturnStmt expr)):_) retype prog@(_, header, _, _)
+checkReturnType ((ReturnStatement (ReturnStmt expr)):_) retype prog
     | validAssignmentType (srch retype) (srch expr) prog = Right (prog)
-    | otherwise = Left ("Invalid return Type " ++ (show (convertToType expr prog)) ++ (show (header))  ++ " in function.")
+    | otherwise = Left ("Invalid return Type " ++ (show (convertToType expr prog))  ++ " in function.")
 checkReturnType (_:stmts) retype prog = checkReturnType stmts retype prog
 
 compileStatements :: [Statement] ->  Either String CompilerData -> Either String CompilerData

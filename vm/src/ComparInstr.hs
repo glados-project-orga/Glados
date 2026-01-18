@@ -41,7 +41,7 @@ compIfEq n st@VMState{stack, ip} =
     case stack of
         (VInt v : rest) ->
             if v == 0
-                then Right st { ip = ip + n, stack = rest }
+                then Right st { ip = n, stack = rest }
                 else Right st { ip = ip + 1, stack = rest }
         _ -> Left "IIfEq: expected int on stack"
 
@@ -51,7 +51,7 @@ compIfGt n st@VMState{stack, ip} =
     case stack of
         (VInt v : rest) ->
             if v > 0
-                then Right st { ip = ip + n, stack = rest }
+                then Right st { ip = n, stack = rest }
                 else Right st { ip = ip + 1, stack = rest }
         _ -> Left "IIfGt: expected int on stack"
 
@@ -61,7 +61,7 @@ compIfICmpLt n st@VMState{stack, ip} =
     case stack of
         (VInt b : VInt a : rest) ->
             if a < b
-                then Right st { ip = ip + n, stack = rest }
+                then Right st { ip = n, stack = rest }
                 else Right st { ip = ip + 1, stack = rest }
         _ -> Left "IIfICmpLt: expected two ints on stack"
 
@@ -94,7 +94,7 @@ compIfNe n st@VMState{stack, ip} =
     case stack of
         (VInt v : rest) ->
             if v /= 0
-                then Right st { ip = ip + n, stack = rest }
+                then Right st { ip = n, stack = rest }
                 else Right st { ip = ip + 1, stack = rest }
         _ -> Left "IIfNe: expected int on stack"
 
@@ -104,7 +104,7 @@ compIfLt n st@VMState{stack, ip} =
     case stack of
         (VInt v : rest) ->
             if v < 0
-                then Right st { ip = ip + n, stack = rest }
+                then Right st { ip = n, stack = rest }
                 else Right st { ip = ip + 1, stack = rest }
         _ -> Left "IIfLt: expected int on stack"
 
@@ -114,7 +114,7 @@ compIfGe n st@VMState{stack, ip} =
     case stack of
         (VInt v : rest) ->
             if v >= 0
-                then Right st { ip = ip + n, stack = rest }
+                then Right st { ip = n, stack = rest }
                 else Right st { ip = ip + 1, stack = rest }
         _ -> Left "IIfGe: expected int on stack"
 
@@ -124,7 +124,7 @@ compIfLe n st@VMState{stack, ip} =
     case stack of
         (VInt v : rest) ->
             if v <= 0
-                then Right st { ip = ip + n, stack = rest }
+                then Right st { ip = n, stack = rest }
                 else Right st { ip = ip + 1, stack = rest }
         _ -> Left "IIfLe: expected int on stack"
 
@@ -134,7 +134,7 @@ compIfACmpEq n st@VMState{stack, ip} =
     case stack of
         (VInt b : VInt a : rest) ->
             if a == b
-                then Right st { ip = ip + n, stack = rest }
+                then Right st { ip = n, stack = rest }
                 else Right st { ip = ip + 1, stack = rest }
         _ -> Left "IIfACmpEq: expected two refs on stack"
 
@@ -144,7 +144,7 @@ compIfACmpNe n st@VMState{stack, ip} =
     case stack of
         (VInt b : VInt a : rest) ->
             if a /= b
-                then Right st { ip = ip + n, stack = rest }
+                then Right st { ip = n, stack = rest }
                 else Right st { ip = ip + 1, stack = rest }
         _ -> Left "IIfACmpNe: expected two refs on stack"
 
@@ -154,7 +154,7 @@ compIfICmpGt n st@VMState{stack, ip} =
     case stack of
         (VInt b : VInt a : rest) ->
             if a > b
-                then Right st { ip = ip + n, stack = rest }
+                then Right st { ip = n, stack = rest }
                 else Right st { ip = ip + 1, stack = rest }
         _ -> Left "IIfICmpGt: expected two ints on stack"
 
@@ -164,7 +164,7 @@ compIfICmpEq n st@VMState{stack, ip} =
     case stack of
         (VInt b : VInt a : rest) ->
             if a == b
-                then Right st { ip = ip + n, stack = rest }
+                then Right st { ip = n, stack = rest }
                 else Right st { ip = ip + 1, stack = rest }
         _ -> Left "IIfICmpEq: expected two ints on stack"
 
@@ -174,7 +174,7 @@ compIfICmpNe n st@VMState{stack, ip} =
     case stack of
         (VInt b : VInt a : rest) ->
             if a /= b
-                then Right st { ip = ip + n, stack = rest }
+                then Right st { ip = n, stack = rest }
                 else Right st { ip = ip + 1, stack = rest }
         _ -> Left "IIfICmpNe: expected two ints on stack"
 
@@ -184,7 +184,7 @@ compIfICmpGe n st@VMState{stack, ip} =
     case stack of
         (VInt b : VInt a : rest) ->
             if a >= b
-                then Right st { ip = ip + n, stack = rest }
+                then Right st { ip = n, stack = rest }
                 else Right st { ip = ip + 1, stack = rest }
         _ -> Left "IIfICmpGe: expected two ints on stack"
 
@@ -194,7 +194,7 @@ compIfICmpLe n st@VMState{stack, ip} =
     case stack of
         (VInt b : VInt a : rest) ->
             if a <= b
-                then Right st { ip = ip + n, stack = rest }
+                then Right st { ip = n, stack = rest }
                 else Right st { ip = ip + 1, stack = rest }
         _ -> Left "IIfICmpLe: expected two ints on stack"
 

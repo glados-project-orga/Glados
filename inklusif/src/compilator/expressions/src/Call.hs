@@ -10,7 +10,7 @@ module Call (compileCallExpr) where
 import CompilerTypes (CompilerData, Search(..), CompileExpr)
 import FunctionUtils (searchFunctions)
 import CompilerTools (appendBody, validAssignmentType)
-import Ast (Expr(..), CallExpr(..), Parameter(..), FunctionDecl(..))
+import Ast (Expr(..), CallExpr(..), Parameter(..), FunctionDecl(..), Literal(..))
 
 pushArg :: CompileExpr -> Expr -> Parameter -> CompilerData -> Either String CompilerData
 pushArg re expr (Parameter _ parType _) prog
@@ -23,10 +23,24 @@ pushArgs _ [] (_:_) _ = Left "Not enough arguments in function call."
 pushArgs _ [] [] prog = Right prog
 pushArgs re (e:es) (p:ps) prog = pushArgs re es ps prog >>= pushArg re e p
 
+
+
 compileCallExpr:: CompileExpr -> CallExpr -> CompilerData -> Either String CompilerData
+compileCallExpr compileExpr (CallExpr "write" args) prog
+    | length args < 2 = Left "Error exepected two arguments for write"
+    | otherwise =
+        case args of
+            (x:(LitExpr (IntLit n)): _) ->
+                if n <= 0 then Left "exepected 0 or 1 for output"
+                else
+                    compileExpr x prog >>= \p1 ->
+                    Right (appendBody p1 ["invoke_write " ++ show n])
+            _ -> Left "Error: write expects (expr, int)"
+    
+
 compileCallExpr re (CallExpr name exprs) prog@(_, defs, _, _) = eitherParams >>=
     \params -> pushArgs re exprs params prog >>=
-    \n_prog -> Right (appendBody n_prog ["invokstatic " ++ name])
+    \n_prog -> Right (appendBody n_prog ["invokestatic " ++ name])
     where eitherParams = case searchFunctions name defs of
             Just (FunctionDecl _ _ foundParams _ _) -> Right (foundParams)
             Nothing -> Left ("Function " ++ name ++ " not found.")

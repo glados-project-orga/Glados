@@ -1,0 +1,10 @@
+fun getChar {
+    cconst 'A'
+    creturn
+}
+
+fun main {
+    invokestatic getChar
+    c2i
+    ireturn
+}

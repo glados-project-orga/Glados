@@ -42,4 +42,4 @@ emitConversion CharType IntType prog = Right $ appendBody prog ["c2i"]
 
 emitConversion BoolType IntType prog = Right prog
 
-emitConversion src tgt _ = Left $ "Unsupported cast"
+emitConversion _ _ _ = Left $ "Unsupported cast"

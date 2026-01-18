@@ -158,6 +158,7 @@ test_exit_code "ireturn - integer return" "$TEST_FILES_DIR/control_ireturn.bc" 9
 test_exit_code "freturn - float return" "$TEST_FILES_DIR/control_freturn.bc" 42
 test_exit_code "dreturn - double return" "$TEST_FILES_DIR/control_dreturn.bc" 42
 test_exit_code "lreturn - long return" "$TEST_FILES_DIR/control_lreturn.bc" 42
+test_exit_code "creturn - char return" "$TEST_FILES_DIR/control_creturn.bc" 65
 echo ""
 
 echo "== Conditional Instructions =="
@@ -178,10 +179,12 @@ echo ""
 echo "== Array Instructions =="
 test_exit_code "newarray/iastore/iaload - array operations" "$TEST_FILES_DIR/array_basic.bc" 42
 test_exit_code "arraylength - get array length" "$TEST_FILES_DIR/array_length.bc" 5
+test_exit_code "astore/aload - store and load array reference" "$TEST_FILES_DIR/array_astore_object.bc" 45
 echo ""
 
 echo "== Object Instructions =="
 test_exit_code "new/putfield/getfield - object operations" "$TEST_FILES_DIR/object_basic.bc" 100
+test_exit_code "astore/aload - store and load object reference" "$TEST_FILES_DIR/object_astore.bc" 30
 echo ""
 
 echo "== IO Instructions =="
@@ -193,7 +196,7 @@ echo ""
 echo "== Constant Pool Instructions =="
 test_output "ldc - load from constant pool" "$TEST_FILES_DIR/const_pool_basic.bc" "42100-7"
 test_output "ldc - load every types from constant pool" "$TEST_FILES_DIR/const_pool_types.bc" "1 -7 40.023 true false 
- string TEST"
+ string TEST 999999999"
 echo ""
 
 echo "========================================"
