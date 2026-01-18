@@ -103,12 +103,17 @@ parseArrayVar :: Parser Expr
 parseArrayVar = ArrayVarExpr <$> identifier
     <*> (symbol '[' *> parseExpression <* symbol ']')
 
+parseClassAccess :: Parser ClassAccess
+parseClassAccess = (ClassArrayAccess <$> identifier
+        <*> (symbol '[' *> parseExpression <* symbol ']'))
+    <|> (ClassMethodCall <$> callExpr)
+    <|> (ClassClassAccess <$> identifier <*> (symbol '.' *> parseClassAccess))
+    <|> (ClassVarAccess <$> identifier)
+
 parseClassVar :: Parser Expr
 parseClassVar = ClassVarExpr <$> identifier
-    <*> (symbol '.' *> parseExpression)
+    <*> (symbol '.' *> parseClassAccess)
 
 parenthesized :: Parser Expr
 parenthesized =
     symbol '(' *> parseExpression <* symbol ')'
-
-
