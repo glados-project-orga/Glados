@@ -1,0 +1,132 @@
+{- 
+-- EPITECH PROJECT, 2025
+-- Operation
+-- File description:
+-- instr
+-}
+
+{-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE RecordWildCards #-}
+
+module ArithmInt (
+    intArith,
+    longArith,
+    floatArith,
+    doubleArith,
+) where
+
+import Data
+import Data.Bits
+import Data.Fixed
+
+intArith :: IntOp -> VMState -> Either String VMState
+intArith op st@VMState{stack, ip} =
+
+    case (op, stack) of
+        (INegInt, (VInt i : rest)) ->
+            Right st { ip = (ip + 1) , stack = (VInt (-i):rest)}
+
+        (IDivInt, (VInt 0 : _ : _)) ->
+            Left "idiv: division by zero"
+
+        (IRemInt, (VInt 0 : _ : _)) ->
+            Left "irem: division by zero"
+
+        (_, (VInt i2 : VInt i1 : rest)) ->
+            let result = case op of
+                            IAddInt  -> i1 + i2
+                            ISubInt  -> i1 - i2
+                            IMulInt  -> i1 * i2
+                            IDivInt  -> i1 `div` i2
+                            IRemInt  -> i1 `mod` i2
+                            IAndInt  -> i1 .&. i2
+                            IOrInt  -> i1 .|. i2
+                            IXorInt  -> xor i1 i2
+                            IShlInt -> 
+                                let s = i2 .&. 0x1F 
+                                in i1 `shiftL` s 
+                            IShrInt ->
+                                let s = i2 .&. 0x1F 
+                                in i1 `shiftR` s
+            in Right st { ip = ip + 1, stack = (VInt result : rest)}
+    
+        _ -> Left "intArith: invalid operands"
+
+
+doubleArith :: DoubleOp -> VMState -> Either String VMState
+doubleArith op st@VMState{stack, ip} =
+    case (op, stack) of
+        (DNegDouble, (VDouble i : rest)) ->
+            Right st { ip = ip + 1, stack = (VDouble (-i) : rest)}
+
+        (DDivDouble, (VDouble 0.0 : _ : _)) ->
+            Left "ddiv: division by zero"
+
+        (DRemDouble, (VDouble 0.0 : _ : _)) ->
+            Left "drem: division by zero"
+
+        (_, (VDouble i2 : VDouble i1 : rest)) ->
+            let result = case op of
+                    DAddDouble -> i1 + i2
+                    DSubDouble -> i1 - i2
+                    DMulDouble -> i1 * i2
+                    DDivDouble -> i1 / i2
+                    DRemDouble -> i1 `mod'` i2
+            in Right st { ip = ip + 1, stack = (VDouble result : rest)}
+
+        _ -> Left "doubleArith: invalid operands"
+
+
+floatArith :: FloatOp -> VMState -> Either String VMState
+floatArith op st@VMState{stack, ip} =
+    case (op, stack) of
+    
+        (FNegFloat, (VFloat x : rest)) ->
+            Right st { ip = ip + 1, stack = (VFloat (-x) : rest)}
+
+        (FDivFloat, (VFloat 0.0 : _ : _)) ->
+            Left "fdiv: division by zero"
+
+        (FRemFloat, (VFloat 0.0 : _ : _)) ->
+            Left "frem: division by zero"
+
+        (_, (VFloat y : VFloat x : rest)) ->
+            let result = case op of
+                    FAddFloat -> x + y
+                    FSubFloat -> x - y
+                    FMulFloat -> x * y
+                    FDivFloat -> x / y
+                    FRemFloat -> x `mod'` y
+            in Right st { ip = ip + 1, stack = (VFloat result : rest)}
+    
+        _ -> Left "floatArith: invalid operands"
+
+
+longArith :: LongOp -> VMState -> Either String VMState
+longArith op st@VMState{stack, ip} =
+    case (op, stack) of
+    
+        (LNegLong, (VLong i : rest)) ->
+            Right st { ip = ip + 1, stack = (VLong (-i) : rest)}
+
+        (LDivLong, (VLong 0 : _ : _)) ->
+            Left "ldiv: division by zero"
+
+        (LRemLong, (VLong 0 : _ : _)) ->
+            Left "lrem: division by zero"
+
+        (_, (VLong i2 : VLong i1 : rest)) ->
+            let result = case op of
+                    LAddLong -> i1 + i2
+                    LSubLong -> i1 - i2
+                    LMulLong -> i1 * i2
+                    LDivLong -> i1 `div` i2
+                    LRemLong -> i1 `mod` i2
+                    LAndLong -> i1 .&. i2
+                    LOrLong  -> i1 .|. i2
+                    LXorLong -> i1 `xor` i2
+                    LShlLong -> i1 `shiftL` fromIntegral i2
+                    LShrLong -> i1 `shiftR` fromIntegral i2
+            in Right st {ip = ip + 1, stack = (VLong result : rest)}
+
+        _ -> Left "longArith: invalid operands"

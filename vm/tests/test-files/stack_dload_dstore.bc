@@ -1,0 +1,7 @@
+fun main {
+    dconst 42.0
+    dstore 0
+    dload 0
+    d2i
+    ireturn
+}
