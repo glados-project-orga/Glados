@@ -1,5 +1,5 @@
 fun main() : void {
-    let f1 -> float = 3.14;
+    let f1 -> double = 3.14;
     let f2 -> double = 2.71;
 
     let sum -> double = f1 + f2;
