@@ -56,15 +56,14 @@ data SourcePos = SourcePos
 
 -- Enum
 data EnumField = EnumField
-  { declName :: String -- la liste d'enum "GAME", "MENU", "OPTIONS", etc..
-  , declValue :: Maybe Int -- Si une value est déclaré sinon on met nothing et c'est démarré à 0
+  { declName :: String
+  , declValue :: Maybe Int
   } deriving (Show, Eq)
 
 -- Déclarations "statement" des éléments suivants :
 -- Fonction / Structure / Enum / TypeDef - Avec généralement les infos suivantes :
--- La SourcePos (en gros l'endroit ou c'est déclaré) je suis moyen sûr de ça honnêtement
+-- La SourcePos (en gros l'endroit ou c'est déclaré)
 -- le nom / les params / le body / etc ..
-
 
 data FunctionDecl = FunctionDecl
   { funcPos :: SourcePos
@@ -106,14 +105,12 @@ data Declaration
   | Class ClassDecl
   deriving (Show, Eq)
 
--- Params d'une fonction
 data Parameter = Parameter
   { paramName :: String
   , paramType :: Type
-  , paramIsRef :: Bool  -- Si on a une référence ou pas ?
+  , paramIsRef :: Bool
   } deriving (Show, Eq)
 
--- Elems d'une structure, ça me paraît court mais je vois pas plus ?
 data StructField = StructField
   { structFieldName :: String
   , structFieldType :: Type
@@ -131,10 +128,9 @@ data LambdaVar = LambdaVar
   , lambdaVarBody :: [Statement]
   } deriving (Show, Eq)
 
--- Les types je pense c'est pas dur à expliquer
 data Type
   = IntType
-  | FloatType -- j'espère on le fait pas
+  | FloatType
   | StringType
   | DoubleType
   | CharType
@@ -164,7 +160,6 @@ data LambdaDecl = LambdaDecl
   , lambdaContent :: LambdaVar
   } deriving (Show, Eq)
 
--- Déclarations
 data VarDecl = VarDecl
   { varName :: String
   , varType :: Type
@@ -248,21 +243,18 @@ data Statement
   | Continue
   deriving (Show, Eq)
 
--- Pattern matchinggg
 data MatchCase
   = MatchCase
-      { matchPattern :: Pattern -- DESSOUS
+      { matchPattern :: Pattern
       , matchBody :: Expr
       }
   deriving (Show, Eq)
 
--- ici
 data Pattern
   = LiteralPattern Literal
   | DefaultPattern  -- le _
   deriving (Show, Eq)
 
--- Expressions
 data CallExpr = CallExpr
   { callName :: String
   , callArgs :: [Expr]
@@ -330,7 +322,6 @@ data Literal
   | BoolLit Bool
   deriving (Show, Eq)
 
--- ops
 data BinOp
   = Add
   | Sub
