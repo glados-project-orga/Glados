@@ -116,7 +116,7 @@ data Instr = ILdc Int
 
            | INewArray | IALoad | IAStore | IArrayLength
            | IIinc Int Int
-           | IInvokeWrite Int
+           | IInvokeWrite Int | IInvokeOpen
            deriving (Show, Eq)
 
 

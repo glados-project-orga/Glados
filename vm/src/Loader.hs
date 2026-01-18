@@ -50,6 +50,7 @@ parseInstr = parseConsts
          <|> parseControlFlow
          <|> parseInvokeStatic
          <|> parseInvokeWrite
+         <|> parseInvokeOpen
          <|> parseReturn
          <|> parseArray
          <|> parseObject
@@ -268,6 +269,9 @@ parseInvokeStatic = parseKeyword "invokestatic" *> (IInvokeStatic <$> parseStrin
 
 parseInvokeWrite :: Parser Instr
 parseInvokeWrite = parseKeyword "invoke_write" *> parseArgSep *> (IInvokeWrite <$> parseInt)
+
+parseInvokeOpen :: Parser Instr
+parseInvokeOpen = parseKeyword "invoke_open" *> pure IInvokeOpen
 
 parseReturn :: Parser Instr
 parseReturn = (parseKeyword "ireturn" *> pure IReturnInt)

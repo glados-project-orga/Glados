@@ -8,10 +8,12 @@
 {-# LANGUAGE NamedFieldPuns #-}
 
 module IOInstr (
-    invokeWrite
+    invokeWrite,
+    invokeOpen
 ) where
 
 import Data
+import Control.Exception (try, IOException)
 import System.IO (hPutStr, stdout, stderr)
 
 invokeWrite :: Int -> VMState -> IO (Either String VMState)
@@ -36,3 +38,23 @@ valueToString (VLong l) = show l
 valueToString (VString s) = s
 valueToString VNull = "null"
 valueToString (VHandle h) = "<handle:" ++ show h ++ ">"
+
+
+invokeOpen :: VMState -> IO (Either String VMState)
+invokeOpen st@VMState{stack, ip} =
+    case stack of
+        [] -> pure $ Left "invoke_read: empty stack"
+        (VString file : rest) ->
+            readFileforMe file >>= \result ->
+                case result of
+                    Left err -> pure $ (Left ("invoke_read: " ++ err))
+                    Right content -> pure $ (Right st {stack = (VString content : rest) , ip = (ip + 1)})
+        (x : _) -> pure $ Left ("invoke_read: expected string, got " ++ show x) 
+
+
+readFileforMe :: String -> IO (Either String String)
+readFileforMe path = do
+    result <- try (readFile path) :: IO (Either IOException String)
+    case result of
+        Left err      -> pure (Left (show err))
+        Right content -> pure (Right content)

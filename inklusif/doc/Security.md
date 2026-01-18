@@ -67,12 +67,11 @@ There is:
 * No direct memory access
 * No manual memory freeing
 
-All memory is handled by the virtual machine of the language.
+All memory is handled by the virtual machine of the language except for array size that is explicit.
 
 Security benefits:
 
 * Prevention of buffer overflows
-* Prevention of use-after-free vulnerabilities
 * Prevention of memory corruption
 * Elimination of segmentation faults caused by invalid memory access
 
@@ -95,9 +94,9 @@ Example:
 
 ```ink
 match value {
-    0 -> ...
-    1 -> ...
-    _ -> ...
+    0 => ...
+    1 => ...
+    _ => ...
 }
 ```
 
@@ -111,7 +110,21 @@ Explicit control flow improves both **security** and **maintainability**, making
 
 ---
 
-## Comparison With Other Languages We Inspired
+## Virtual Machine Safety
+
+The language runs on a managed virtual machine that provides:
+
+* Automatic memory management
+* Runtime checks for array bounds and type safety
+* Handle Division by zero errors
+* Handle crash even with invalid bytecode
+* Stack underflow protection
+
+These features further enhance the safety of programs by providing an additional layer of protection against common runtime errors.
+
+---
+
+## Comparison With Other Languages That Inspired Inklusif
 
 ### C / C++
 
