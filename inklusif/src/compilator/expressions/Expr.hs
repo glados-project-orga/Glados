@@ -12,7 +12,6 @@ import CompilerTypes (CompilerData, CompileExpr)
 import CompilerTools (getLitArrayType)
 import CompileLiteral (compileLiteralExpr)
 import BinOp (compileBinOpExpr)
-import ArrayIndex (compileArrayIndex)
 import ArrayLiteral (compileArrayLiteral)
 import Call (compileCallExpr)
 import Var (compileVarExpr)
@@ -31,7 +30,6 @@ prepareArrayLiteral re exprs prog = arrayType >>= \at -> compileArrayLiteral re 
 
 compileExpr :: Expr -> CompilerData -> Either String CompilerData
 compileExpr (LitExpr lit) prog = compileLiteralExpr lit prog
-compileExpr (ArrayAssignement indx) prog = compileArrayIndex compileExpr indx prog
 compileExpr (ArrayLiteral exprs) prog = prepareArrayLiteral compileExpr exprs prog
 compileExpr (CallExpression call) prog = compileCallExpr compileExpr call prog
 compileExpr (ClassVarExpr cname expr) prog = compileClassVarExpr compileExpr (cname, expr) prog

@@ -7,10 +7,12 @@ import CompilerTools (appendSymbolTable,
     addValToHeader,
     isClassDefined,
     )
+import SymbolTableUtils (getVar)
 import Typedef (getTypedefType, typeNameExists)
 import ArrayLiteral (compileArrayLiteral)
 import Ast (VarDecl, Type(..), VarDecl(..), Expr(..), ArrayVar(..))
 import Expr (compileExpr)
+import Data.Either (isRight)
 
 storeInSymbolTable :: String -> Type -> CompilerData -> CompilerData
 storeInSymbolTable name t prog@(_, _, _, symTable) =
@@ -71,6 +73,7 @@ compileVarDecl (VarDecl _ _ _ True True) _ =
 compileVarDecl (VarDecl name t value True _) prog = storeConstVar name t value prog
 compileVarDecl (VarDecl _ _ _ _ True) prog = Right prog
 compileVarDecl (VarDecl name t value _ _) prog@(_,  defines, _, _)
+    | isRight (getVar name prog) = Left ("Variable " ++ name ++ " is already declared.")
     | isSameType t value prog = case t of
         ArrayType arr -> storeArrayVar name t arr value prog
         CustomType _ -> getCustomType t defines >>=
