@@ -21,6 +21,7 @@ module Ast
     Literal(..),
     BinOp(..),
     SourcePos(..),
+    ClassAccess(..),
     FunctionDecl(..),
     ClassDecl(..),
     LambdaVar(..),
@@ -285,11 +286,18 @@ data FieldAccessExpr = FieldAccessExpr
   , fieldName :: String
   } deriving (Show, Eq)
 
+data ClassAccess
+  = ClassArrayAccess String Expr
+  | ClassMethodCall CallExpr
+  | ClassVarAccess String
+  | ClassClassAccess String ClassAccess
+  deriving (Show, Eq)
+
 data Expr
   = LitExpr Literal
   | VarExpr String
   | ArrayVarExpr String Expr
-  | ClassVarExpr String Expr
+  | ClassVarExpr String ClassAccess
   | BinOpExpr BinOp Expr Expr
   | UnaryOpExpr UnaryOp Expr
   | CallExpression CallExpr
