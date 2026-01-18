@@ -20,7 +20,7 @@ import StackInstr (stack_All_Instr, stack_chargement, stackInstrLdc, stackInstrI
 import ComparInstr
 import ConvInstr
 import ControlFlowInstr
-import IOInstr (invokeWrite)
+import IOInstr (invokeWrite, invokeOpen)
 import qualified Data.Map as Map
 import qualified Data.Vector as V
 
@@ -28,6 +28,7 @@ import qualified Data.Vector as V
 execInstr :: Instr -> VMState -> IO (Either String VMState)
 
 execInstr (ILdc n) st = pure $ stackInstrLdc n st
+
 execInstr (IStck sst) st = pure $ stack_All_Instr sst st
 execInstr (IStck_1 sst) st = pure $ stack_chargement sst st
 
@@ -46,10 +47,10 @@ execInstr (IReturnInt) st = pure $ controlFlowReturnInt st
 execInstr (IReturnLong) st = pure $ controlFlowReturnLong st
 execInstr (IReturnFloat) st = pure $ controlFlowReturnFloat st
 execInstr (IReturnDouble) st = pure $ controlFlowReturnDouble st
+execInstr (IReturnChar) st = pure $ controlFlowReturnChar st
 execInstr (IReturnA) st = pure $ controlFlowReturnA st
 
 execInstr (IGoto offset) st = pure $ controlFlowGoto offset st
-
 execInstr (IGetField fieldName) st = pure $ heapInstrGetField fieldName st
 execInstr (IPutField fieldName) st = pure $ heapInstrPutField fieldName st
 execInstr (INew className) st = pure $ heapInstrNew className st
@@ -74,18 +75,15 @@ execInstr (IIfICmpLe n) st = pure $ compIfICmpLe n st
 execInstr (ILcmp) st = pure $ compLCmp st
 execInstr (IFcmpl) st = pure $ compFCmpL st
 execInstr (IFcmpg) st = pure $ compFCmpG st
-
 execInstr (IDcmpl) st = pure $ compDCmpL st
 execInstr (IDcmpg) st = pure $ compDCmpG st
 
-execInstr (IInvokeStatic funcName) st = pure $ controlFlowInvokeStatic funcName st
-
 execInstr (IConv op) st = pure $ convOp op st
-
 execInstr (IIinc idx inc) st = pure $ stackInstrIinc idx inc st
 
+execInstr (IInvokeStatic funcName) st = pure $ controlFlowInvokeStatic funcName st
 execInstr (IInvokeWrite fd) st = invokeWrite fd st
-
+execInstr (IInvokeOpen) st = invokeOpen st;
 
 
 exec :: VMState -> IO (Either String VMState)
