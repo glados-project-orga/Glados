@@ -1,0 +1,181 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style type="text/css">
+span.lineno { color: white; background: #aaaaaa; border-right: solid white 12px }
+span.nottickedoff { background: yellow}
+span.istickedoff { background: white }
+span.tickonlyfalse { margin: -1px; border: 1px solid #f20913; background: #f20913 }
+span.tickonlytrue  { margin: -1px; border: 1px solid #60de51; background: #60de51 }
+span.funcount { font-size: small; color: orange; z-index: 2; position: absolute; right: 20 }
+span.decl { font-weight: bold }
+span.spaces    { background: white }
+</style>
+</head>
+<body>
+<pre>
+<span class="decl"><span class="nottickedoff">never executed</span> <span class="tickonlytrue">always true</span> <span class="tickonlyfalse">always false</span></span>
+</pre>
+<pre>
+<span class="lineno">    1 </span>{-# LANGUAGE MultiParamTypeClasses #-}
+<span class="lineno">    2 </span>{-# LANGUAGE TypeSynonymInstances #-}
+<span class="lineno">    3 </span>{-# LANGUAGE FlexibleInstances #-}
+<span class="lineno">    4 </span>
+<span class="lineno">    5 </span>{-
+<span class="lineno">    6 </span>-- EPITECH PROJECT, 2026
+<span class="lineno">    7 </span>-- glados
+<span class="lineno">    8 </span>-- File description:
+<span class="lineno">    9 </span>-- comptype
+<span class="lineno">   10 </span>-}
+<span class="lineno">   11 </span>
+<span class="lineno">   12 </span>module CompilerTypes (
+<span class="lineno">   13 </span>    ConstantPool,
+<span class="lineno">   14 </span>    Bytecode,
+<span class="lineno">   15 </span>    SymbolTable,
+<span class="lineno">   16 </span>    SymInfo(..),
+<span class="lineno">   17 </span>    Ast,
+<span class="lineno">   18 </span>    CompilerData,
+<span class="lineno">   19 </span>    Defines,
+<span class="lineno">   20 </span>    CompileResult,
+<span class="lineno">   21 </span>    CompileExpr,
+<span class="lineno">   22 </span>    ShowType(..),
+<span class="lineno">   23 </span>    TypeEq(..),
+<span class="lineno">   24 </span>    Convert(..),
+<span class="lineno">   25 </span>    TypeNormalized(..),
+<span class="lineno">   26 </span>    HeapSize,
+<span class="lineno">   27 </span>    Handle,
+<span class="lineno">   28 </span>    SearchTypes(..),
+<span class="lineno">   29 </span>    Search(..)
+<span class="lineno">   30 </span>) where
+<span class="lineno">   31 </span>
+<span class="lineno">   32 </span>
+<span class="lineno">   33 </span>import Ast (
+<span class="lineno">   34 </span>    Declaration(..),
+<span class="lineno">   35 </span>    FunctionDecl,
+<span class="lineno">   36 </span>    ClassDecl,
+<span class="lineno">   37 </span>    EnumDecl,
+<span class="lineno">   38 </span>    TypedefDecl,
+<span class="lineno">   39 </span>    Expr(..),
+<span class="lineno">   40 </span>    Type(..),
+<span class="lineno">   41 </span>    Literal(..),
+<span class="lineno">   42 </span>    ArrayVar(..)
+<span class="lineno">   43 </span>    )
+<span class="lineno">   44 </span>type Handle = Int
+<span class="lineno">   45 </span>type HeapSize = Int
+<span class="lineno">   46 </span>type Ast = [Declaration]
+<span class="lineno">   47 </span>type ConstantPool = [String]
+<span class="lineno">   48 </span>type Bytecode = [String]
+<span class="lineno">   49 </span>type Defines = (HeapSize, [FunctionDecl], [ClassDecl], [EnumDecl], [TypedefDecl], Int)
+<span class="lineno">   50 </span>
+<span class="lineno">   51 </span>data TypeNormalized
+<span class="lineno">   52 </span>    = TypeNorm Type
+<span class="lineno">   53 </span>    | LitNorm Literal
+<span class="lineno">   54 </span>    deriving (<span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Eq</span></span></span></span>)
+<span class="lineno">   55 </span>
+<span class="lineno">   56 </span>data SearchTypes
+<span class="lineno">   57 </span>    = SearchType Type
+<span class="lineno">   58 </span>    | SearchExpr Expr
+<span class="lineno">   59 </span>    deriving (<span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>, <span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Eq</span></span></span></span>)
+<span class="lineno">   60 </span>
+<span class="lineno">   61 </span>class Search a where
+<span class="lineno">   62 </span>    srch :: a -&gt; SearchTypes
+<span class="lineno">   63 </span>
+<span class="lineno">   64 </span>instance Search Type where
+<span class="lineno">   65 </span>    <span class="decl"><span class="istickedoff">srch t = SearchType t</span></span>
+<span class="lineno">   66 </span>
+<span class="lineno">   67 </span>instance Search Expr where
+<span class="lineno">   68 </span>    <span class="decl"><span class="istickedoff">srch e = SearchExpr e</span></span>
+<span class="lineno">   69 </span>
+<span class="lineno">   70 </span>class ShowType a where
+<span class="lineno">   71 </span>    showType :: a -&gt; String
+<span class="lineno">   72 </span>
+<span class="lineno">   73 </span>class TypeEq a b where
+<span class="lineno">   74 </span>    typeEq :: a -&gt; b -&gt; Bool
+<span class="lineno">   75 </span>
+<span class="lineno">   76 </span>class Convert a where
+<span class="lineno">   77 </span>    convert :: a -&gt; Type
+<span class="lineno">   78 </span>
+<span class="lineno">   79 </span>instance Convert Literal where
+<span class="lineno">   80 </span>    <span class="decl"><span class="istickedoff">convert (IntLit _)    = IntType</span>
+<span class="lineno">   81 </span><span class="spaces">    </span><span class="istickedoff">convert (FloatLit _)  = <span class="nottickedoff">FloatType</span></span>
+<span class="lineno">   82 </span><span class="spaces">    </span><span class="istickedoff">convert (DoubleLit _) = <span class="nottickedoff">DoubleType</span></span>
+<span class="lineno">   83 </span><span class="spaces">    </span><span class="istickedoff">convert (BoolLit _)   = <span class="nottickedoff">BoolType</span></span>
+<span class="lineno">   84 </span><span class="spaces">    </span><span class="istickedoff">convert (CharLit _)   = <span class="nottickedoff">CharType</span></span>
+<span class="lineno">   85 </span><span class="spaces">    </span><span class="istickedoff">convert (LongLit _)   = <span class="nottickedoff">LongType</span></span>
+<span class="lineno">   86 </span><span class="spaces">    </span><span class="istickedoff">convert (StringLit s) = ArrayType (ArrayVar CharType (LitExpr (IntLit (length s))))</span></span>
+<span class="lineno">   87 </span>
+<span class="lineno">   88 </span>instance Convert String where
+<span class="lineno">   89 </span>    <span class="decl"><span class="nottickedoff">convert &quot;int&quot;    = IntType</span>
+<span class="lineno">   90 </span><span class="spaces">    </span><span class="nottickedoff">convert &quot;float&quot;  = FloatType</span>
+<span class="lineno">   91 </span><span class="spaces">    </span><span class="nottickedoff">convert &quot;double&quot; = DoubleType</span>
+<span class="lineno">   92 </span><span class="spaces">    </span><span class="nottickedoff">convert &quot;bool&quot;   = BoolType</span>
+<span class="lineno">   93 </span><span class="spaces">    </span><span class="nottickedoff">convert &quot;char&quot;   = CharType</span>
+<span class="lineno">   94 </span><span class="spaces">    </span><span class="nottickedoff">convert &quot;void&quot;   = VoidType</span>
+<span class="lineno">   95 </span><span class="spaces">    </span><span class="nottickedoff">convert other    = CustomType other</span></span>
+<span class="lineno">   96 </span>
+<span class="lineno">   97 </span>instance TypeEq Type (Either String String) where
+<span class="lineno">   98 </span>    <span class="decl"><span class="nottickedoff">typeEq _ (Left _)      = False</span>
+<span class="lineno">   99 </span><span class="spaces">    </span><span class="nottickedoff">typeEq val (Right str)     = typeEq val str</span></span>
+<span class="lineno">  100 </span>
+<span class="lineno">  101 </span>instance TypeEq Type (Maybe Type) where
+<span class="lineno">  102 </span>    <span class="decl"><span class="nottickedoff">typeEq _ (Nothing)      = False</span>
+<span class="lineno">  103 </span><span class="spaces">    </span><span class="nottickedoff">typeEq val (Just typ)     =  val == typ</span></span>
+<span class="lineno">  104 </span>
+<span class="lineno">  105 </span>instance TypeEq Type (Either String Type) where
+<span class="lineno">  106 </span>    <span class="decl"><span class="istickedoff">typeEq _ (Left _)      = <span class="nottickedoff">False</span></span>
+<span class="lineno">  107 </span><span class="spaces">    </span><span class="istickedoff">typeEq val (Right cmplVal)     = val == cmplVal</span></span>
+<span class="lineno">  108 </span>
+<span class="lineno">  109 </span>instance TypeEq (Either String Type) (Either String Type) where
+<span class="lineno">  110 </span>    <span class="decl"><span class="nottickedoff">typeEq (Left _) _ = False</span>
+<span class="lineno">  111 </span><span class="spaces">    </span><span class="nottickedoff">typeEq _ (Left _) = False</span>
+<span class="lineno">  112 </span><span class="spaces">    </span><span class="nottickedoff">typeEq (Right val1) (Right val2) = typeEq val1 val2</span></span>
+<span class="lineno">  113 </span>
+<span class="lineno">  114 </span>instance TypeEq TypeNormalized TypeNormalized where
+<span class="lineno">  115 </span>    <span class="decl"><span class="nottickedoff">typeEq (TypeNorm t1) (TypeNorm t2) = t1 == t2</span>
+<span class="lineno">  116 </span><span class="spaces">    </span><span class="nottickedoff">typeEq (LitNorm l1) (LitNorm l2)   = l1 == l2</span>
+<span class="lineno">  117 </span><span class="spaces">    </span><span class="nottickedoff">typeEq _ _                         = False</span></span>
+<span class="lineno">  118 </span>
+<span class="lineno">  119 </span>instance TypeEq Type Type where
+<span class="lineno">  120 </span>    <span class="decl"><span class="istickedoff">typeEq (ArrayType (ArrayVar CharType _)) StringType = <span class="nottickedoff">True</span></span>
+<span class="lineno">  121 </span><span class="spaces">    </span><span class="istickedoff">typeEq (ArrayType (ArrayVar t1 _)) (ArrayType (ArrayVar t2 _)) = typeEq t1 t2</span>
+<span class="lineno">  122 </span><span class="spaces">    </span><span class="istickedoff">typeEq (CustomType name1) (CustomType name2)  = <span class="nottickedoff">name1 == name2</span></span>
+<span class="lineno">  123 </span><span class="spaces">    </span><span class="istickedoff">typeEq (LongType) (IntType) = <span class="nottickedoff">True</span></span>
+<span class="lineno">  124 </span><span class="spaces">    </span><span class="istickedoff">typeEq t1 t2                      = t1 == t2</span></span>
+<span class="lineno">  125 </span>
+<span class="lineno">  126 </span>instance TypeEq Type String where
+<span class="lineno">  127 </span>    <span class="decl"><span class="nottickedoff">typeEq IntType &quot;int&quot;          = True</span>
+<span class="lineno">  128 </span><span class="spaces">    </span><span class="nottickedoff">typeEq FloatType &quot;float&quot;      = True</span>
+<span class="lineno">  129 </span><span class="spaces">    </span><span class="nottickedoff">typeEq DoubleType &quot;double&quot;    = True</span>
+<span class="lineno">  130 </span><span class="spaces">    </span><span class="nottickedoff">typeEq BoolType &quot;bool&quot;        = True</span>
+<span class="lineno">  131 </span><span class="spaces">    </span><span class="nottickedoff">typeEq CharType &quot;char&quot;        = True</span>
+<span class="lineno">  132 </span><span class="spaces">    </span><span class="nottickedoff">typeEq (ArrayType (ArrayVar CharType _)) &quot;string&quot; = True</span>
+<span class="lineno">  133 </span><span class="spaces">    </span><span class="nottickedoff">typeEq (ArrayType (ArrayVar t _)) arrayVar = typeEq t arrayVar</span>
+<span class="lineno">  134 </span><span class="spaces">    </span><span class="nottickedoff">typeEq VoidType &quot;void&quot;        = True</span>
+<span class="lineno">  135 </span><span class="spaces">    </span><span class="nottickedoff">typeEq (CustomType name) str  = name == str</span>
+<span class="lineno">  136 </span><span class="spaces">    </span><span class="nottickedoff">typeEq _ _                    = False</span></span>
+<span class="lineno">  137 </span>
+<span class="lineno">  138 </span>instance TypeEq Type Literal where
+<span class="lineno">  139 </span>    <span class="decl"><span class="nottickedoff">typeEq (IntType) (IntLit _)          = True</span>
+<span class="lineno">  140 </span><span class="spaces">    </span><span class="nottickedoff">typeEq (DoubleType) (DoubleLit _)    = True</span>
+<span class="lineno">  141 </span><span class="spaces">    </span><span class="nottickedoff">typeEq (FloatType) (FloatLit _)      = True</span>
+<span class="lineno">  142 </span><span class="spaces">    </span><span class="nottickedoff">typeEq (BoolType) (BoolLit _)        = True</span>
+<span class="lineno">  143 </span><span class="spaces">    </span><span class="nottickedoff">typeEq (CharType) (CharLit _)        = True</span>
+<span class="lineno">  144 </span><span class="spaces">    </span><span class="nottickedoff">typeEq (ArrayType (ArrayVar CharType _)) (StringLit _) = True</span>
+<span class="lineno">  145 </span><span class="spaces">    </span><span class="nottickedoff">typeEq _ _                             = False</span></span>
+<span class="lineno">  146 </span>
+<span class="lineno">  147 </span>data SymInfo = SymInfo
+<span class="lineno">  148 </span>  { <span class="istickedoff"><span class="decl"><span class="istickedoff">symIndex</span></span></span> :: Int
+<span class="lineno">  149 </span>  , <span class="istickedoff"><span class="decl"><span class="istickedoff">symVal</span></span></span>  :: Type
+<span class="lineno">  150 </span>  , <span class="nottickedoff"><span class="decl"><span class="nottickedoff">symIsConst</span></span></span> :: Maybe Handle
+<span class="lineno">  151 </span>  , <span class="nottickedoff"><span class="decl"><span class="nottickedoff">symIsRef</span></span></span> :: Bool
+<span class="lineno">  152 </span>  } deriving (<span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff"><span class="decl"><span class="nottickedoff">Show</span></span></span></span></span></span>, <span class="decl"><span class="istickedoff"><span class="decl"><span class="nottickedoff">Eq</span></span></span></span>)
+<span class="lineno">  153 </span>
+<span class="lineno">  154 </span>
+<span class="lineno">  155 </span>type SymbolTable = [(String, SymInfo)]
+<span class="lineno">  156 </span>type CompilerData = (ConstantPool, Defines, Bytecode, SymbolTable)
+<span class="lineno">  157 </span>type CompileResult = Either String CompilerData
+<span class="lineno">  158 </span>type CompileExpr   = Expr -&gt; CompilerData -&gt; CompileResult
+
+</pre>
+</body>
+</html>

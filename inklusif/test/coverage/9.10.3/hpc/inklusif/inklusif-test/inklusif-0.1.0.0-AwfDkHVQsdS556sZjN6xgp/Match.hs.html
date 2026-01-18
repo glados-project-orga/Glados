@@ -1,0 +1,104 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style type="text/css">
+span.lineno { color: white; background: #aaaaaa; border-right: solid white 12px }
+span.nottickedoff { background: yellow}
+span.istickedoff { background: white }
+span.tickonlyfalse { margin: -1px; border: 1px solid #f20913; background: #f20913 }
+span.tickonlytrue  { margin: -1px; border: 1px solid #60de51; background: #60de51 }
+span.funcount { font-size: small; color: orange; z-index: 2; position: absolute; right: 20 }
+span.decl { font-weight: bold }
+span.spaces    { background: white }
+</style>
+</head>
+<body>
+<pre>
+<span class="decl"><span class="nottickedoff">never executed</span> <span class="tickonlytrue">always true</span> <span class="tickonlyfalse">always false</span></span>
+</pre>
+<pre>
+<span class="lineno">    1 </span>{-
+<span class="lineno">    2 </span>-- EPITECH PROJECT, 2026
+<span class="lineno">    3 </span>-- glados
+<span class="lineno">    4 </span>-- File description:
+<span class="lineno">    5 </span>-- match
+<span class="lineno">    6 </span>-}
+<span class="lineno">    7 </span>
+<span class="lineno">    8 </span>module Match (compileMatch) where
+<span class="lineno">    9 </span>
+<span class="lineno">   10 </span>import CompilerTypes (CompilerData)
+<span class="lineno">   11 </span>import CompilerTools (appendBody)
+<span class="lineno">   12 </span>import Ast (MatchStmt(..), MatchCase(..), Pattern(..), Literal(..), Expr(..))
+<span class="lineno">   13 </span>import Expr (compileExpr)
+<span class="lineno">   14 </span>import Labels (generateLabel)
+<span class="lineno">   15 </span>import EitherUtils (bindE)
+<span class="lineno">   16 </span>
+<span class="lineno">   17 </span>compileMatch :: MatchStmt -&gt; CompilerData -&gt; Either String CompilerData
+<span class="lineno">   18 </span><span class="decl"><span class="nottickedoff">compileMatch (MatchStmt scrutinee cases) prog =</span>
+<span class="lineno">   19 </span><span class="spaces">  </span><span class="nottickedoff">bindE (compileExpr scrutinee prog) (\p1 -&gt;</span>
+<span class="lineno">   20 </span><span class="spaces">    </span><span class="nottickedoff">let (lEnd, p2) = generateLabel p1</span>
+<span class="lineno">   21 </span><span class="spaces">        </span><span class="nottickedoff">(nonDef, mDef) = splitDefault cases</span>
+<span class="lineno">   22 </span><span class="spaces">    </span><span class="nottickedoff">in bindE (compileNonDefault lEnd nonDef p2) (\p3 -&gt;</span>
+<span class="lineno">   23 </span><span class="spaces">         </span><span class="nottickedoff">bindE (compileDefaultIfAny lEnd mDef p3) (\p4 -&gt;</span>
+<span class="lineno">   24 </span><span class="spaces">           </span><span class="nottickedoff">Right (emit (lEnd ++ &quot;:&quot;) p4))))</span></span>
+<span class="lineno">   25 </span>
+<span class="lineno">   26 </span>compileDefaultIfAny :: String -&gt; Maybe MatchCase -&gt; CompilerData -&gt; Either String CompilerData
+<span class="lineno">   27 </span><span class="decl"><span class="nottickedoff">compileDefaultIfAny _ Nothing p =</span>
+<span class="lineno">   28 </span><span class="spaces">  </span><span class="nottickedoff">Right (emit &quot;pop&quot; p)</span>
+<span class="lineno">   29 </span><span class="spaces"></span><span class="nottickedoff">compileDefaultIfAny lEnd (Just c) p =</span>
+<span class="lineno">   30 </span><span class="spaces">  </span><span class="nottickedoff">compileDefault lEnd c p</span></span>
+<span class="lineno">   31 </span>
+<span class="lineno">   32 </span>compileNonDefault :: String -&gt; [MatchCase] -&gt; CompilerData -&gt; Either String CompilerData
+<span class="lineno">   33 </span><span class="decl"><span class="nottickedoff">compileNonDefault _ [] p = Right p</span>
+<span class="lineno">   34 </span><span class="spaces"></span><span class="nottickedoff">compileNonDefault lEnd (c:cs) p =</span>
+<span class="lineno">   35 </span><span class="spaces">  </span><span class="nottickedoff">bindE (compileOneCase lEnd c p) (\p' -&gt;</span>
+<span class="lineno">   36 </span><span class="spaces">    </span><span class="nottickedoff">compileNonDefault lEnd cs p')</span></span>
+<span class="lineno">   37 </span>
+<span class="lineno">   38 </span>compileOneCase :: String -&gt; MatchCase -&gt; CompilerData -&gt; Either String CompilerData
+<span class="lineno">   39 </span><span class="decl"><span class="nottickedoff">compileOneCase lEnd (MatchCase pat body) p =</span>
+<span class="lineno">   40 </span><span class="spaces">  </span><span class="nottickedoff">case pat of</span>
+<span class="lineno">   41 </span><span class="spaces">    </span><span class="nottickedoff">DefaultPattern -&gt; Left &quot;match: DefaultPattern must be last&quot;</span>
+<span class="lineno">   42 </span><span class="spaces">    </span><span class="nottickedoff">LiteralPattern lit -&gt;</span>
+<span class="lineno">   43 </span><span class="spaces">      </span><span class="nottickedoff">bindE (literalToComparableInt lit) (\litExpr -&gt;</span>
+<span class="lineno">   44 </span><span class="spaces">        </span><span class="nottickedoff">let (lCase, p1) = generateLabel p</span>
+<span class="lineno">   45 </span><span class="spaces">            </span><span class="nottickedoff">(lNext, p2) = generateLabel p1</span>
+<span class="lineno">   46 </span><span class="spaces">            </span><span class="nottickedoff">p3 = emit &quot;dup&quot; p2</span>
+<span class="lineno">   47 </span><span class="spaces">        </span><span class="nottickedoff">in bindE (compileExpr litExpr p3) (\p4 -&gt;</span>
+<span class="lineno">   48 </span><span class="spaces">             </span><span class="nottickedoff">let p5 = emit &quot;isub&quot; p4</span>
+<span class="lineno">   49 </span><span class="spaces">                 </span><span class="nottickedoff">p6 = emit (&quot;ifeq &quot; ++ lCase) p5</span>
+<span class="lineno">   50 </span><span class="spaces">                 </span><span class="nottickedoff">p7 = emit (&quot;goto &quot; ++ lNext) p6</span>
+<span class="lineno">   51 </span><span class="spaces">                 </span><span class="nottickedoff">p8 = emit (lCase ++ &quot;:&quot;) p7</span>
+<span class="lineno">   52 </span><span class="spaces">                 </span><span class="nottickedoff">p9 = emit &quot;pop&quot; p8</span>
+<span class="lineno">   53 </span><span class="spaces">             </span><span class="nottickedoff">in bindE (compileExpr body p9) (\p10 -&gt;</span>
+<span class="lineno">   54 </span><span class="spaces">                  </span><span class="nottickedoff">let p11 = emit (&quot;goto &quot; ++ lEnd) p10</span>
+<span class="lineno">   55 </span><span class="spaces">                      </span><span class="nottickedoff">p12 = emit (lNext ++ &quot;:&quot;) p11</span>
+<span class="lineno">   56 </span><span class="spaces">                  </span><span class="nottickedoff">in Right p12)))</span></span>
+<span class="lineno">   57 </span>
+<span class="lineno">   58 </span>compileDefault :: String -&gt; MatchCase -&gt; CompilerData -&gt; Either String CompilerData
+<span class="lineno">   59 </span><span class="decl"><span class="nottickedoff">compileDefault lEnd (MatchCase _ body) p =</span>
+<span class="lineno">   60 </span><span class="spaces">  </span><span class="nottickedoff">let p1 = emit &quot;pop&quot; p</span>
+<span class="lineno">   61 </span><span class="spaces">  </span><span class="nottickedoff">in bindE (compileExpr body p1) (\p2 -&gt;</span>
+<span class="lineno">   62 </span><span class="spaces">       </span><span class="nottickedoff">Right (emit (&quot;goto &quot; ++ lEnd) p2))</span></span>
+<span class="lineno">   63 </span>
+<span class="lineno">   64 </span>splitDefault :: [MatchCase] -&gt; ([MatchCase], Maybe MatchCase)
+<span class="lineno">   65 </span><span class="decl"><span class="nottickedoff">splitDefault [] = ([], Nothing)</span>
+<span class="lineno">   66 </span><span class="spaces"></span><span class="nottickedoff">splitDefault (c:cs) =</span>
+<span class="lineno">   67 </span><span class="spaces">  </span><span class="nottickedoff">case matchPattern c of</span>
+<span class="lineno">   68 </span><span class="spaces">    </span><span class="nottickedoff">DefaultPattern -&gt; (cs, Just c)</span>
+<span class="lineno">   69 </span><span class="spaces">    </span><span class="nottickedoff">_ -&gt;</span>
+<span class="lineno">   70 </span><span class="spaces">      </span><span class="nottickedoff">let (xs, d) = splitDefault cs</span>
+<span class="lineno">   71 </span><span class="spaces">      </span><span class="nottickedoff">in (c:xs, d)</span></span>
+<span class="lineno">   72 </span>
+<span class="lineno">   73 </span>emit :: String -&gt; CompilerData -&gt; CompilerData
+<span class="lineno">   74 </span><span class="decl"><span class="nottickedoff">emit instr prog = appendBody prog [instr]</span></span>
+<span class="lineno">   75 </span>
+<span class="lineno">   76 </span>literalToComparableInt :: Literal -&gt; Either String Expr
+<span class="lineno">   77 </span><span class="decl"><span class="nottickedoff">literalToComparableInt (IntLit n)  = Right (LitExpr (IntLit n))</span>
+<span class="lineno">   78 </span><span class="spaces"></span><span class="nottickedoff">literalToComparableInt (BoolLit b) = Right (LitExpr (IntLit (if b then 1 else 0)))</span>
+<span class="lineno">   79 </span><span class="spaces"></span><span class="nottickedoff">literalToComparableInt (CharLit c) = Right (LitExpr (IntLit (fromEnum c)))</span>
+<span class="lineno">   80 </span><span class="spaces"></span><span class="nottickedoff">literalToComparableInt _ =</span>
+<span class="lineno">   81 </span><span class="spaces">  </span><span class="nottickedoff">Left &quot;match: unsupported pattern literal type (only Int/Bool/Char supported)&quot;</span></span>
+
+</pre>
+</body>
+</html>

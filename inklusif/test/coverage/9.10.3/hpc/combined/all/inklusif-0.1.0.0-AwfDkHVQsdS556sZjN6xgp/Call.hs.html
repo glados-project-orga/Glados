@@ -1,0 +1,88 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style type="text/css">
+span.lineno { color: white; background: #aaaaaa; border-right: solid white 12px }
+span.nottickedoff { background: yellow}
+span.istickedoff { background: white }
+span.tickonlyfalse { margin: -1px; border: 1px solid #f20913; background: #f20913 }
+span.tickonlytrue  { margin: -1px; border: 1px solid #60de51; background: #60de51 }
+span.funcount { font-size: small; color: orange; z-index: 2; position: absolute; right: 20 }
+span.decl { font-weight: bold }
+span.spaces    { background: white }
+</style>
+</head>
+<body>
+<pre>
+<span class="decl"><span class="nottickedoff">never executed</span> <span class="tickonlytrue">always true</span> <span class="tickonlyfalse">always false</span></span>
+</pre>
+<pre>
+<span class="lineno">    1 </span>{-
+<span class="lineno">    2 </span>-- EPITECH PROJECT, 2026
+<span class="lineno">    3 </span>-- glados
+<span class="lineno">    4 </span>-- File description:
+<span class="lineno">    5 </span>-- Call.hs
+<span class="lineno">    6 </span>-}
+<span class="lineno">    7 </span>
+<span class="lineno">    8 </span>module Call (compileCallExpr, compileMethExpr) where
+<span class="lineno">    9 </span>
+<span class="lineno">   10 </span>import CompilerTypes (CompilerData, Search(..), CompileExpr)
+<span class="lineno">   11 </span>import FunctionUtils (searchFunctions)
+<span class="lineno">   12 </span>import CompilerTools (appendBody, validAssignmentType)
+<span class="lineno">   13 </span>import Ast (Expr(..), CallExpr(..), Parameter(..), FunctionDecl(..), Literal(..))
+<span class="lineno">   14 </span>
+<span class="lineno">   15 </span>pushArg :: CompileExpr -&gt; Expr -&gt; Parameter -&gt; CompilerData -&gt; Either String CompilerData
+<span class="lineno">   16 </span><span class="decl"><span class="nottickedoff">pushArg re expr (Parameter _ parType _) prog</span>
+<span class="lineno">   17 </span><span class="spaces">    </span><span class="nottickedoff">| validAssignmentType (srch parType) (srch expr) prog = re expr prog</span>
+<span class="lineno">   18 </span><span class="spaces">    </span><span class="nottickedoff">| otherwise = Left &quot;Invalid parameter type in function call.&quot;</span></span>
+<span class="lineno">   19 </span>
+<span class="lineno">   20 </span>pushArgs :: CompileExpr -&gt; [Expr] -&gt; [Parameter] -&gt; CompilerData -&gt; Either String CompilerData
+<span class="lineno">   21 </span><span class="decl"><span class="nottickedoff">pushArgs _ (_:_) [] _ = Left &quot;Too much arguments in function call.&quot;</span>
+<span class="lineno">   22 </span><span class="spaces"></span><span class="nottickedoff">pushArgs _ [] (_:_) _ = Left &quot;Not enough arguments in function call.&quot;</span>
+<span class="lineno">   23 </span><span class="spaces"></span><span class="nottickedoff">pushArgs _ [] [] prog = Right prog</span>
+<span class="lineno">   24 </span><span class="spaces"></span><span class="nottickedoff">pushArgs re (e:es) (p:ps) prog = pushArgs re es ps prog &gt;&gt;= pushArg re e p</span></span>
+<span class="lineno">   25 </span>
+<span class="lineno">   26 </span>
+<span class="lineno">   27 </span>
+<span class="lineno">   28 </span>compileMethExpr:: CompileExpr -&gt; [String] -&gt; CallExpr -&gt; CompilerData -&gt; Either String CompilerData
+<span class="lineno">   29 </span><span class="decl"><span class="nottickedoff">compileMethExpr re this (CallExpr name exprs) prog@(_, defs, _, _) = eitherParams &gt;&gt;=</span>
+<span class="lineno">   30 </span><span class="spaces">    </span><span class="nottickedoff">\params -&gt; pushArgs re exprs params prog &gt;&gt;= \incomplete_prog -&gt; (Right (appendBody incomplete_prog this)) &gt;&gt;=</span>
+<span class="lineno">   31 </span><span class="spaces">    </span><span class="nottickedoff">\n_prog -&gt; Right (appendBody n_prog [&quot;invokestatic &quot; ++ name])</span>
+<span class="lineno">   32 </span><span class="spaces">    </span><span class="nottickedoff">where eitherParams = case searchFunctions name defs of</span>
+<span class="lineno">   33 </span><span class="spaces">            </span><span class="nottickedoff">Just (FunctionDecl _ _ foundParams _ _) -&gt; case foundParams of</span>
+<span class="lineno">   34 </span><span class="spaces">                </span><span class="nottickedoff">_:thisSkip -&gt; Right thisSkip</span>
+<span class="lineno">   35 </span><span class="spaces">                </span><span class="nottickedoff">_ -&gt; Left (&quot;Method &quot; ++ name ++ &quot; missing 'this' parameter.&quot;)</span>
+<span class="lineno">   36 </span><span class="spaces">            </span><span class="nottickedoff">Nothing -&gt; Left (&quot;Function &quot; ++ name ++ &quot; not found.&quot;)</span></span>
+<span class="lineno">   37 </span>
+<span class="lineno">   38 </span>compileCallExpr:: CompileExpr -&gt; CallExpr -&gt; CompilerData -&gt; Either String CompilerData
+<span class="lineno">   39 </span><span class="decl"><span class="nottickedoff">compileCallExpr compileExpr (CallExpr &quot;write&quot; args) prog</span>
+<span class="lineno">   40 </span><span class="spaces">    </span><span class="nottickedoff">| length args /= 2 = Left &quot;Error exepected two arguments for write&quot;</span>
+<span class="lineno">   41 </span><span class="spaces">    </span><span class="nottickedoff">| otherwise =</span>
+<span class="lineno">   42 </span><span class="spaces">        </span><span class="nottickedoff">case args of</span>
+<span class="lineno">   43 </span><span class="spaces">            </span><span class="nottickedoff">(x:(LitExpr (IntLit n)): _) -&gt;</span>
+<span class="lineno">   44 </span><span class="spaces">                </span><span class="nottickedoff">if n &lt;= 0 then Left &quot;exepected 1 or 2 for output&quot;</span>
+<span class="lineno">   45 </span><span class="spaces">                </span><span class="nottickedoff">else</span>
+<span class="lineno">   46 </span><span class="spaces">                    </span><span class="nottickedoff">compileExpr x prog &gt;&gt;= \p1 -&gt;</span>
+<span class="lineno">   47 </span><span class="spaces">                    </span><span class="nottickedoff">Right (appendBody p1 [&quot;invoke_write &quot; ++ show n])</span>
+<span class="lineno">   48 </span><span class="spaces">            </span><span class="nottickedoff">_ -&gt; Left &quot;Error: write expects (expr, int)&quot;</span>
+<span class="lineno">   49 </span><span class="spaces"></span><span class="nottickedoff"></span>
+<span class="lineno">   50 </span><span class="spaces"></span><span class="nottickedoff">compileCallExpr _ (CallExpr &quot;open&quot; args) prog</span>
+<span class="lineno">   51 </span><span class="spaces">    </span><span class="nottickedoff">| length args /= 1 =  Left &quot;Error exepected one argument for open&quot;</span>
+<span class="lineno">   52 </span><span class="spaces">    </span><span class="nottickedoff">| otherwise =</span>
+<span class="lineno">   53 </span><span class="spaces">        </span><span class="nottickedoff">case args of</span>
+<span class="lineno">   54 </span><span class="spaces">            </span><span class="nottickedoff">[LitExpr (StringLit file)] -&gt; </span>
+<span class="lineno">   55 </span><span class="spaces">                </span><span class="nottickedoff">let prog1 = appendBody prog [&quot;sconst \&quot;&quot; ++ file ++ &quot;\&quot;&quot;] </span>
+<span class="lineno">   56 </span><span class="spaces">                    </span><span class="nottickedoff">prog2 = appendBody prog1 [&quot;invoke_open&quot;]</span>
+<span class="lineno">   57 </span><span class="spaces">                </span><span class="nottickedoff">in Right prog2</span>
+<span class="lineno">   58 </span><span class="spaces">            </span><span class="nottickedoff">_ -&gt; Left &quot;Error: open expects a string literal&quot;</span>
+<span class="lineno">   59 </span><span class="spaces"></span><span class="nottickedoff"></span>
+<span class="lineno">   60 </span><span class="spaces"></span><span class="nottickedoff">compileCallExpr re (CallExpr name exprs) prog@(_, defs, _, _) = eitherParams &gt;&gt;=</span>
+<span class="lineno">   61 </span><span class="spaces">    </span><span class="nottickedoff">\params -&gt; pushArgs re exprs params prog &gt;&gt;=</span>
+<span class="lineno">   62 </span><span class="spaces">    </span><span class="nottickedoff">\n_prog -&gt; Right (appendBody n_prog [&quot;invokestatic &quot; ++ name])</span>
+<span class="lineno">   63 </span><span class="spaces">    </span><span class="nottickedoff">where eitherParams = case searchFunctions name defs of</span>
+<span class="lineno">   64 </span><span class="spaces">            </span><span class="nottickedoff">Just (FunctionDecl _ _ foundParams _ _) -&gt; Right (foundParams)</span>
+<span class="lineno">   65 </span><span class="spaces">            </span><span class="nottickedoff">Nothing -&gt; Left (&quot;Function &quot; ++ name ++ &quot; not found.&quot;)</span></span>
+
+</pre>
+</body>
+</html>
