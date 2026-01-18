@@ -5,7 +5,7 @@ module NormalizeTests (
 import Test.HUnit
 import CompilerTools (convertToType)
 import CompilerTypes (CompilerData, SymInfo(..))
-import Ast (Type(..), Literal(..), Expr(..), ArrayVar(..), BinOp(..), UnaryOp(..), SourcePos(..), ClassDecl(..), StructField(..), EnumDecl(..), EnumField(..))
+import Ast (Type(..), Literal(..), Expr(..), ArrayVar(..), BinOp(..), UnaryOp(..), SourcePos(..), EnumDecl(..), EnumField(..))
 
 emptyCompilerData :: CompilerData
 emptyCompilerData = ([], (0, [], [], [], [], 0), [], [])
