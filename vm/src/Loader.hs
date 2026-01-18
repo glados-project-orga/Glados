@@ -273,6 +273,7 @@ parseReturn = (parseKeyword "ireturn" *> pure IReturnInt)
           <|> (parseKeyword "dreturn" *> pure IReturnDouble)
           <|> (parseKeyword "freturn" *> pure IReturnFloat)
           <|> (parseKeyword "lreturn" *> pure IReturnLong)
+          <|> (parseKeyword "creturn" *> pure IReturnChar)
           <|> (parseKeyword "return" *> pure IReturn)
 
 parseObject :: Parser Instr
