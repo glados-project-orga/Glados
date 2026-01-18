@@ -10,6 +10,7 @@ module Loader (
 ) where
 
 import Data
+import Data.Int (Int64)
 import Parser (
     Parser(..),
     runParser,
@@ -49,6 +50,7 @@ parseInstr = parseConsts
          <|> parseControlFlow
          <|> parseInvokeStatic
          <|> parseInvokeWrite
+         <|> parseInvokeOpen
          <|> parseReturn
          <|> parseArray
          <|> parseObject
@@ -268,11 +270,15 @@ parseInvokeStatic = parseKeyword "invokestatic" *> (IInvokeStatic <$> parseStrin
 parseInvokeWrite :: Parser Instr
 parseInvokeWrite = parseKeyword "invoke_write" *> parseArgSep *> (IInvokeWrite <$> parseInt)
 
+parseInvokeOpen :: Parser Instr
+parseInvokeOpen = parseKeyword "invoke_open" *> pure IInvokeOpen
+
 parseReturn :: Parser Instr
 parseReturn = (parseKeyword "ireturn" *> pure IReturnInt)
           <|> (parseKeyword "dreturn" *> pure IReturnDouble)
           <|> (parseKeyword "freturn" *> pure IReturnFloat)
           <|> (parseKeyword "lreturn" *> pure IReturnLong)
+          <|> (parseKeyword "creturn" *> pure IReturnChar)
           <|> (parseKeyword "areturn" *> pure IReturnA)
           <|> (parseKeyword "return" *> pure IReturn)
 
@@ -351,7 +357,13 @@ parseValue = parseSpaces *> parseValue' <* parseSpaces
     parseValue' = (VBool <$> parseBool)
               <|> (VChar <$> parseSingleChar)
               <|> (VString <$> parseQuotedString)
+              <|> (VFloat <$> parseFloatWithSuffix)
               <|> (VDouble <$> parseDouble)
-              <|> (VFloat <$> parseFloat)
-              <|> (VLong <$> parseLong)
+              <|> (VLong <$> parseLongWithSuffix)
               <|> (VInt <$> parseInt)
+
+parseFloatWithSuffix :: Parser Float
+parseFloatWithSuffix = parseFloat <* (parseChar 'f' <|> parseChar 'F')
+
+parseLongWithSuffix :: Parser Int64
+parseLongWithSuffix = parseLong <* (parseChar 'L' <|> parseChar 'l')
