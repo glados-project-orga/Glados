@@ -12,5 +12,5 @@ fun main() : void {
     op * op;
     op = op;
 
-    print(op);
+    write(op, 1);
 }
