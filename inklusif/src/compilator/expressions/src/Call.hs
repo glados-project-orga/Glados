@@ -5,7 +5,7 @@
 -- Call.hs
 -}
 
-module Call (compileCallExpr) where
+module Call (compileCallExpr, compileMethExpr) where
 
 import CompilerTypes (CompilerData, Search(..), CompileExpr)
 import FunctionUtils (searchFunctions)
@@ -24,6 +24,16 @@ pushArgs _ [] [] prog = Right prog
 pushArgs re (e:es) (p:ps) prog = pushArgs re es ps prog >>= pushArg re e p
 
 
+
+compileMethExpr:: CompileExpr -> [String] -> CallExpr -> CompilerData -> Either String CompilerData
+compileMethExpr re this (CallExpr name exprs) prog@(_, defs, _, _) = eitherParams >>=
+    \params -> pushArgs re exprs params prog >>= \incomplete_prog -> (Right (appendBody incomplete_prog this)) >>=
+    \n_prog -> Right (appendBody n_prog ["invokestatic " ++ name])
+    where eitherParams = case searchFunctions name defs of
+            Just (FunctionDecl _ _ foundParams _ _) -> case foundParams of
+                _:thisSkip -> Right thisSkip
+                _ -> Left ("Method " ++ name ++ " missing 'this' parameter.")
+            Nothing -> Left ("Function " ++ name ++ " not found.")
 
 compileCallExpr:: CompileExpr -> CallExpr -> CompilerData -> Either String CompilerData
 compileCallExpr compileExpr (CallExpr "write" args) prog

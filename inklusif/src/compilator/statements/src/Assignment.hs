@@ -3,7 +3,7 @@ import CompilerTypes (CompilerData, Search(..), SearchTypes(..))
 import CompilerTools (appendBody, validAssignmentType, typePrefixVal, convertToType, getTypePrefix, getArraySubType)
 import SymbolTableUtils (getVarIndex, getVarType)
 import Expr (compileExpr)
-import Ast (Assignment(..), Expr(..), ArrayIndexExpr(..), Type(..))
+import Ast (Assignment(..), Expr(..), ArrayIndexExpr(..), Type(..), ClassAccess(..))
 
 
 validExprForTask :: SearchTypes -> SearchTypes -> CompilerData -> Either String CompilerData
@@ -31,22 +31,31 @@ basicAssignment (Assignment target@(VarExpr name) value) prog
     | otherwise = Left ("Invalid assignment types for " ++ name ++ ": " ++ (show (convertToType value prog)) ++ ".")
 basicAssignment target _ = Left ("Unknown assignment target. " ++ show target)
 
+
+multipleFieldAccess :: ClassAccess -> CompilerData -> Either String (String, CompilerData)
+multipleFieldAccess (ClassVarAccess varName) prog = Right (varName, prog)
+multipleFieldAccess (ClassClassAccess nclName cacc) prog = Right (appendBody prog ["getfield " ++ nclName]) >>=
+    \n_prog -> multipleFieldAccess cacc n_prog
+multipleFieldAccess _ _ = Left "Unknown assignment target."
+
 classAssignment :: Expr -> Expr -> CompilerData -> Either String CompilerData
-classAssignment target@(ClassVarExpr objName (VarExpr name)) value prog |
+classAssignment target@(ClassVarExpr objName access) value prog |
     validAssignmentType (srch target) (srch value) prog =
         getVarIndex objName prog >>=
-        \objIndex -> (Right (appendBody prog ["aload " ++ show objIndex])) >>= 
-        \objProg -> compileExpr value objProg >>=
+        \objIndex -> (Right (appendBody prog ["aload " ++ show objIndex])) >>=
+        \objProg -> multipleFieldAccess access objProg >>=
+        \(name, fieldProg) -> compileExpr value fieldProg >>=
         \valueProg -> Right $ appendBody valueProg ["putfield " ++ name]
-    | otherwise = Left ("Invalid assignment types for field " ++ name ++ ": " ++
-        (show (convertToType value prog)) ++ " " ++ name ++ " being "
+    | otherwise = errName >>= \ern -> Left ("Invalid assignment types for field " ++ (fst ern) ++ ": " ++
+        (show (convertToType value prog)) ++ " " ++ (fst ern) ++ " being "
         ++ show (convertToType target prog) ++ ".")
+        where errName = (multipleFieldAccess access prog)
 classAssignment _ _ _ = Left "Unknown assignment target."
 
 compileAssignment :: Assignment -> CompilerData -> Either String CompilerData
 compileAssignment (Assignment target@(VarExpr _) value) prog = basicAssignment (Assignment target value) prog
 compileAssignment (Assignment (ArrayVarExpr arrName indexExpr) value) prog =
     compileArrayIndex (ArrayIndexExpr arrName indexExpr value) prog
-compileAssignment (Assignment target@(ClassVarExpr _ (VarExpr _)) value) prog =
+compileAssignment (Assignment target@(ClassVarExpr _ _) value) prog =
     classAssignment target value prog
 compileAssignment _ _ = Left "Unknown assignment target." 

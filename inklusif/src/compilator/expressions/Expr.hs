@@ -32,7 +32,7 @@ compileExpr :: Expr -> CompilerData -> Either String CompilerData
 compileExpr (LitExpr lit) prog = compileLiteralExpr lit prog
 compileExpr (ArrayLiteral exprs) prog = prepareArrayLiteral compileExpr exprs prog
 compileExpr (CallExpression call) prog = compileCallExpr compileExpr call prog
-compileExpr (ClassVarExpr cname expr) prog = compileClassVarExpr compileExpr (cname, expr) prog
+compileExpr (ClassVarExpr cname cacc) prog = compileClassVarExpr compileExpr (cname, cacc) prog
 compileExpr (ClassConstructorExpr cname exprs) prog = compileClassConstructorExpr (cname, exprs) prog
 compileExpr (VarExpr expr) prog = compileVarExpr expr prog
 compileExpr (ArrayVarExpr nam idxe) prog = compileArrayVarExpr compileExpr (nam, idxe) prog

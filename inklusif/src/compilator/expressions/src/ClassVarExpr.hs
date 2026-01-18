@@ -1,17 +1,25 @@
 module ClassVarExpr (compileClassVarExpr) where
-import Call (compileCallExpr)
-import Ast (Expr(..), CallExpr(..))
+import Call (compileMethExpr)
+import Ast (Expr(..), CallExpr(..), ClassAccess(..), Type(..))
 import CompilerTypes (CompilerData, CompileExpr)
 import SymbolTableUtils (getVarIndex)
-import CompilerTools (appendBody)
+import CompilerTools (appendBody, typePrefixVal, convertToType)
 
-compileFieldAccess :: (String, String) -> CompilerData -> Either String CompilerData
-compileFieldAccess (varName, fldName) prog =
-    getVarIndex varName prog >>= \compVal ->
-    Right (appendBody prog (["aload " ++ show compVal] ++ ["getfield " ++ fldName]))
+compileClassArrayVarExpr :: CompileExpr -> [String] -> Type -> Expr -> CompilerData -> Either String CompilerData
+compileClassArrayVarExpr re this t indexExprs prog = re indexExprs prog
+    >>= \idxProg  -> Right (appendBody idxProg (this ++[typePrefixVal t ++ "aload" ]))
 
-compileClassVarExpr :: CompileExpr -> (String, Expr) -> CompilerData -> Either String CompilerData
-compileClassVarExpr _ (objName, (VarExpr fldName)) prog = compileFieldAccess (objName, fldName) prog
-compileClassVarExpr re (objName, (CallExpression (CallExpr cname args))) prog =
-    compileCallExpr re (CallExpr cname ((VarExpr objName):args)) prog
-compileClassVarExpr _ _ _ = Left "Unknown class variable expression."
+compileBasicClassAccess :: CompileExpr -> [String] -> (String, ClassAccess) -> Type -> CompilerData -> Either String CompilerData
+compileBasicClassAccess re this (_, (ClassMethodCall (CallExpr cname args))) _ prog =
+    compileMethExpr re this (CallExpr cname args) prog
+compileBasicClassAccess re this (_, (ClassArrayAccess arrName idxExpr)) st prog =
+        compileClassArrayVarExpr re (this ++ ["getfield " ++ arrName]) st idxExpr prog
+compileBasicClassAccess _ this (_, (ClassVarAccess fldName)) _ prog =
+    Right (appendBody prog (this ++["getfield " ++ fldName]))
+compileBasicClassAccess re this (_, (ClassClassAccess nclName cacc)) st prog =
+    compileBasicClassAccess re (this ++["getfield " ++ nclName]) (nclName, cacc) st prog
+
+compileClassVarExpr :: CompileExpr -> (String, ClassAccess) -> CompilerData -> Either String CompilerData
+compileClassVarExpr re clVar@(cname, cacc) prog = getVarIndex cname prog >>=
+        \idx -> convertToType (ClassVarExpr cname cacc) prog >>= \subType ->
+            compileBasicClassAccess re ["aload " ++ show idx] clVar subType prog
