@@ -83,15 +83,8 @@ parse_expected_file() {
         return 1
     fi
     
-    while IFS= read -r line || [ -n "$line" ]; do
-        [[ -z "$line" || "$line" =~ ^# ]] && continue
-        
-        if [[ "$line" =~ ^exit_code:[[:space:]]*(.*) ]]; then
-            EXPECTED_EXIT_CODE="${BASH_REMATCH[1]}"
-        elif [[ "$line" =~ ^output:[[:space:]]*(.*) ]]; then
-            EXPECTED_OUTPUT="${BASH_REMATCH[1]}"
-        fi
-    done < "$expected_file"
+    EXPECTED_EXIT_CODE=$(grep "^exit_code:" "$expected_file" | sed 's/^exit_code:[[:space:]]*//')
+    EXPECTED_OUTPUT=$(grep "^output:" "$expected_file" | sed 's/^output:[[:space:]]*//')
     
     return 0
 }
