@@ -5,12 +5,11 @@
 -- expr
 -}
 
-module Literal (compileLiteralExpr) where
+module CompileLiteral (compileLiteralExpr) where
 
 import Ast (Literal(..))
 import CompilerTypes (CompilerData)
 import CompilerTools (appendBody)
-import CompilerTools (storeInConstantPool)
 
 compileLiteralExpr :: Literal -> CompilerData -> Either String CompilerData
 compileLiteralExpr (IntLit n) prog = Right $ appendBody prog ["iconst " ++ show n]
@@ -20,9 +19,9 @@ compileLiteralExpr (DoubleLit x) prog = Right $ appendBody prog ["dconst " ++ sh
 compileLiteralExpr (BoolLit True) prog = Right $ appendBody prog ["iconst 1"]
 compileLiteralExpr (BoolLit False) prog = Right $ appendBody prog ["iconst 0"]
 compileLiteralExpr (CharLit c) prog = Right $ appendBody prog ["cconst " ++ "'" ++ [c] ++ "'"]
-compileLiteralExpr (StringLit s) prog = Right $ compileStringLiteral s prog
+compileLiteralExpr (StringLit s) prog = Right $ appendBody prog ["sconst \"" ++ s ++"\""]
 
-compileStringLiteral :: String -> CompilerData -> CompilerData
-compileStringLiteral s prog = appendBody new_prog ["ldc " ++ show handle]
-  where
-    (new_prog, handle) = storeInConstantPool prog s
+-- compileStringLiteral :: String -> CompilerData -> CompilerData
+-- compileStringLiteral s prog = appendBody new_prog ["ldc " ++ show handle]
+--   where
+--     (new_prog, handle) = storeInConstantPool prog s

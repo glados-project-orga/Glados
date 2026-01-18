@@ -1,6 +1,6 @@
 fun main {
     iconst 0
-    ifeq 3
+    ifeq 4
     iconst 1
     ireturn
     iconst 0

@@ -46,17 +46,26 @@ correspondLabels table (l:ls) =
 correspondLine :: LabelTable -> String -> String
 correspondLine table line =
   case words line of
-    ["ifeq", lab] ->
-      case M.lookup lab table of
-        Just n  -> "ifeq " ++ show n
-        Nothing -> error ("Label inconnu: " ++ lab)
 
-    ["goto", lab] ->
-      case M.lookup lab table of
-        Just n  -> "goto " ++ show n
-        Nothing -> error ("Label inconnu: " ++ lab)
-  
+    [op, lab] 
+      | op `elem` 
+          [ "goto" , "ifeq",  "ifne", "iflt",
+            "ifle", "ifgt", "ifge" , "if_icmpeq",
+            "if_icmpne", "if_icmplt" , "if_icmple",
+            "if_icmpgt", "if_icmpge"
+          ] ->
+              case M.lookup lab table of 
+                Just n -> op ++ " " ++ show n
+                Nothing -> error ("Label inconnu: " ++ lab)
     _ -> line
+
+
+resolveLabels :: CompilerData -> CompilerData
+resolveLabels (cp, defs, bytecode, symtab) =
+    let table   = findLabels bytecode
+        bc1     = correspondLabels table bytecode
+        bcFinal = removeLabels bc1
+    in (cp, defs, bcFinal, symtab)
 
 
 generateLabel :: CompilerData -> (String, CompilerData)
@@ -75,11 +84,3 @@ removeLabel line =
 
 removeLabels :: [String] -> [String]
 removeLabels = filter removeLabel
-
-
-resolveLabels :: CompilerData -> CompilerData
-resolveLabels (cp, defs, bytecode, symtab) =
-    let table   = findLabels bytecode
-        bc1     = correspondLabels table bytecode
-        bcFinal = removeLabels bc1
-    in (cp, defs, bcFinal, symtab)

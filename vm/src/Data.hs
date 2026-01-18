@@ -88,7 +88,7 @@ data StackCharg =  ILoadInt Int
                 | ILoadFloat Int | IStoreFloat Int | IConstFloat Float
                 | ILoadLong Int | IStoreLong Int | IConstLong Int64
                 | ILoadDouble Int | IStoreDouble Int | IConstDouble Double
-                | ILoadChar Int | IStoreChar Int | IConstChar Char
+                | ILoadChar Int | IStoreChar Int | IConstChar Char | IConstString String
                 | ALoad Int  | AStore  Int
            deriving (Show, Eq)
 
@@ -109,9 +109,9 @@ data Instr = ILdc Int
            | IIfICmpGt Int | IIfICmpLe Int | ILcmp | IFcmpl
            | IFcmpg | IDcmpl | IDcmpg
 
-           | IGoto Int | IGoto_w Int
+           | IGoto Int
            | IInvokeStatic String
-           | IReturn | IReturnInt | IReturnDouble | IReturnFloat | IReturnLong | IReturnChar
+           | IReturn | IReturnInt | IReturnDouble | IReturnFloat | IReturnLong | IReturnChar | IReturnA
            | INew String | IGetField String | IPutField String
 
            | INewArray | IALoad | IAStore | IArrayLength

@@ -11,6 +11,7 @@ import System.Environment (getArgs)
 import Help (argErrorLog, parsingErrorLog)
 import Args (checkArgs)
 import InkParser (parseInkFile)
+import CompilerMain (compileAst)
 
 main :: IO ()
 main = getArgs >>= \args ->
@@ -18,5 +19,7 @@ main = getArgs >>= \args ->
         (putStrLn $ "File content loaded successfully:\n" ++ content) >>
             parseInkFile content >>=
                 either parsingErrorLog (\decl ->
-                    putStrLn $ "Parsed Declaration:\n" ++ show decl
+                    case compileAst decl of
+                        Left err -> putStrLn $ "Compilation error: " ++ err
+                        Right ioAction -> ioAction
                 ))

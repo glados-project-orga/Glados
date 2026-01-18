@@ -48,6 +48,10 @@ stackInstrConstChar :: Char -> VMState -> Either String VMState
 stackInstrConstChar c st@VMState{stack, ip} =
     Right st {ip = ip + 1, stack = VChar c : stack}
 
+stackInstrConstString :: String -> VMState -> Either String VMState
+stackInstrConstString s st@VMState{stack, ip} =
+    Right st {ip = ip + 1, stack = VString s : stack}
+
 stackInstrLdc :: Int -> VMState -> Either String VMState
 stackInstrLdc n st@VMState{stack, ip, constPool} =
     case constPool V.!? n of
@@ -83,6 +87,7 @@ stackInstrALoad :: Int -> VMState -> Either String VMState
 stackInstrALoad n st@VMState{stack, ip, locals} =
     case locals V.!? n of
         Just (VInt v) -> Right st { ip = ip + 1 , stack = (VInt v : stack)}
+        Just (VHandle h) -> Right st { ip = ip + 1 , stack = (VHandle h : stack)}
         Just _ -> Left ("aload: expected reference at local index " ++ show n)
         Nothing -> Left ("Invalid local index: " ++ show n)
 
@@ -92,6 +97,8 @@ stackInstrAStore n st@VMState{stack, ip, locals} =
     case stack of
         (VInt v : rest) ->
             Right st { ip = ip + 1, stack = rest, locals = (locals V.// [(n, VInt v)])}
+        (VHandle h : rest) ->
+            Right st { ip = ip + 1, stack = rest, locals = (locals V.// [(n, VHandle h)])}
         (_ : _) ->
             Left ("astore: expected reference on stack for local index " ++ show n)
         [] -> Left "astore: empty stack"
@@ -245,6 +252,7 @@ stack_chargement ins st =
         IStoreChar n    -> stackInstrStoreChar n st
         IConstChar c    -> stackInstrConstChar c st
 
+        IConstString s  -> stackInstrConstString s st
 
 stackInstrIinc :: Int -> Int -> VMState -> Either String VMState
 stackInstrIinc idx inc st@VMState{ip, locals} =

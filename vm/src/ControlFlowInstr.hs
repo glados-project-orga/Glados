@@ -11,11 +11,11 @@ module ControlFlowInstr (
     controlFlowReturn,
     controlFlowReturnInt,
     controlFlowGoto,
-    controlFlowGoto_w,
     controlFlowReturnDouble,
     controlFlowReturnFloat,
     controlFlowReturnLong,
     controlFlowReturnChar,
+    controlFlowReturnA,
     controlFlowInvokeStatic
 ) where
 
@@ -37,6 +37,29 @@ controlFlowReturn st@VMState{functions, currentFunc, frames} =
                 currentFunc = fFunction,
                 frames = restFrames
             }
+
+
+controlFlowReturnA :: VMState -> Either String VMState
+controlFlowReturnA st@VMState{stack, functions, currentFunc, frames} =
+    case stack of
+        [] -> Left "Stack underflow in AReturn"
+        ((VHandle v) : restStack) ->
+            case frames of
+                [] ->
+                    case Map.lookup currentFunc functions of
+                        Nothing -> Left ("Function not found: " ++ currentFunc)
+                        Just func -> Right st { 
+                            ip = V.length (funcCode func),
+                            stack = [VHandle v]
+                        }
+                (Frame{fIP, fFunction}:restFrames) ->
+                    Right st {
+                        ip = fIP,
+                        currentFunc = fFunction,
+                        frames = restFrames,
+                        stack = VHandle v: restStack
+                    }
+        _ -> Left "AReturn: expected a reference (VHandle) on the stack"
 
 
 controlFlowReturnInt :: VMState -> Either String VMState
@@ -158,12 +181,6 @@ controlFlowReturnChar st@VMState{stack, functions, currentFunc, frames} =
 controlFlowGoto :: Int -> VMState -> Either String VMState
 controlFlowGoto offset st =
     Right st {ip = offset}
-
-
-controlFlowGoto_w :: Int -> VMState -> Either String VMState
-controlFlowGoto_w offset st =
-    Right st {ip = offset}
-
 
 controlFlowInvokeStatic :: String -> VMState -> Either String VMState
 controlFlowInvokeStatic funcName st@VMState{functions, frames, currentFunc, ip} =

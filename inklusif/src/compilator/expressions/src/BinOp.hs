@@ -7,10 +7,11 @@
 
 module BinOp (compileBinOpExpr) where
 
-import Ast (Expr(..), BinOp(..))
-import CompilerTypes (CompilerData, CompileExpr, CompilerVal(..))
-import CompilerTools (appendBody, convertToCompilerVal, typePrefixVal)
-import SymbolTableUtils (getVarIndex, getVarVal)
+import Labels (generateLabel)
+import Ast (Expr(..), BinOp(..), Type(..))
+import CompilerTypes (CompilerData, CompileExpr)
+import CompilerTools (appendBody, convertToType, typePrefixVal)
+import SymbolTableUtils (getVarIndex, getVarType)
 
 compileBinOpExpr :: CompileExpr -> Expr -> CompilerData -> Either String CompilerData
 compileBinOpExpr compile (BinOpExpr op left right) prog =
@@ -22,14 +23,14 @@ compileBinOpExpr compile (BinOpExpr op left right) prog =
         ModEqual -> compileCompoundAssign compile Mod left right prog
         _ -> compile left prog >>= \progLeft ->
              compile right progLeft >>= \progRight ->
-             convertToCompilerVal left prog >>= \exprType ->
+             convertToType left prog >>= \exprType ->
              emitBinOp op exprType progRight
 compileBinOpExpr _ _ _ = Left "compileBinOpExpr called with non-BinOp expression"
 
 compileCompoundAssign :: CompileExpr -> BinOp -> Expr -> Expr -> CompilerData -> Either String CompilerData
 compileCompoundAssign compile op (VarExpr varName) right prog =
     getVarIndex varName prog >>= \idx ->
-    getVarVal varName prog >>= \varType ->
+    getVarType varName prog >>= \varType ->
     let loadInstr = typePrefixVal varType ++ "load " ++ show idx
         storeInstr = typePrefixVal varType ++ "store " ++ show idx
     in Right (appendBody prog [loadInstr]) >>= \progLoad ->
@@ -39,7 +40,7 @@ compileCompoundAssign compile op (VarExpr varName) right prog =
 compileCompoundAssign _ _ _ _ _ =
     Left "Compound assignment requires a variable on the left side"
 
-emitBinOp :: BinOp -> CompilerVal -> CompilerData -> Either String CompilerData
+emitBinOp :: BinOp -> Type -> CompilerData -> Either String CompilerData
 
 emitBinOp Add t prog = Right $ appendBody prog [typePrefixVal t ++ "add"]
 emitBinOp Sub t prog = Right $ appendBody prog [typePrefixVal t ++ "sub"]
@@ -59,29 +60,39 @@ emitBinOp Or _ prog = Right $ appendBody prog ["ior"]
 
 emitBinOp op _ _ = Left $ "BinOp not implemented: " ++ show op
 
-emitComparison :: CompilerVal -> String -> CompilerData -> CompilerData
-emitComparison (IntCmpl _) cond prog = emitIntComparison cond prog
+emitComparison :: Type -> String -> CompilerData -> CompilerData
+emitComparison (IntType) cond prog = emitIntComparison (IntType) cond prog
 emitComparison t cond prog = emitCmpThenBranch t cond prog
 
-emitIntComparison :: String -> CompilerData -> CompilerData
-emitIntComparison cond prog = appendBody prog
-    [ "if_icmp" ++ cond ++ " 3"
-    , "iconst 0"
-    , "goto 2"
-    , "iconst 1"
-    ]
+emitIntComparison :: Type -> String -> CompilerData -> CompilerData
+emitIntComparison _ cond prog =
+    let (lTrue,  prog1) = generateLabel prog
+        (lEnd,   prog2) = generateLabel prog1
+        prog3 = appendBody prog2 ["if_icmp" ++ cond ++ " " ++ lTrue]
+        prog4 = appendBody prog3 ["iconst 0"]
+        prog5 = appendBody prog4 ["goto " ++ lEnd]
+        prog6 = appendBody prog5 [lTrue ++ ":"]
+        prog7 = appendBody prog6 ["iconst 1"]
+        prog8 = appendBody prog7 [lEnd ++ ":"]
+    in prog8
 
-emitCmpThenBranch :: CompilerVal -> String -> CompilerData -> CompilerData
-emitCmpThenBranch t cond prog = appendBody prog
-    [ cmpInstr t
-    , "if" ++ cond ++ " 3"
-    , "iconst 0"
-    , "goto 2"
-    , "iconst 1"
-    ]
 
-cmpInstr :: CompilerVal -> String
-cmpInstr (LongCmpl _) = "lcmp"
-cmpInstr (FloatCmpl _) = "fcmpl"
-cmpInstr (DoubleCmpl _) = "dcmpl"
+emitCmpThenBranch :: Type -> String -> CompilerData -> CompilerData
+emitCmpThenBranch t cond prog =
+    let (lTrue,  prog1) = generateLabel prog
+        (lEnd,   prog2) = generateLabel prog1
+        prog3 = appendBody prog2 [cmpInstr t]
+        prog4 = appendBody prog3 ["if" ++ cond ++ " " ++ lTrue]
+        prog5 = appendBody prog4 ["iconst 0"]
+        prog6 = appendBody prog5 ["goto " ++ lEnd]
+        prog7 = appendBody prog6 [lTrue ++ ":"]
+        prog8 = appendBody prog7 ["iconst 1"]
+        prog9 = appendBody prog8 [lEnd ++ ":"]
+    in prog9
+
+
+cmpInstr :: Type -> String
+cmpInstr (LongType) = "lcmp"
+cmpInstr (FloatType) = "fcmpl"
+cmpInstr (DoubleType) = "dcmpl"
 cmpInstr _ = "lcmp"

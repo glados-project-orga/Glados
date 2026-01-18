@@ -62,6 +62,7 @@ parseConsts = parseConstInt
           <|> parseConstFloat
           <|> parseConstDouble
           <|> parseConstChar
+          <|> parseConstString
 
 parseConstInt :: Parser Instr
 parseConstInt = parseKeyword "iconst" *> parseArgSep *> ((IStck_1 . IConstInt) <$> parseInt)
@@ -77,6 +78,9 @@ parseConstDouble = parseKeyword "dconst" *> parseArgSep *> ((IStck_1 . IConstDou
 
 parseConstChar :: Parser Instr
 parseConstChar = parseKeyword "cconst" *> parseArgSep *> ((IStck_1 . IConstChar) <$> parseSingleChar)
+
+parseConstString :: Parser Instr
+parseConstString = parseKeyword "sconst" *> parseArgSep *> ((IStck_1 . IConstString) <$> parseQuotedString)
 
 parseLdc :: Parser Instr
 parseLdc = parseKeyword "ldc" *> parseSpaces *> (ILdc <$> parseInt)
@@ -212,14 +216,10 @@ parseControlFlow = parseIfICmpGt
                <|> parseIfGe
                <|> parseIfLt
                <|> parseIfLe
-               <|> parseGotoW
                <|> parseGoto
 
 parseGoto :: Parser Instr
 parseGoto = parseKeyword "goto" *> parseSpaces *> (IGoto <$> parseInt)
-
-parseGotoW :: Parser Instr
-parseGotoW = parseKeyword "goto_w" *> parseSpaces *> (IGoto_w <$> parseInt)
 
 parseIfEq :: Parser Instr
 parseIfEq = parseKeyword "ifeq" *> parseSpaces *> (IIfEq <$> parseInt)
@@ -275,6 +275,7 @@ parseReturn = (parseKeyword "ireturn" *> pure IReturnInt)
           <|> (parseKeyword "freturn" *> pure IReturnFloat)
           <|> (parseKeyword "lreturn" *> pure IReturnLong)
           <|> (parseKeyword "creturn" *> pure IReturnChar)
+          <|> (parseKeyword "areturn" *> pure IReturnA)
           <|> (parseKeyword "return" *> pure IReturn)
 
 parseObject :: Parser Instr

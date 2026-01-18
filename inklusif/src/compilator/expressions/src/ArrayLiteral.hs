@@ -1,21 +1,27 @@
 module ArrayLiteral (compileArrayLiteral, getLitArrayType) where
-import CompilerTypes (CompilerData)
-import CompilerTools (appendBody, getLitArrayType, isArrayMixed, getNuancedArray)
-import Expr (compileExpr)
-import Ast (Expr(..))
-import Data.Maybe (fromMaybe, listToMaybe)
+import CompilerTypes (CompilerData, CompileExpr)
+import CompilerTools (appendBody,
+    getLitArrayType,
+    typePrefixVal,
+    getNuancedArray,
+    isArrayGivenType
+    )
+import Ast (Expr(..), Type(..))
 
-compileOneCell :: [Expr] -> Int -> CompilerData -> Either String CompilerData
-compileOneCell [] _ prog = Right prog
-compileOneCell (ex:exs) index prog = compileExpr ex addedIndexProg
-    >>= (\new_prog -> compileOneCell exs (index + 1) new_prog)
-        where addedIndexProg = appendBody prog [("iconst " ++ show index)]
+compileOneCell :: CompileExpr -> [Expr] -> Int -> String -> CompilerData -> Either String CompilerData
+compileOneCell _ [] _ _ prog = Right prog
+compileOneCell re (ex:exs) index prefix prog = (re ex addedIndexProg)
+    >>= (\cellProg -> Right (appendBody cellProg [prefix ++ "astore"]))
+    >>= (\new_prog -> compileOneCell re exs (index + 1) prefix new_prog)
+        where addedIndexProg = appendBody prog ["dup", ("iconst " ++ show index)]
 
-compileArrayLiteral :: [Expr] -> CompilerData -> Either String CompilerData
-compileArrayLiteral [] prog = Right prog
-compileArrayLiteral exprs prog
-    | not (null arrayError) = Left firstError
-    | isArrayMixed validTypes = Left "Array contains mixed expression types."
-    | otherwise = compileOneCell exprs 0 prog
-        where firstError = fromMaybe "Unknown error" (listToMaybe arrayError)
+
+compileArrayLiteral :: CompileExpr -> [Expr] -> Type -> CompilerData -> Either String CompilerData
+compileArrayLiteral _ [] _ prog = Right prog
+compileArrayLiteral re exprs t prog 
+    | not (null arrayError) = Left (unlines arrayError)
+    | not (isArrayGivenType t validTypes) = Left "Array literal contains invalid types."
+    | otherwise = compileOneCell re exprs 0 prefix prog
+        where prefix = typePrefixVal t
               (arrayError, validTypes) = getNuancedArray exprs prog
+
