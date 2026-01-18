@@ -20,8 +20,8 @@ parseLiteralExpr =
     LitExpr <$> parseLiteral
 
 parseLiteral :: Parser Literal
-parseLiteral = (DoubleLit <$> parseDouble)
-    <|> (FloatLit  <$> parseFloat)
+parseLiteral = (FloatLit  <$> parseFloat)
+    <|> (DoubleLit <$> parseDouble)
     <|> parseNumberLiteral
     <|> parseCharLiteral
     <|> (BoolLit True  <$ keyword "true")
