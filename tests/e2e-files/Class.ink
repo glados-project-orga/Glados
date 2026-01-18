@@ -15,5 +15,6 @@ fun main() : void {
     p.y = 20;
     p.move(5, -10);
 
-    print("Point coordinates: (",  p.x, ", ",  p.y, ")");
+    write(p.x, 1);
+    write(p.y, 1);
 }

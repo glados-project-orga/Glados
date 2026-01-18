@@ -14,8 +14,9 @@ writeHeader cp =
 
 writeConstants :: ConstantPool -> String
 writeConstants [] = ""
+writeConstants [x] = x ++ "\n"
 writeConstants (x:xs) =
-  x ++ ";\n" ++ writeConstants xs
+  x ++ ";" ++ writeConstants xs
 
 writeBody :: Bytecode -> String
 writeBody [] = ""

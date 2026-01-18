@@ -174,9 +174,10 @@ parseDouble = (negate <$> (parseChar '-' *> parseUDouble)) <|> parseUDouble
 
 parseUFloat :: Parser Float
 parseUFloat = read <$>
-        ((\a b -> a ++ "." ++ b)
+        ((\a b _ -> a ++ "." ++ b)
             <$> some (parseAnyChar ['0'..'9'])
-            <*> (parseChar '.' *> many (parseAnyChar ['0'..'9'])))
+            <*> (parseChar '.' *> many (parseAnyChar ['0'..'9']))
+            <*> (parseChar 'f' <|> parseChar 'F'))
 
 parseFloat :: Parser Float
 parseFloat = (negate <$> (parseChar '-' *> parseUFloat)) <|> parseUFloat

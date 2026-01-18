@@ -1,3 +1,4 @@
 fun main() : void {
-    write("Hello world !", 1);
+    const str -> string = "Hello world !"; 
+    write(str, 1);
 }
