@@ -31,11 +31,12 @@ controlFlowReturn st@VMState{functions, currentFunc, frames} =
             case Map.lookup currentFunc functions of
                 Nothing -> Left ("Function not found: " ++ currentFunc)
                 Just func -> Right st {ip = V.length (funcCode func)}
-        (Frame{fIP, fFunction}:restFrames) ->
+        (Frame{fLocals, fIP, fFunction}:restFrames) ->
             Right st { 
                 ip = fIP,
                 currentFunc = fFunction,
-                frames = restFrames
+                frames = restFrames,
+                locals = V.fromList fLocals
             }
 
 
@@ -52,12 +53,13 @@ controlFlowReturnA st@VMState{stack, functions, currentFunc, frames} =
                             ip = V.length (funcCode func),
                             stack = [VHandle v]
                         }
-                (Frame{fIP, fFunction}:restFrames) ->
+                (Frame{fLocals, fIP, fFunction}:restFrames) ->
                     Right st {
                         ip = fIP,
                         currentFunc = fFunction,
                         frames = restFrames,
-                        stack = VHandle v: restStack
+                        stack = VHandle v: restStack,
+                        locals = V.fromList fLocals
                     }
         _ -> Left "AReturn: expected a reference (VHandle) on the stack"
 
@@ -75,12 +77,13 @@ controlFlowReturnInt st@VMState{stack, functions, currentFunc, frames} =
                             ip = V.length (funcCode func),
                             stack = [VInt returnValue]
                         }
-                (Frame{fIP, fFunction}:restFrames) ->
+                (Frame{fLocals, fIP, fFunction}:restFrames) ->
                     Right st {
                         ip = fIP,
                         currentFunc = fFunction,
                         frames = restFrames,
-                        stack = VInt returnValue : restStack
+                        stack = VInt returnValue : restStack,
+                        locals = V.fromList fLocals
                     }
         _ -> Left "IReturnInt expects an integer on top of the stack"
 
@@ -99,12 +102,13 @@ controlFlowReturnFloat st@VMState{stack, functions, currentFunc, frames} =
                             ip = V.length (funcCode func),
                             stack = [VFloat returnValue]
                         }
-                (Frame{fIP, fFunction}:restFrames) ->
+                (Frame{fLocals, fIP, fFunction}:restFrames) ->
                     Right st {
                         ip = fIP,
                         currentFunc = fFunction,
                         frames = restFrames,
-                        stack = VFloat returnValue : restStack
+                        stack = VFloat returnValue : restStack,
+                        locals = V.fromList fLocals
                     }
         _ -> Left "IReturnFloat expects an float on top of the stack"
 
@@ -122,12 +126,13 @@ controlFlowReturnDouble st@VMState{stack, functions, currentFunc, frames} =
                             ip = V.length (funcCode func),
                             stack = [VDouble returnValue]
                         }
-                (Frame{fIP, fFunction}:restFrames) ->
+                (Frame{fLocals, fIP, fFunction}:restFrames) ->
                     Right st {
                         ip = fIP,
                         currentFunc = fFunction,
                         frames = restFrames,
-                        stack = VDouble returnValue : restStack
+                        stack = VDouble returnValue : restStack,
+                        locals = V.fromList fLocals
                     }
         _ -> Left "IReturnIDouble expects an double on top of the stack"
 
@@ -145,12 +150,13 @@ controlFlowReturnLong st@VMState{stack, functions, currentFunc, frames} =
                             ip = V.length (funcCode func),
                             stack = [VLong returnValue]
                         }
-                (Frame{fIP, fFunction}:restFrames) ->
+                (Frame{fLocals, fIP, fFunction}:restFrames) ->
                     Right st {
                         ip = fIP,
                         currentFunc = fFunction,
                         frames = restFrames,
-                        stack = VLong returnValue : restStack
+                        stack = VLong returnValue : restStack,
+                        locals = V.fromList fLocals
                     }
         _ -> Left "IReturnLong expects an long on top of the stack"
 
@@ -168,12 +174,13 @@ controlFlowReturnChar st@VMState{stack, functions, currentFunc, frames} =
                             ip = V.length (funcCode func),
                             stack = [VChar returnValue]
                         }
-                (Frame{fIP, fFunction}:restFrames) ->
+                (Frame{fLocals, fIP, fFunction}:restFrames) ->
                     Right st {
                         ip = fIP,
                         currentFunc = fFunction,
                         frames = restFrames,
-                        stack = VChar returnValue : restStack
+                        stack = VChar returnValue : restStack,
+                        locals = V.fromList fLocals
                     }
         _ -> Left "IReturnChar expects a char on top of the stack"
 
@@ -183,13 +190,14 @@ controlFlowGoto offset st =
     Right st {ip = offset}
 
 controlFlowInvokeStatic :: String -> VMState -> Either String VMState
-controlFlowInvokeStatic funcName st@VMState{functions, frames, currentFunc, ip} =
+controlFlowInvokeStatic funcName st@VMState{functions, frames, currentFunc, ip, locals} =
     case Map.lookup funcName functions of
         Nothing -> Left ("Function not found: " ++ funcName)
         Just _ -> 
-            let newFrame = Frame {fLocals = [], fIP = ip + 1, fFunction = currentFunc}
+            let newFrame = Frame {fLocals = V.toList locals, fIP = ip + 1, fFunction = currentFunc}
             in Right st { 
                 ip = 0,
                 currentFunc = funcName,
-                frames = newFrame : frames
+                frames = newFrame : frames,
+                locals = V.empty
             }
