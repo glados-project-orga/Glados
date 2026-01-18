@@ -8,6 +8,7 @@
 module Main (main) where
 
 import System.Environment (getArgs)
+import System.Directory (doesFileExist)
 import System.Exit (exitWith, ExitCode(..))
 import System.IO (hPutStrLn, stderr)
 import Loader (loadBytecode)
@@ -19,11 +20,16 @@ import qualified Data.Vector as V
 main :: IO ()
 main = getArgs >>= \args ->
   case args of
-    [file] -> runFile file
+    [file] -> checkFile file
     _      -> usage >> exitWith (ExitFailure 84)
 
 usage :: IO ()
 usage = hPutStrLn stderr "Usage: glados-vm <bytecode-file>"
+
+checkFile :: FilePath -> IO ()
+checkFile path = doesFileExist path >>= \exists -> case exists of
+  True -> runFile path
+  False -> hPutStrLn stderr "File not found" >> exitWith (ExitFailure 84)
 
 runFile :: FilePath -> IO ()
 runFile path = readFile path >>= \content ->
@@ -38,7 +44,7 @@ runVM constPoolVec parsedFuncs =
     Just _ -> 
       let initialState = VMState
             { stack      = []
-            , locals     = V.replicate 10 (VInt 0)
+            , locals     = V.empty
             , ip         = 0
             , functions  = parsedFuncs
             , currentFunc = "main"

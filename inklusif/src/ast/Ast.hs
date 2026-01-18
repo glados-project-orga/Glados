@@ -21,6 +21,7 @@ module Ast
     Literal(..),
     BinOp(..),
     SourcePos(..),
+    ClassAccess(..),
     FunctionDecl(..),
     ClassDecl(..),
     LambdaVar(..),
@@ -55,15 +56,14 @@ data SourcePos = SourcePos
 
 -- Enum
 data EnumField = EnumField
-  { declName :: String -- la liste d'enum "GAME", "MENU", "OPTIONS", etc..
-  , declValue :: Maybe Int -- Si une value est déclaré sinon on met nothing et c'est démarré à 0
+  { declName :: String
+  , declValue :: Maybe Int
   } deriving (Show, Eq)
 
 -- Déclarations "statement" des éléments suivants :
 -- Fonction / Structure / Enum / TypeDef - Avec généralement les infos suivantes :
--- La SourcePos (en gros l'endroit ou c'est déclaré) je suis moyen sûr de ça honnêtement
+-- La SourcePos (en gros l'endroit ou c'est déclaré)
 -- le nom / les params / le body / etc ..
-
 
 data FunctionDecl = FunctionDecl
   { funcPos :: SourcePos
@@ -105,14 +105,12 @@ data Declaration
   | Class ClassDecl
   deriving (Show, Eq)
 
--- Params d'une fonction
 data Parameter = Parameter
   { paramName :: String
   , paramType :: Type
-  , paramIsRef :: Bool  -- Si on a une référence ou pas ?
+  , paramIsRef :: Bool
   } deriving (Show, Eq)
 
--- Elems d'une structure, ça me paraît court mais je vois pas plus ?
 data StructField = StructField
   { structFieldName :: String
   , structFieldType :: Type
@@ -130,10 +128,9 @@ data LambdaVar = LambdaVar
   , lambdaVarBody :: [Statement]
   } deriving (Show, Eq)
 
--- Les types je pense c'est pas dur à expliquer
 data Type
   = IntType
-  | FloatType -- j'espère on le fait pas
+  | FloatType
   | StringType
   | DoubleType
   | CharType
@@ -154,7 +151,7 @@ instance Show Type where
   show LongType = "long"
   show (LambdaType _) = "lambda"
   show DoubleType = "double"
-  show (ArrayType (ArrayVar t _)) = "array " ++ show t
+  show (ArrayType (ArrayVar t s)) = "array " ++ show t ++ " " ++ show s
   show (CustomType s) = s
   show VoidType = "void"
 
@@ -163,7 +160,6 @@ data LambdaDecl = LambdaDecl
   , lambdaContent :: LambdaVar
   } deriving (Show, Eq)
 
--- Déclarations
 data VarDecl = VarDecl
   { varName :: String
   , varType :: Type
@@ -222,7 +218,6 @@ data ThrowStmt = ThrowStmt
   { throwMessage :: Expr
   } deriving (Show, Eq)
 
-
 data ReturnStmt = ReturnStmt
   { returnExpr :: Expr
   } deriving (Show, Eq)
@@ -248,21 +243,18 @@ data Statement
   | Continue
   deriving (Show, Eq)
 
--- Pattern matchinggg
 data MatchCase
   = MatchCase
-      { matchPattern :: Pattern -- DESSOUS
+      { matchPattern :: Pattern
       , matchBody :: Expr
       }
   deriving (Show, Eq)
 
--- ici
 data Pattern
   = LiteralPattern Literal
   | DefaultPattern  -- le _
   deriving (Show, Eq)
 
--- Expressions
 data CallExpr = CallExpr
   { callName :: String
   , callArgs :: [Expr]
@@ -285,11 +277,18 @@ data FieldAccessExpr = FieldAccessExpr
   , fieldName :: String
   } deriving (Show, Eq)
 
+data ClassAccess
+  = ClassArrayAccess String Expr
+  | ClassMethodCall CallExpr
+  | ClassVarAccess String
+  | ClassClassAccess String ClassAccess
+  deriving (Show, Eq)
+
 data Expr
   = LitExpr Literal
   | VarExpr String
   | ArrayVarExpr String Expr
-  | ClassVarExpr String Expr
+  | ClassVarExpr String ClassAccess
   | BinOpExpr BinOp Expr Expr
   | UnaryOpExpr UnaryOp Expr
   | CallExpression CallExpr
@@ -299,6 +298,7 @@ data Expr
   | ArrayLiteral [Expr]
   | ArrayAssignement ArrayIndexExpr
   | CastExpr Type Expr
+  | FieldAccessExpression FieldAccessExpr
   | StructLiteral [(String, Expr)]
   | Lambda [Parameter] [Statement]
   deriving (Show, Eq)
@@ -322,7 +322,6 @@ data Literal
   | BoolLit Bool
   deriving (Show, Eq)
 
--- ops
 data BinOp
   = Add
   | Sub

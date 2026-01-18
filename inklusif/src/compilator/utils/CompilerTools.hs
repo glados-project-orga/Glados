@@ -11,7 +11,12 @@ module CompilerTools (
     validAssignmentType,
     getNuancedArray,
     convertToType,
-    addValToHeader
+    addValToHeader,
+    getArraySubType,
+    isArrayGivenType,
+    isClassDefined,
+    getEnumValue,
+    getFromEnum,
     )
 where
 
@@ -38,8 +43,14 @@ import Ast (Declaration(..),
     StructField(..),
     Type(..),
     Literal(..),
+    ArrayVar(..),
+    EnumField(..),
+    EnumDecl(..),
+    UnaryOp(..),
+    ClassAccess(..),
     )
 import Data.List (find)
+import Data.Foldable (asum)
 
 appendHeader :: CompilerData -> ConstantPool -> CompilerData
 appendHeader (header, def, body, symblTable) newHead =
@@ -91,33 +102,31 @@ typePrefixVal (LongType ) = "l"
 typePrefixVal (FloatType ) = "f"
 typePrefixVal (DoubleType ) = "d"
 typePrefixVal (CharType ) = "c"
-typePrefixVal (BoolType ) = "b"
+typePrefixVal (BoolType ) = "i"
 typePrefixVal (ArrayType _) = "a"
 typePrefixVal _ = "a"
 
-getNuancedArray :: [Expr] -> CompilerData -> ([String], [String])
+getNuancedArray :: [Expr] -> CompilerData -> ([String], [Type])
 getNuancedArray [] _ = ([], [])
 getNuancedArray exprs prog = (lefts arrayTypes, rights arrayTypes)
-    where arrayTypes = map (\expr -> arrayCellValidType expr prog) exprs
+    where arrayTypes = map (\expr -> convertToType expr prog) exprs
 
-isArrayMixed :: [String] -> Bool
+isArrayGivenType :: Type -> [Type] -> Bool
+isArrayGivenType VoidType [] = True
+isArrayGivenType t xs = all (== t) xs
+
+isArrayMixed :: [Type] -> Bool
 isArrayMixed [] = False
 isArrayMixed (headType:xs) = any (/= headType) xs
 
-getLitArrayType :: [Expr] -> CompilerData -> Either String String
-getLitArrayType [] _ = Right "array void"
+getLitArrayType :: [Expr] -> CompilerData -> Either String Type
+getLitArrayType [] _ = Right (ArrayType (ArrayVar VoidType (LitExpr (IntLit 0))))
 getLitArrayType exprs prog | not (null arrayError) = Left firstError
                            | isArrayMixed validTypes = Left "Array contains mixed expression types."
-                           | otherwise = Right ("array " ++ firstType)
+                           | otherwise = Right (ArrayType (ArrayVar (fval) (LitExpr (IntLit 0))))
     where firstError = fromMaybe "Unknown error" (listToMaybe arrayError)
-          firstType = fromMaybe "unknown" (listToMaybe validTypes)
+          fval = fromMaybe VoidType (listToMaybe validTypes)
           (arrayError, validTypes) = getNuancedArray exprs prog
-
-arrayCellValidType :: Expr -> CompilerData -> Either String String
-arrayCellValidType (ArrayLiteral arr) prog = getLitArrayType arr prog
-arrayCellValidType (VarExpr varName) prog = show <$> getVarType varName prog
-arrayCellValidType (ArrayVarExpr _ _) _ = Right "array"
-arrayCellValidType _ _ = Left "Invalid expression type for array cell"
 
 getClasses :: CompilerData -> [ClassDecl]
 getClasses (_, (_, _, classes, _, _, _), _, _) = classes
@@ -129,19 +138,75 @@ getClass clname prog =
     where classes = getClasses prog
 
 getClassVarType ::  String -> String -> CompilerData -> Either String Type
-getClassVarType clname varName prog =
-    getClass clname prog >>= \(ClassDecl _ _ fields _) ->
-    maybe (Left ("Variable " ++ varName ++ " does not exist in class " ++ clname ++ "."))
-          (Right . structFieldType) (find (\(StructField name _) -> name == varName) fields)
+getClassVarType cTypeName varName prog =
+    getClass cTypeName prog >>= \(ClassDecl _ _ fields _) ->
+            maybe (Left ("Variable " ++ varName ++ " does not exist in class " ++ cTypeName ++ "."))
+            (Right . structFieldType) (find (\(StructField name _) -> name == varName) fields)
+
+isClassDefined :: String -> Defines -> Bool
+isClassDefined searched (_, _, classDefs, _, _, _) =
+    any (\(ClassDecl _ name _ _) -> name == searched) classDefs
+
+normalizeBinOp :: (Expr, Expr) -> CompilerData -> Either String TypeNormalized
+normalizeBinOp (left, right) prog =
+    convertToType left prog >>= \normLeft ->
+    convertToType right prog >>= \normRight ->
+    Right (opPriorityTable (normLeft, normRight))
+
+opPriorityTable :: (Type, Type) -> TypeNormalized
+opPriorityTable op | any (== DoubleType) op = (TypeNorm DoubleType)
+                   | any (== FloatType) op = (TypeNorm FloatType)
+                   | any (== LongType) op = (TypeNorm LongType)
+                   | any (== IntType) op = (TypeNorm IntType)
+                   | any (== BoolType) op = (TypeNorm BoolType)
+                   | otherwise = (TypeNorm VoidType)
+
+getFromEnum :: [EnumField] -> String -> Maybe Int
+getFromEnum enumfields searched =
+    find (\enumfield -> declName enumfield == searched) enumfields >>= declValue
+
+getEnumValue :: [EnumDecl] -> String -> Maybe Int
+getEnumValue enums searched =
+    asum $ map (\enum -> getFromEnum (enumDecl enum) searched) enums
+
+getArraySubType :: Type -> Either String Type
+getArraySubType (ArrayType (ArrayVar t _)) = Right t
+getArraySubType _ = Left "Type is not an array type when searching array type."
+
+normalizeClassVarType :: String -> ClassAccess -> CompilerData -> Either String TypeNormalized
+normalizeClassVarType clDecName (ClassVarAccess varName) prog =
+    getClassVarType clDecName varName prog >>= \typ -> Right (TypeNorm typ)
+normalizeClassVarType clDecName (ClassArrayAccess varName _) prog =
+    getClassVarType clDecName varName prog >>= getArraySubType >>= \typ -> Right (TypeNorm typ)
+normalizeClassVarType clDecName (ClassMethodCall (CallExpr methName _)) prog =
+    case getFunctionReturnType methName prog of
+        Just retType -> Right (TypeNorm retType)
+        Nothing -> Left ("Unknown method return type for method " ++ methName ++ " in class " ++ clDecName)
+normalizeClassVarType clDecName (ClassClassAccess nclName cacc) prog = normalizeClassVarType nDname cacc prog
+    where nDname = case getClassVarType clDecName nclName prog of
+            Right (CustomType name) -> name
+            _ -> ""
 
 normalizeExprType :: Expr -> CompilerData -> Either String TypeNormalized
 normalizeExprType (LitExpr lit) _ = Right (LitNorm lit)
-normalizeExprType (VarExpr name) prog = getVarType name prog >>= (Right . TypeNorm)
-normalizeExprType (ArrayVarExpr name _) prog = getVarType name prog >>= (Right . TypeNorm)
-normalizeExprType (ClassVarExpr clName (VarExpr varName)) prog =
-    getClassVarType clName varName prog >>= \typ -> Right (TypeNorm typ)
+normalizeExprType (VarExpr name) prog@(_, (_, _, _, enums, _, _), _, _) =
+    case getEnumValue enums name of
+    Just _ -> Right (TypeNorm IntType)
+    _ -> getVarType name prog >>= (Right . TypeNorm)
+normalizeExprType (ArrayVarExpr name _) prog = getVarType name prog
+    >>= getArraySubType >>= (Right . TypeNorm)
+normalizeExprType (BinOpExpr _ l r) prog = normalizeBinOp (l, r) prog
+normalizeExprType (CastExpr t _) _ = Right (TypeNorm t)
+normalizeExprType (ClassVarExpr clName classAccess) prog =
+    dName >>= \dname -> normalizeClassVarType dname classAccess prog
+    where dName = case getVarType clName prog of
+            Right (CustomType name) -> Right name
+            _ -> Left ("Class type of " ++ clName ++ " does not exist.")
+normalizeExprType (ClassConstructorExpr clName _) (_, defs, _, _)
+    | isClassDefined clName defs = Right (TypeNorm (CustomType clName))
+    | otherwise = Left ("Class " ++ clName ++ " does not exist.")
 normalizeExprType (ArrayLiteral arr) prog =
-    getLitArrayType arr prog >>= \typ -> Right (TypeNorm (convert typ))
+    getLitArrayType arr prog >>= \typ -> Right (TypeNorm typ)
 normalizeExprType (CallExpression (CallExpr name _)) prog =
     case getFunctionReturnType name prog of
         Just retType -> Right (TypeNorm retType)
@@ -150,7 +215,12 @@ normalizeExprType (MethodCallExpression (MethodCallExpr _ name _)) prog =
     case getFunctionReturnType name prog of
         Just retType -> Right (TypeNorm retType)
         Nothing -> Left "Unknown function return type"
-normalizeExprType _ _ = Left "Unknown expression type"
+normalizeExprType (UnaryOpExpr op expr) prog = normalizeUnaryOp op expr prog
+normalizeExprType expr _ = Left ("Unknown expression type :" ++ (show expr))
+
+normalizeUnaryOp :: UnaryOp -> Expr -> CompilerData -> Either String TypeNormalized
+normalizeUnaryOp Not _ _ = Right (TypeNorm BoolType)
+normalizeUnaryOp _ expr prog = normalizeExprType expr prog
 
 normalizeToType :: TypeNormalized -> Type
 normalizeToType (TypeNorm typ) = typ
@@ -160,7 +230,7 @@ convertToType :: Expr -> CompilerData-> Either String Type
 convertToType expr prog = normalizeExprType expr prog >>= (Right . normalizeToType)
 
 validAssignmentType :: SearchTypes -> SearchTypes -> CompilerData -> Bool
-validAssignmentType (SearchType t1) (SearchType t2) _ = t1 == t2
+validAssignmentType (SearchType t1) (SearchType t2) _ = t1 `typeEq` t2
 validAssignmentType (SearchExpr expr) (SearchType t) prog = t `typeEq` (convertToType expr prog)
 validAssignmentType (SearchType t) (SearchExpr expr) prog = t `typeEq` (convertToType expr prog)
 validAssignmentType (SearchExpr expr1) (SearchExpr expr2) prog = normed1 `typeEq` normed2

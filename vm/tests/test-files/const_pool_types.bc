@@ -1,5 +1,5 @@
 header {
-    1; -7; 40.023; True; False; '\n'; "string TEST"
+    1; -7; 40.023; True; False; '\n'; "string TEST"; 999999999L
 }
 
 fun main {
@@ -28,6 +28,10 @@ fun main {
     cconst ' '
     invoke_write 1
     ldc 6
+    invoke_write 1
+    cconst ' '
+    invoke_write 1
+    ldc 7
     invoke_write 1
     iconst 0
     ireturn
