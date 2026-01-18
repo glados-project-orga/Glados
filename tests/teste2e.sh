@@ -9,7 +9,7 @@ E2E_TEST_DIR="$PROJECT_ROOT/tests/e2e-files"
 
 COMPILER_BIN="$COMPILER_DIR/inklusif"
 VM_BIN="$VM_DIR/glados-vm"
-BYTECODE_OUTPUT="$COMPILER_DIR/binary.ink"
+BYTECODE_OUTPUT="$PROJECT_ROOT/binary.ink"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -38,22 +38,26 @@ log_warn() {
 
 build_compiler() {
     log_info "Building Inklusif compiler..."
-    cd "$COMPILER_DIR"
+    pushd "$COMPILER_DIR" > /dev/null
     if ! make all; then
         echo -e "${RED}Compiler build failed${NC}"
+        popd > /dev/null
         return 1
     fi
+    popd > /dev/null
     log_info "Compiler build successful"
     return 0
 }
 
 build_vm() {
     log_info "Building GLaDOS VM..."
-    cd "$COMPILER_DIR"
+    pushd "$VM_DIR" > /dev/null
     if ! make all; then
         echo -e "${RED}VM build failed${NC}"
+        popd > /dev/null
         return 1
     fi
+    popd > /dev/null
     log_info "VM build successful"
     return 0
 }
