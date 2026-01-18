@@ -21,6 +21,7 @@ module Ast
     Literal(..),
     BinOp(..),
     SourcePos(..),
+    ClassAccess(..),
     FunctionDecl(..),
     ClassDecl(..),
     LambdaVar(..),
@@ -150,7 +151,7 @@ instance Show Type where
   show LongType = "long"
   show (LambdaType _) = "lambda"
   show DoubleType = "double"
-  show (ArrayType (ArrayVar t _)) = "array " ++ show t
+  show (ArrayType (ArrayVar t s)) = "array " ++ show t ++ " " ++ show s
   show (CustomType s) = s
   show VoidType = "void"
 
@@ -276,11 +277,18 @@ data FieldAccessExpr = FieldAccessExpr
   , fieldName :: String
   } deriving (Show, Eq)
 
+data ClassAccess
+  = ClassArrayAccess String Expr
+  | ClassMethodCall CallExpr
+  | ClassVarAccess String
+  | ClassClassAccess String ClassAccess
+  deriving (Show, Eq)
+
 data Expr
   = LitExpr Literal
   | VarExpr String
   | ArrayVarExpr String Expr
-  | ClassVarExpr String Expr
+  | ClassVarExpr String ClassAccess
   | BinOpExpr BinOp Expr Expr
   | UnaryOpExpr UnaryOp Expr
   | CallExpression CallExpr

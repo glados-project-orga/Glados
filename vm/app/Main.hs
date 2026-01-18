@@ -38,7 +38,7 @@ runVM constPoolVec parsedFuncs =
     Just _ -> 
       let initialState = VMState
             { stack      = []
-            , locals     = V.replicate 10 (VInt 0)
+            , locals     = V.empty
             , ip         = 0
             , functions  = parsedFuncs
             , currentFunc = "main"

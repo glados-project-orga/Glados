@@ -5,6 +5,7 @@ import SymbolTableUtils (getVar)
 import CompilerTypes (CompilerData, SymInfo(..), CompileExpr)
 import Ast (Expr(..))
 
+
 compileArrayVarExpr :: CompileExpr -> (String, Expr) -> CompilerData -> Either String CompilerData
 compileArrayVarExpr re (varName, indexExprs) prog = arrVar
     >>= \(idx, t) -> Right (appendBody prog ["aload " ++ show idx])

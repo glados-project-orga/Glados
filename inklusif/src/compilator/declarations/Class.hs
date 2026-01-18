@@ -8,9 +8,9 @@ import CompilerError (errPos)
 appendMethods :: Either String CompilerData -> String-> [FunctionDecl] -> Either String CompilerData
 appendMethods (Left err) _ _ = Left err
 appendMethods prog _ [] = prog
-appendMethods (Right prog) cname ((FunctionDecl pos name params retype statement):funs) =
+appendMethods (Right (h, def, bod, _)) cname ((FunctionDecl pos name params retype statement):funs) =
     appendMethods new_prog cname funs
-    where new_prog = compileFunction updated_fun prog
+    where new_prog = compileFunction updated_fun (h, def, bod, [])
           updated_fun = FunctionDecl pos name
             ((Parameter "this" (CustomType cname) False):params)
             retype statement

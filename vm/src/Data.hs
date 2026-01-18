@@ -109,14 +109,14 @@ data Instr = ILdc Int
            | IIfICmpGt Int | IIfICmpLe Int | ILcmp | IFcmpl
            | IFcmpg | IDcmpl | IDcmpg
 
-           | IGoto Int | IGoto_w Int
+           | IGoto Int
            | IInvokeStatic String
-           | IReturn | IReturnInt | IReturnDouble | IReturnFloat | IReturnLong
+           | IReturn | IReturnInt | IReturnDouble | IReturnFloat | IReturnLong | IReturnChar | IReturnA
            | INew String | IGetField String | IPutField String
 
            | INewArray | IALoad | IAStore | IArrayLength
            | IIinc Int Int
-           | IInvokeWrite Int
+           | IInvokeWrite Int | IInvokeOpen
            deriving (Show, Eq)
 
 
