@@ -1,9 +1,9 @@
 module Assignment (compileAssignment) where
-import CompilerTypes (CompilerData, Search(..), SearchTypes(..))
-import CompilerTools (appendBody, validAssignmentType, typePrefixVal, convertToType, getTypePrefix, getArraySubType)
+import CompilerTypes (CompilerData, Search(..), SearchTypes(..), TypeEq(..))
+import CompilerTools (appendBody, validAssignmentType, typePrefixVal, convertToType, getTypePrefix, typePrefixVal, getArraySubType)
 import SymbolTableUtils (getVarIndex, getVarType)
 import Expr (compileExpr)
-import Ast (Assignment(..), Expr(..), ArrayIndexExpr(..), Type(..), ClassAccess(..))
+import Ast (Assignment(..), Expr(..), ArrayIndexExpr(..), Type(..), ClassAccess(..), ArrayVar(..), Literal(..))
 
 
 validExprForTask :: SearchTypes -> SearchTypes -> CompilerData -> Either String CompilerData
@@ -38,17 +38,23 @@ multipleFieldAccess (ClassClassAccess nclName cacc) prog = Right (appendBody pro
     \n_prog -> multipleFieldAccess cacc n_prog
 multipleFieldAccess _ _ = Left "Unknown assignment target."
 
+maybeCreateArray :: Expr -> CompilerData -> Either String CompilerData
+maybeCreateArray expr prog = case convertToType expr prog of
+    Right (ArrayType (ArrayVar _ (LitExpr (IntLit len)))) -> Right (appendBody prog ["iconst " ++ show len, "newarray"])
+    Right _ -> Right prog
+    Left err -> Left err
+
 classAssignment :: Expr -> Expr -> CompilerData -> Either String CompilerData
 classAssignment target@(ClassVarExpr objName access) value prog |
     validAssignmentType (srch target) (srch value) prog =
         getVarIndex objName prog >>=
         \objIndex -> (Right (appendBody prog ["aload " ++ show objIndex])) >>=
         \objProg -> multipleFieldAccess access objProg >>=
-        \(name, fieldProg) -> compileExpr value fieldProg >>=
+        \(name, fieldProg) -> maybeCreateArray target fieldProg >>= \arrayProg -> compileExpr value arrayProg >>=
         \valueProg -> Right $ appendBody valueProg ["putfield " ++ name]
-    | otherwise = errName >>= \ern -> Left ("Invalid assignment types for field " ++ (fst ern) ++ ": " ++
-        (show (convertToType value prog)) ++ " " ++ (fst ern) ++ " being "
-        ++ show (convertToType target prog) ++ ".")
+    | otherwise = errName >>= \ern -> Left ("Invalid assignment types for field '" ++ (fst ern) ++ "': " ++
+        "cannot assign " ++ (show (convertToType value prog)) ++ " to field of type "
+        ++ show (convertToType target prog) ++ ". TypeEq result: " ++ show ((convertToType value prog) `typeEq` (convertToType target prog))) 
         where errName = (multipleFieldAccess access prog)
 classAssignment _ _ _ = Left "Unknown assignment target."
 

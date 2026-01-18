@@ -230,7 +230,7 @@ convertToType :: Expr -> CompilerData-> Either String Type
 convertToType expr prog = normalizeExprType expr prog >>= (Right . normalizeToType)
 
 validAssignmentType :: SearchTypes -> SearchTypes -> CompilerData -> Bool
-validAssignmentType (SearchType t1) (SearchType t2) _ = t1 == t2
+validAssignmentType (SearchType t1) (SearchType t2) _ = t1 `typeEq` t2
 validAssignmentType (SearchExpr expr) (SearchType t) prog = t `typeEq` (convertToType expr prog)
 validAssignmentType (SearchType t) (SearchExpr expr) prog = t `typeEq` (convertToType expr prog)
 validAssignmentType (SearchExpr expr1) (SearchExpr expr2) prog = normed1 `typeEq` normed2

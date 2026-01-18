@@ -6,8 +6,9 @@ import SymbolTableUtils (getVarIndex)
 import CompilerTools (appendBody, typePrefixVal, convertToType)
 
 compileClassArrayVarExpr :: CompileExpr -> [String] -> Type -> Expr -> CompilerData -> Either String CompilerData
-compileClassArrayVarExpr re this t indexExprs prog = re indexExprs prog
-    >>= \idxProg  -> Right (appendBody idxProg (this ++[typePrefixVal t ++ "aload" ]))
+compileClassArrayVarExpr re this t indexExprs prog = Right (appendBody prog (this))
+    >>= \arrProg -> re indexExprs arrProg >>= \indexProg ->
+    Right (appendBody indexProg [typePrefixVal t ++ "aload" ])
 
 compileBasicClassAccess :: CompileExpr -> [String] -> (String, ClassAccess) -> Type -> CompilerData -> Either String CompilerData
 compileBasicClassAccess re this (_, (ClassMethodCall (CallExpr cname args))) _ prog =
@@ -15,7 +16,7 @@ compileBasicClassAccess re this (_, (ClassMethodCall (CallExpr cname args))) _ p
 compileBasicClassAccess re this (_, (ClassArrayAccess arrName idxExpr)) st prog =
         compileClassArrayVarExpr re (this ++ ["getfield " ++ arrName]) st idxExpr prog
 compileBasicClassAccess _ this (_, (ClassVarAccess fldName)) _ prog =
-    Right (appendBody prog (this ++["getfield " ++ fldName]))
+    Right (appendBody prog (this ++ ["getfield " ++ fldName]))
 compileBasicClassAccess re this (_, (ClassClassAccess nclName cacc)) st prog =
     compileBasicClassAccess re (this ++["getfield " ++ nclName]) (nclName, cacc) st prog
 
