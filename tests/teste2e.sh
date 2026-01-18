@@ -108,6 +108,8 @@ run_test() {
     local compile_output
     local compile_exit_code
     
+    rm -f "$BYTECODE_OUTPUT"
+    
     compile_output=$("$COMPILER_BIN" "$ink_file")
     compile_exit_code=$?
     

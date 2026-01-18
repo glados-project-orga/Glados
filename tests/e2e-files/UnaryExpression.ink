@@ -2,9 +2,9 @@ fun main() : void {
     let a -> int = 10;
 
     a = -a;
-    print(a);
+    write(a, 1);
     ++a;
     a += 9;
 
-    print(a, -a);
+    write(a, 1);
 }

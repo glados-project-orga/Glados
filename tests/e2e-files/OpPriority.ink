@@ -6,6 +6,6 @@ fun main() : void {
     let result1 -> int = a + b * c;      
     let result2 -> int = (a + b) * c;    
 
-    print(result1);
-    print(result2);
+    write(result1, 1);
+    write(result2, 1);
 }

@@ -16,5 +16,6 @@ fun main() : void {
     let six -> int = SIX;
     let seven -> int = SEVEN;
 
-    print(six, seven);
+    write(six, 1);
+    write(seven, 1);
 }
