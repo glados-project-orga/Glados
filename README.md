@@ -120,3 +120,20 @@ Typical commands:
 - `make clean` — remove temporary files
 - `make fclean` — clean build artifacts
 
+## Contributors
+
+This project was developed collaboratively as part of the EPITECH curriculum.
+
+The contributors to this project are:
+
+- celianrag
+- Pliya
+- Luigianiki
+- HajarAhazzam
+- KerwanC
+
+All contributors participated in the design, implementation and testing
+of the project throughout its different stages, working collaboratively
+and supporting each other as the project evolved.
+
+
