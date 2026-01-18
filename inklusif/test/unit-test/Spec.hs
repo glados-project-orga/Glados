@@ -12,10 +12,13 @@ module Main (
 import Test.HUnit
 import SymTableTest (testSymTable)
 import CompilerToolsTest (testCompilerTools)
+import NormalizeTests (testNormalize)
+
 tests :: Test
 tests = TestList[
     testSymTable,
-    testCompilerTools
+    testCompilerTools,
+    testNormalize
     ]
 
 main :: IO Counts
