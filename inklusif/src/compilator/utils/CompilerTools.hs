@@ -17,6 +17,9 @@ module CompilerTools (
     isClassDefined,
     getEnumValue,
     getFromEnum,
+    getClass,
+    getClassVarType,
+    getClasses,
     )
 where
 
