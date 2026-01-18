@@ -46,7 +46,7 @@ jobs:
 
       - name: Check binaries exist
         run: |
-          ls -l inklusif/glados
+          ls -l inklusif/binary.ink
           ls -l vm/glados-vm
 
       - name: Create zip archive
@@ -60,7 +60,7 @@ jobs:
         with:
           files: |
             glados-${{ github.ref_name }}.zip
-            inklusif/glados
+            inklusif/binary.ink
             vm/glados-vm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
