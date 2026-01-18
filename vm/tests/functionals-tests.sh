@@ -158,6 +158,7 @@ test_exit_code "ireturn - integer return" "$TEST_FILES_DIR/control_ireturn.bc" 9
 test_exit_code "freturn - float return" "$TEST_FILES_DIR/control_freturn.bc" 42
 test_exit_code "dreturn - double return" "$TEST_FILES_DIR/control_dreturn.bc" 42
 test_exit_code "lreturn - long return" "$TEST_FILES_DIR/control_lreturn.bc" 42
+test_exit_code "creturn - char return" "$TEST_FILES_DIR/control_creturn.bc" 65
 echo ""
 
 echo "== Conditional Instructions =="
