@@ -12,9 +12,6 @@ on:
 permissions:
   contents: write   # pour pouvoir create release
 
-permissions:
-  contents: write   # pour pouvoir create release
-
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
@@ -49,11 +46,11 @@ jobs:
 
       - name: Check binaries exist
         run: |
-          ls -l inklusif/inklusif
+          ls -l inklusif/glados
           ls -l vm/glados-vm
 
       - name: Create zip archive
-        run: zip glados-${{ github.ref_name }}.zip inklusif/inklusif vm/glados-vm
+        run: zip glados-${{ github.ref_name }}.zip inklusif/glados vm/glados-vm
         # zip avec le nom du tag:v0.1.0.zip
 
       - name: Create GitHub Release
