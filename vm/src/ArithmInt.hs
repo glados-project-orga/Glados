@@ -26,6 +26,12 @@ intArith op st@VMState{stack, ip} =
         (INegInt, (VInt i : rest)) ->
             Right st { ip = (ip + 1) , stack = (VInt (-i):rest)}
 
+        (IDivInt, (VInt 0 : _ : _)) ->
+            Left "idiv: division by zero"
+
+        (IRemInt, (VInt 0 : _ : _)) ->
+            Left "irem: division by zero"
+
         (_, (VInt i2 : VInt i1 : rest)) ->
             let result = case op of
                             IAddInt  -> i1 + i2
@@ -53,6 +59,12 @@ doubleArith op st@VMState{stack, ip} =
         (DNegDouble, (VDouble i : rest)) ->
             Right st { ip = ip + 1, stack = (VDouble (-i) : rest)}
 
+        (DDivDouble, (VDouble 0.0 : _ : _)) ->
+            Left "ddiv: division by zero"
+
+        (DRemDouble, (VDouble 0.0 : _ : _)) ->
+            Left "drem: division by zero"
+
         (_, (VDouble i2 : VDouble i1 : rest)) ->
             let result = case op of
                     DAddDouble -> i1 + i2
@@ -72,6 +84,12 @@ floatArith op st@VMState{stack, ip} =
         (FNegFloat, (VFloat x : rest)) ->
             Right st { ip = ip + 1, stack = (VFloat (-x) : rest)}
 
+        (FDivFloat, (VFloat 0.0 : _ : _)) ->
+            Left "fdiv: division by zero"
+
+        (FRemFloat, (VFloat 0.0 : _ : _)) ->
+            Left "frem: division by zero"
+
         (_, (VFloat y : VFloat x : rest)) ->
             let result = case op of
                     FAddFloat -> x + y
@@ -90,6 +108,12 @@ longArith op st@VMState{stack, ip} =
     
         (LNegLong, (VLong i : rest)) ->
             Right st { ip = ip + 1, stack = (VLong (-i) : rest)}
+
+        (LDivLong, (VLong 0 : _ : _)) ->
+            Left "ldiv: division by zero"
+
+        (LRemLong, (VLong 0 : _ : _)) ->
+            Left "lrem: division by zero"
 
         (_, (VLong i2 : VLong i1 : rest)) ->
             let result = case op of

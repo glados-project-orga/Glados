@@ -158,6 +158,7 @@ test_exit_code "ireturn - integer return" "$TEST_FILES_DIR/control_ireturn.bc" 9
 test_exit_code "freturn - float return" "$TEST_FILES_DIR/control_freturn.bc" 42
 test_exit_code "dreturn - double return" "$TEST_FILES_DIR/control_dreturn.bc" 42
 test_exit_code "lreturn - long return" "$TEST_FILES_DIR/control_lreturn.bc" 42
+test_exit_code "creturn - char return" "$TEST_FILES_DIR/control_creturn.bc" 65
 echo ""
 
 echo "== Conditional Instructions =="
@@ -195,7 +196,7 @@ echo ""
 echo "== Constant Pool Instructions =="
 test_output "ldc - load from constant pool" "$TEST_FILES_DIR/const_pool_basic.bc" "42100-7"
 test_output "ldc - load every types from constant pool" "$TEST_FILES_DIR/const_pool_types.bc" "1 -7 40.023 true false 
- string TEST"
+ string TEST 999999999"
 echo ""
 
 echo "========================================"
